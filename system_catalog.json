@@ -92,6 +92,158 @@
       ],
       "created_at": "2025-09-08T21:08:16.282740",
       "row_count": 0
+    },
+    "employees": {
+      "name": "employees",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INT",
+          "constraints": null
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR(50)",
+          "constraints": null
+        },
+        {
+          "name": "salary",
+          "type": "INT",
+          "constraints": null
+        },
+        {
+          "name": "department",
+          "type": "VARCHAR(30)",
+          "constraints": null
+        }
+      ],
+      "created_at": "2025-09-09T00:11:20.719286",
+      "row_count": 0
+    },
+    "departments": {
+      "name": "departments",
+      "columns": [
+        {
+          "name": "dept_id",
+          "type": "INT",
+          "constraints": null
+        },
+        {
+          "name": "dept_name",
+          "type": "VARCHAR(30)",
+          "constraints": null
+        },
+        {
+          "name": "manager",
+          "type": "VARCHAR(50)",
+          "constraints": null
+        }
+      ],
+      "created_at": "2025-09-09T00:11:20.731111",
+      "row_count": 0
+    },
+    "projects": {
+      "name": "projects",
+      "columns": [
+        {
+          "name": "proj_id",
+          "type": "INT",
+          "constraints": null
+        },
+        {
+          "name": "proj_name",
+          "type": "VARCHAR(100)",
+          "constraints": null
+        },
+        {
+          "name": "dept_id",
+          "type": "INT",
+          "constraints": null
+        }
+      ],
+      "created_at": "2025-09-09T00:11:20.733117",
+      "row_count": 0
+    },
+    "customers": {
+      "name": "customers",
+      "columns": [
+        {
+          "name": "customer_id",
+          "type": "INT",
+          "constraints": null
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR(100)",
+          "constraints": null
+        },
+        {
+          "name": "city",
+          "type": "VARCHAR(50)",
+          "constraints": null
+        },
+        {
+          "name": "age",
+          "type": "INT",
+          "constraints": null
+        }
+      ],
+      "created_at": "2025-09-09T00:11:20.780024",
+      "row_count": 0
+    },
+    "order_items": {
+      "name": "order_items",
+      "columns": [
+        {
+          "name": "item_id",
+          "type": "INT",
+          "constraints": null
+        },
+        {
+          "name": "order_id",
+          "type": "INT",
+          "constraints": null
+        },
+        {
+          "name": "product_name",
+          "type": "VARCHAR(100)",
+          "constraints": null
+        },
+        {
+          "name": "quantity",
+          "type": "INT",
+          "constraints": null
+        },
+        {
+          "name": "price",
+          "type": "INT",
+          "constraints": null
+        }
+      ],
+      "created_at": "2025-09-09T00:11:20.780024",
+      "row_count": 0
+    },
+    "test_table": {
+      "name": "test_table",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INT",
+          "constraints": null
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR(50)",
+          "constraints": null
+        },
+        {
+          "name": "value",
+          "type": "INT",
+          "constraints": null
+        }
+      ],
+      "created_at": "2025-09-09T00:11:20.814033",
+      "row_count": 0
     }
   },
   "metadata": {
