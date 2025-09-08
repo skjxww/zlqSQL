@@ -13,6 +13,30 @@ class TokenType(Enum):
     INTO = "INTO"
     VALUES = "VALUES"
     DELETE = "DELETE"
+    UPDATE = "UPDATE"
+    SET = "SET"
+
+    # JOIN相关
+    JOIN = "JOIN"
+    INNER = "INNER"
+    LEFT = "LEFT"
+    RIGHT = "RIGHT"
+    ON = "ON"
+
+    # 排序和分组
+    ORDER = "ORDER"
+    BY = "BY"
+    GROUP = "GROUP"
+    HAVING = "HAVING"
+    ASC = "ASC"
+    DESC = "DESC"
+
+    # 聚合函数
+    COUNT = "COUNT"
+    SUM = "SUM"
+    AVG = "AVG"
+    MAX = "MAX"
+    MIN = "MIN"
 
     # 数据类型
     INT = "INT"
@@ -37,6 +61,7 @@ class TokenType(Enum):
     COMMA = ","
     LEFT_PAREN = "("
     RIGHT_PAREN = ")"
+    DOT = "."
 
     # 特殊符号
     ASTERISK = "*"
@@ -54,10 +79,10 @@ class TokenType(Enum):
 class Token:
     def __init__(self, token_type: TokenType, lexeme: str, line: int, column: int, value: Any = None):
         self.type = token_type
-        self.lexeme = lexeme  # 词素值
-        self.line = line  # 行号
-        self.column = column  # 列号
-        self.value = value  # 实际值（用于数字、字符串等）
+        self.lexeme = lexeme
+        self.line = line
+        self.column = column
+        self.value = value
 
     def __repr__(self):
         return f"[{self.type.value}, {self.lexeme}, {self.line}, {self.column}]"

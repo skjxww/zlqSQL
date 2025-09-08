@@ -5,65 +5,86 @@ from sql_compiler.exceptions.compiler_errors import SemanticError
 
 
 class PlanGenerator:
-    """执行计划生成器"""
+    """执行计划生成器 - 扩展支持新操作"""
 
-    def __init__(self):
-        pass
-
-    def generate(self, ast: Statement) -> Operator:
+    def generate(self, stmt: Statement) -> Operator:
         """生成执行计划"""
-        return ast.accept(self)
+        if isinstance(stmt, CreateTableStmt):
+            return self._generate_create_table_plan(stmt)
+        elif isinstance(stmt, InsertStmt):
+            return self._generate_insert_plan(stmt)
+        elif isinstance(stmt, SelectStmt):
+            return self._generate_select_plan(stmt)
+        elif isinstance(stmt, UpdateStmt):
+            return self._generate_update_plan(stmt)
+        elif isinstance(stmt, DeleteStmt):
+            return self._generate_delete_plan(stmt)
+        else:
+            raise SemanticError(f"不支持的语句类型: {type(stmt).__name__}")
 
-    def visit_create_table_stmt(self, stmt: CreateTableStmt) -> CreateTableOp:
+    def _generate_create_table_plan(self, stmt: CreateTableStmt) -> Operator:
         """生成CREATE TABLE执行计划"""
         return CreateTableOp(stmt.table_name, stmt.columns)
 
-    def visit_insert_stmt(self, stmt: InsertStmt) -> InsertOp:
+    def _generate_insert_plan(self, stmt: InsertStmt) -> Operator:
         """生成INSERT执行计划"""
-        # 评估值表达式
-        values = []
-        for value_expr in stmt.values:
-            if isinstance(value_expr, LiteralExpr):
-                values.append(value_expr.value)
-            else:
-                # 对于更复杂的表达式，这里需要进一步处理
-                values.append(str(value_expr.to_dict()))
+        return InsertOp(stmt.table_name, stmt.columns, stmt.values)
 
-        return InsertOp(stmt.table_name, stmt.columns, values)
-
-    def visit_select_stmt(self, stmt: SelectStmt) -> Operator:
+    def _generate_select_plan(self, stmt: SelectStmt) -> Operator:
         """生成SELECT执行计划"""
-        # 构建执行计划树：Project -> Filter -> SeqScan
+        # 从FROM子句开始构建计划
+        plan = self._generate_from_plan(stmt.from_clause)
 
-        # 1. 基础扫描算子
-        scan_op = SeqScanOp(stmt.table_name)
-
-        # 2. 如果有WHERE条件，添加过滤算子
-        current_op = scan_op
+        # 添加WHERE过滤
         if stmt.where_clause:
-            filter_op = FilterOp(stmt.where_clause)
-            filter_op.add_child(current_op)
-            current_op = filter_op
+            plan = FilterOp(stmt.where_clause, [plan])
 
-        # 3. 添加投影算子
-        project_op = ProjectOp(stmt.columns)
-        project_op.add_child(current_op)
+        # 添加GROUP BY
+        if stmt.group_by:
+            plan = GroupByOp(stmt.group_by, stmt.having_clause, [plan])
 
-        return project_op
+        # 添加投影
+        if stmt.columns != ["*"]:
+            plan = ProjectOp(stmt.columns, [plan])
 
-    def visit_delete_stmt(self, stmt: DeleteStmt) -> DeleteOp:
+        # 添加ORDER BY
+        if stmt.order_by:
+            plan = OrderByOp(stmt.order_by, [plan])
+
+        return plan
+
+    def _generate_from_plan(self, from_clause: FromClause) -> Operator:
+        """生成FROM子句的执行计划"""
+        if isinstance(from_clause, TableRef):
+            return SeqScanOp(from_clause.table_name)
+        elif isinstance(from_clause, JoinExpr):
+            left_plan = self._generate_from_plan(from_clause.left)
+            right_plan = self._generate_from_plan(from_clause.right)
+            return JoinOp(from_clause.join_type, from_clause.on_condition,
+                          [left_plan, right_plan])
+        else:
+            raise SemanticError(f"不支持的FROM子句类型: {type(from_clause).__name__}")
+
+    def _generate_update_plan(self, stmt: UpdateStmt) -> Operator:
+        """生成UPDATE执行计划"""
+        # 先扫描表
+        scan_plan = SeqScanOp(stmt.table_name)
+
+        # 如果有WHERE条件，添加过滤
+        if stmt.where_clause:
+            scan_plan = FilterOp(stmt.where_clause, [scan_plan])
+
+        # 添加UPDATE操作
+        return UpdateOp(stmt.table_name, stmt.assignments, [scan_plan])
+
+    def _generate_delete_plan(self, stmt: DeleteStmt) -> Operator:
         """生成DELETE执行计划"""
-        return DeleteOp(stmt.table_name, stmt.where_clause)
+        # 先扫描表
+        scan_plan = SeqScanOp(stmt.table_name)
 
-    def visit_binary_expr(self, expr: BinaryExpr):
-        """处理二元表达式"""
-        # 在执行计划生成阶段，表达式通常作为算子的参数
-        return expr
+        # 如果有WHERE条件，添加过滤
+        if stmt.where_clause:
+            scan_plan = FilterOp(stmt.where_clause, [scan_plan])
 
-    def visit_identifier_expr(self, expr: IdentifierExpr):
-        """处理标识符表达式"""
-        return expr
-
-    def visit_literal_expr(self, expr: LiteralExpr):
-        """处理字面量表达式"""
-        return expr
+        # 添加DELETE操作
+        return DeleteOp(stmt.table_name, [scan_plan])

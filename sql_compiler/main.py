@@ -7,7 +7,6 @@ from sql_compiler.catalog.catalog_manager import CatalogManager
 from sql_compiler.exceptions.compiler_errors import CompilerError
 from sql_compiler.utils.helpers import print_tokens, format_json
 
-
 class SQLCompiler:
     def __init__(self):
         self.catalog = CatalogManager()
@@ -308,6 +307,19 @@ def run_error_tests():
     compiler.compile_multiple(error_test_cases)
 
 
+def run_extended_tests():
+    """运行扩展功能测试"""
+    from sql_compiler.extended_test import test_extended_sql, test_complex_queries, test_error_cases_extended
+
+    print("开始执行扩展功能测试...")
+    test_extended_sql()
+
+    print("\n" + "=" * 100 + "\n")
+    test_complex_queries()
+
+    print("\n" + "=" * 100 + "\n")
+    test_error_cases_extended()
+
 if __name__ == "__main__":
     if "--test" in sys.argv:
         run_tests()
@@ -315,6 +327,8 @@ if __name__ == "__main__":
         run_multi_line_tests()
     elif "--error-test" in sys.argv:
         run_error_tests()
+    elif "--extended-test" in sys.argv:
+        run_extended_tests()
     elif "--all-test" in sys.argv:
         print("执行所有测试...")
         run_tests()
