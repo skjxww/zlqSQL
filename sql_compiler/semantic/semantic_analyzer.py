@@ -44,7 +44,9 @@ class SemanticAnalyzer:
                 raise SemanticError(f"无效的数据类型: {column_type}")
 
         # 添加到目录
-        self.catalog.create_table(stmt.table_name, stmt.columns)
+        success = self.catalog.create_table(stmt.table_name, stmt.columns)
+        if not success:
+            raise SemanticError(f"创建表 '{stmt.table_name}' 失败")
 
     def _analyze_insert(self, stmt: InsertStmt):
         """分析INSERT语句"""
@@ -53,7 +55,10 @@ class SemanticAnalyzer:
             raise SemanticError(f"表 '{stmt.table_name}' 不存在")
 
         table_info = self.catalog.get_table(stmt.table_name)
-        table_columns = [col[0] for col in table_info['columns']]
+        if not table_info:
+            raise SemanticError(f"无法获取表 '{stmt.table_name}' 的信息")
+
+        table_columns = [col["name"] for col in table_info["columns"]]
 
         # 检查列名
         if stmt.columns:
@@ -69,8 +74,9 @@ class SemanticAnalyzer:
             raise SemanticError(f"值的数量({len(stmt.values)})与列的数量({len(target_columns)})不匹配")
 
         # 分析每个值表达式
+        available_tables = {stmt.table_name: table_columns}
         for value in stmt.values:
-            self._analyze_expression(value, {stmt.table_name: table_columns})
+            self._analyze_expression(value, available_tables)
 
     def _analyze_select(self, stmt: SelectStmt):
         """分析SELECT语句"""
@@ -114,7 +120,10 @@ class SemanticAnalyzer:
             raise SemanticError(f"表 '{stmt.table_name}' 不存在")
 
         table_info = self.catalog.get_table(stmt.table_name)
-        table_columns = [col[0] for col in table_info['columns']]
+        if not table_info:
+            raise SemanticError(f"无法获取表 '{stmt.table_name}' 的信息")
+
+        table_columns = [col["name"] for col in table_info["columns"]]
         available_tables = {stmt.table_name: table_columns}
 
         # 分析赋值语句
@@ -135,7 +144,10 @@ class SemanticAnalyzer:
 
         if stmt.where_clause:
             table_info = self.catalog.get_table(stmt.table_name)
-            table_columns = [col[0] for col in table_info['columns']]
+            if not table_info:
+                raise SemanticError(f"无法获取表 '{stmt.table_name}' 的信息")
+
+            table_columns = [col["name"] for col in table_info["columns"]]
             available_tables = {stmt.table_name: table_columns}
             self._analyze_expression(stmt.where_clause, available_tables)
 
@@ -146,7 +158,10 @@ class SemanticAnalyzer:
                 raise SemanticError(f"表 '{from_clause.table_name}' 不存在")
 
             table_info = self.catalog.get_table(from_clause.table_name)
-            table_columns = [col[0] for col in table_info['columns']]
+            if not table_info:
+                raise SemanticError(f"无法获取表 '{from_clause.table_name}' 的信息")
+
+            table_columns = [col["name"] for col in table_info["columns"]]
 
             # 使用别名（如果有）作为键，否则使用表名
             key = from_clause.alias if from_clause.alias else from_clause.table_name
@@ -197,7 +212,10 @@ class SemanticAnalyzer:
         """检查列引用是否有效"""
         if "." in col_ref:
             # table.column 格式
-            table_name, column_name = col_ref.split(".", 1)
+            parts = col_ref.split(".", 1)
+            if len(parts) != 2:
+                return False
+            table_name, column_name = parts
             return (table_name in available_tables and
                     column_name in available_tables[table_name])
         else:
