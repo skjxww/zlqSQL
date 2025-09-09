@@ -58,7 +58,7 @@ class SyntaxAnalyzer:
         elif self._match(TokenType.INSERT):
             return self._parse_insert()
         elif self._match(TokenType.SELECT):
-            return self._parse_select()
+            return self._parse_select()  # SELECT token已经被消费
         elif self._match(TokenType.UPDATE):
             return self._parse_update()
         elif self._match(TokenType.DELETE):
@@ -67,7 +67,6 @@ class SyntaxAnalyzer:
             raise SyntaxErr(f"无效的语句开头: '{current_token.lexeme}'",
                             current_token.line, current_token.column,
                             "CREATE, INSERT, SELECT, UPDATE, DELETE")
-
     # ==================== CREATE TABLE 解析 ====================
 
     def _parse_create_table(self) -> CreateTableStmt:
@@ -177,10 +176,11 @@ class SyntaxAnalyzer:
     # ==================== SELECT 解析 ====================
 
     def _parse_select(self) -> SelectStmt:
-        """解析SELECT语句"""
+        """解析SELECT语句（SELECT token已经被消费）"""
         # 解析选择列表
         columns = self._parse_select_list()
 
+        # 其余代码保持不变...
         # 解析FROM子句
         self._expect(TokenType.FROM)
         from_clause = self._parse_from_clause()
@@ -211,7 +211,7 @@ class SyntaxAnalyzer:
             self._expect(TokenType.BY)
             order_by = []
 
-            column = self._parse_column_reference()
+            column = self._parse_order_by_item()
             direction = "ASC"  # 默认升序
             if self._match(TokenType.ASC):
                 direction = "ASC"
@@ -220,7 +220,7 @@ class SyntaxAnalyzer:
             order_by.append((column, direction))
 
             while self._match(TokenType.COMMA):
-                column = self._parse_column_reference()
+                column = self._parse_order_by_item()
                 direction = "ASC"
                 if self._match(TokenType.ASC):
                     direction = "ASC"
@@ -265,6 +265,24 @@ class SyntaxAnalyzer:
         # 普通列引用
         return self._parse_column_reference()
 
+    def _parse_order_by_item(self) -> str:
+        """解析ORDER BY项"""
+        # 可能是聚合函数
+        if self._check_aggregate_function():
+            func_name = self._advance().lexeme
+            self._expect(TokenType.LEFT_PAREN)
+
+            if self._match(TokenType.ASTERISK):
+                self._expect(TokenType.RIGHT_PAREN)
+                return f"{func_name}(*)"
+            else:
+                column = self._parse_column_reference()
+                self._expect(TokenType.RIGHT_PAREN)
+                return f"{func_name}({column})"
+
+        # 普通列引用
+        return self._parse_column_reference()
+
     def _check_aggregate_function(self) -> bool:
         """检查是否是聚合函数"""
         return self._check(TokenType.COUNT, TokenType.SUM, TokenType.AVG,
@@ -282,18 +300,17 @@ class SyntaxAnalyzer:
         return first_part
 
     def _parse_from_clause(self) -> FromClause:
-        """解析FROM子句"""
-        # 解析主表
-        table_name = self._expect(TokenType.IDENTIFIER).lexeme
-        from_clause = TableRef(table_name)
+        """解析FROM子句 - 修复版本"""
+        # 解析第一个表引用
+        from_clause = self._parse_table_reference()
 
-        # 解析可能的JOIN
-        while self._check_join():
+        # 解析可能的JOIN链
+        while self._is_join_keyword():
             join_type = self._parse_join_type()
             self._expect(TokenType.JOIN)
 
-            right_table = self._expect(TokenType.IDENTIFIER).lexeme
-            right_ref = TableRef(right_table)
+            # 解析右表引用
+            right_ref = self._parse_table_reference()
 
             # 解析ON条件
             on_condition = None
@@ -304,8 +321,21 @@ class SyntaxAnalyzer:
 
         return from_clause
 
-    def _check_join(self) -> bool:
-        """检查是否是JOIN语句"""
+    def _parse_table_reference(self) -> TableRef:
+        """解析表引用（表名 + 可选别名）"""
+        table_name = self._expect(TokenType.IDENTIFIER).lexeme
+
+        # 检查是否有别名
+        alias = None
+        # 如果下一个token是标识符，且不是SQL关键字，则认为是别名
+        if (self._check(TokenType.IDENTIFIER) and
+                not self._is_sql_keyword(self._current_token())):
+            alias = self._advance().lexeme
+
+        return TableRef(table_name, alias)
+
+    def _is_join_keyword(self) -> bool:
+        """检查是否是JOIN相关关键字"""
         return (self._check(TokenType.JOIN) or
                 self._check(TokenType.INNER) or
                 self._check(TokenType.LEFT) or
@@ -322,6 +352,35 @@ class SyntaxAnalyzer:
         else:
             return "INNER"  # 默认INNER JOIN
 
+    def _is_sql_keyword(self, token: Token) -> bool:
+        """检查token是否是SQL关键字"""
+        sql_keywords = {
+            # 基本查询关键字
+            TokenType.SELECT, TokenType.FROM, TokenType.WHERE,
+
+            # 分组和排序
+            TokenType.GROUP, TokenType.BY, TokenType.ORDER, TokenType.HAVING,
+            TokenType.ASC, TokenType.DESC,
+
+            # JOIN相关
+            TokenType.JOIN, TokenType.INNER, TokenType.LEFT, TokenType.RIGHT, TokenType.ON,
+
+            # 逻辑运算符
+            TokenType.AND, TokenType.OR, TokenType.NOT, TokenType.IN,  # 添加了 IN
+
+            # DML关键字
+            TokenType.INSERT, TokenType.INTO, TokenType.VALUES,
+            TokenType.UPDATE, TokenType.SET,
+            TokenType.DELETE,
+
+            # DDL关键字
+            TokenType.CREATE, TokenType.TABLE,
+
+            # 聚合函数
+            TokenType.COUNT, TokenType.SUM, TokenType.AVG, TokenType.MAX, TokenType.MIN
+        }
+        return token.type in sql_keywords
+
     # ==================== UPDATE 解析 ====================
 
     def _parse_update(self) -> UpdateStmt:
@@ -336,7 +395,7 @@ class SyntaxAnalyzer:
         # 第一个赋值
         column = self._expect(TokenType.IDENTIFIER).lexeme
         self._expect(TokenType.EQUALS)
-        expression = self._parse_expression()
+        expression = self._parse_expression()  # 这里会正确解析 age + 1
         assignments.append((column, expression))
 
         # 后续赋值
@@ -349,7 +408,7 @@ class SyntaxAnalyzer:
         # 可选的WHERE子句
         where_clause = None
         if self._match(TokenType.WHERE):
-            where_clause = self._parse_expression()
+            where_clause = self._parse_expression()  # 这里会正确解析 customer_id IN (...)
 
         return UpdateStmt(table_name, assignments, where_clause)
 
@@ -407,11 +466,133 @@ class SyntaxAnalyzer:
 
     def _parse_comparison(self) -> Expression:
         """解析比较表达式"""
+        expr = self._parse_arithmetic()
+
+        while True:
+            if self._match(TokenType.GREATER_THAN, TokenType.GREATER_EQUAL,
+                           TokenType.LESS_THAN, TokenType.LESS_EQUAL):
+                operator = self._previous().lexeme
+                right = self._parse_arithmetic()
+                expr = BinaryExpr(expr, operator, right)
+            elif self._match(TokenType.IN):
+                # 处理 IN 表达式
+                right_expr = self._parse_in_expression()
+                expr = InExpr(expr, right_expr, False)
+            elif self._check(TokenType.NOT) and self._peek_next_token().type == TokenType.IN:
+                # 处理 NOT IN 表达式
+                self._advance()  # 消费 NOT
+                self._advance()  # 消费 IN
+                right_expr = self._parse_in_expression()
+                expr = InExpr(expr, right_expr, True)
+            else:
+                break
+
+        return expr
+
+    def _parse_subquery(self) -> SelectStmt:
+        """解析子查询（括号内的SELECT语句）"""
+        # 消费 SELECT token
+        self._expect(TokenType.SELECT)
+
+        # 解析选择列表
+        columns = self._parse_select_list()
+
+        # 解析FROM子句
+        self._expect(TokenType.FROM)
+        from_clause = self._parse_from_clause()
+
+        # 可选的WHERE子句
+        where_clause = None
+        if self._match(TokenType.WHERE):
+            where_clause = self._parse_expression()
+
+        # 可选的GROUP BY子句
+        group_by = None
+        if self._match(TokenType.GROUP):
+            self._expect(TokenType.BY)
+            group_by = []
+            group_by.append(self._parse_column_reference())
+
+            while self._match(TokenType.COMMA):
+                group_by.append(self._parse_column_reference())
+
+        # 可选的HAVING子句
+        having_clause = None
+        if self._match(TokenType.HAVING):
+            having_clause = self._parse_expression()
+
+        # 可选的ORDER BY子句
+        order_by = None
+        if self._match(TokenType.ORDER):
+            self._expect(TokenType.BY)
+            order_by = []
+
+            column = self._parse_order_by_item()
+            direction = "ASC"
+            if self._match(TokenType.ASC):
+                direction = "ASC"
+            elif self._match(TokenType.DESC):
+                direction = "DESC"
+            order_by.append((column, direction))
+
+            while self._match(TokenType.COMMA):
+                column = self._parse_order_by_item()
+                direction = "ASC"
+                if self._match(TokenType.ASC):
+                    direction = "ASC"
+                elif self._match(TokenType.DESC):
+                    direction = "DESC"
+                order_by.append((column, direction))
+
+        return SelectStmt(columns, from_clause, where_clause, group_by, having_clause, order_by)
+
+    def _parse_in_expression(self) -> Expression:
+        """解析 IN 表达式的右侧部分"""
+        self._expect(TokenType.LEFT_PAREN)
+
+        # 检查是否是子查询
+        if self._check(TokenType.SELECT):
+            # 解析子查询
+            subquery = self._parse_subquery()
+            self._expect(TokenType.RIGHT_PAREN)
+            return SubqueryExpr(subquery)
+        else:
+            # 解析值列表
+            values = []
+            if not self._check(TokenType.RIGHT_PAREN):  # 避免空列表
+                values.append(self._parse_expression())
+                while self._match(TokenType.COMMA):
+                    values.append(self._parse_expression())
+
+            self._expect(TokenType.RIGHT_PAREN)
+            return ValueListExpr(values)
+
+    def _peek_next_token(self) -> Token:
+        """查看下一个token但不消费"""
+        if self.current + 1 < len(self.tokens):
+            return self.tokens[self.current + 1]
+        return Token(TokenType.EOF, '', 1, 1)
+
+    def _parse_arithmetic(self) -> Expression:
+        """解析算术表达式（加法和减法）"""
+        expr = self._parse_term()
+
+        while self._match(TokenType.PLUS, TokenType.MINUS):
+            operator = self._previous().lexeme
+            right = self._parse_term()
+            expr = BinaryExpr(expr, operator, right)
+
+        return expr
+
+    def _parse_term(self) -> Expression:
+        """解析乘法和除法表达式"""
         expr = self._parse_primary()
 
-        while self._match(TokenType.GREATER_THAN, TokenType.GREATER_EQUAL,
-                          TokenType.LESS_THAN, TokenType.LESS_EQUAL):
+        while self._match(TokenType.MULTIPLY, TokenType.DIVIDE, TokenType.ASTERISK):
             operator = self._previous().lexeme
+            # 将 * 符号统一处理为乘法
+            if operator == '*':
+                operator = '*'
             right = self._parse_primary()
             expr = BinaryExpr(expr, operator, right)
 
@@ -434,9 +615,10 @@ class SyntaxAnalyzer:
             if self._match(TokenType.ASTERISK):
                 arguments.append(LiteralExpr("*"))
             else:
-                arguments.append(self._parse_expression())
-                while self._match(TokenType.COMMA):
+                if not self._check(TokenType.RIGHT_PAREN):  # 避免空参数列表
                     arguments.append(self._parse_expression())
+                    while self._match(TokenType.COMMA):
+                        arguments.append(self._parse_expression())
 
             self._expect(TokenType.RIGHT_PAREN)
             return FunctionExpr(func_name, arguments)

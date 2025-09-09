@@ -166,3 +166,22 @@ class CatalogManager:
                 table_info = self.get_table(table_name)
                 columns = [col['name'] for col in table_info['columns']]
                 print(f"    {table_name}: [{', '.join(columns)}]")
+
+    def get_column_type(self, table_name: str, column_name: str) -> Optional[str]:
+        """获取列的数据类型"""
+        column_info = self.get_column_info(table_name, column_name)
+        if column_info:
+            return column_info.get("type")
+        return None
+
+    def get_table_column_types(self, table_name: str) -> Dict[str, str]:
+        """获取表的所有列及其类型"""
+        table_info = self.get_table(table_name)
+        if not table_info:
+            return {}
+
+        column_types = {}
+        for col in table_info["columns"]:
+            column_types[col["name"]] = col["type"]
+
+        return column_types

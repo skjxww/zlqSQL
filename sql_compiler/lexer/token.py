@@ -48,13 +48,19 @@ class TokenType(Enum):
     INTEGER_LITERAL = "INTEGER_LITERAL"
     STRING_LITERAL = "STRING_LITERAL"
 
-    # 运算符
+    # 比较运算符
     EQUALS = "="
     NOT_EQUALS = "<>"
     LESS_THAN = "<"
     GREATER_THAN = ">"
     LESS_EQUAL = "<="
     GREATER_EQUAL = ">="
+
+    # 算术运算符 - 新增
+    PLUS = "+"
+    MINUS = "-"
+    MULTIPLY = "*"
+    DIVIDE = "/"
 
     # 分隔符
     SEMICOLON = ";"
@@ -64,12 +70,15 @@ class TokenType(Enum):
     DOT = "."
 
     # 特殊符号
-    ASTERISK = "*"
+    ASTERISK = "*"  # 保留用于 SELECT *，但 * 也可以用作乘法
 
     # 逻辑运算符
     AND = "AND"
     OR = "OR"
     NOT = "NOT"
+
+    # 其他关键字
+    IN = "IN"  # 添加 IN 支持
 
     # 特殊
     EOF = "EOF"

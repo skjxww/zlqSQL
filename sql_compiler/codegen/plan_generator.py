@@ -5,7 +5,7 @@ from sql_compiler.exceptions.compiler_errors import SemanticError
 
 
 class PlanGenerator:
-    """执行计划生成器 - 扩展支持新操作"""
+    """执行计划生成器 """
 
     def generate(self, stmt: Statement) -> Operator:
         """生成执行计划"""

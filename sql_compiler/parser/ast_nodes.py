@@ -176,6 +176,48 @@ class Expression(ASTNode):
     pass
 
 
+class InExpr(Expression):
+    """IN表达式节点"""
+
+    def __init__(self, left_expr: Expression, right_expr: Expression, is_not: bool = False):
+        self.left_expr = left_expr  # 左侧表达式
+        self.right_expr = right_expr  # 右侧表达式（可能是子查询或值列表）
+        self.is_not = is_not  # 是否是 NOT IN
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": "InExpr",
+            "left_expr": self.left_expr.to_dict(),
+            "right_expr": self.right_expr.to_dict(),
+            "is_not": self.is_not
+        }
+
+
+class SubqueryExpr(Expression):
+    """子查询表达式节点"""
+
+    def __init__(self, select_stmt: 'SelectStmt'):
+        self.select_stmt = select_stmt
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": "SubqueryExpr",
+            "select_stmt": self.select_stmt.to_dict()
+        }
+
+
+class ValueListExpr(Expression):
+    """值列表表达式节点（用于 IN (1, 2, 3) 这种形式）"""
+
+    def __init__(self, values: List[Expression]):
+        self.values = values
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": "ValueListExpr",
+            "values": [value.to_dict() for value in self.values]
+        }
+
 class BinaryExpr(Expression):
     """二元表达式"""
 

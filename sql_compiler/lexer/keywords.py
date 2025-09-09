@@ -46,22 +46,30 @@ KEYWORDS = {
     'AND': TokenType.AND,
     'OR': TokenType.OR,
     'NOT': TokenType.NOT,
+    'IN': TokenType.IN,  # 添加 IN
 }
 
-# 符号映射表
+# 符号映射表 - 更新
 SYMBOLS = {
     ';': TokenType.SEMICOLON,
     ',': TokenType.COMMA,
     '(': TokenType.LEFT_PAREN,
     ')': TokenType.RIGHT_PAREN,
+    '.': TokenType.DOT,
+
+    # 比较运算符
     '=': TokenType.EQUALS,
     '<>': TokenType.NOT_EQUALS,
-    '<': TokenType.LESS_THAN,
-    '>': TokenType.GREATER_THAN,
     '<=': TokenType.LESS_EQUAL,
     '>=': TokenType.GREATER_EQUAL,
-    '*': TokenType.ASTERISK,
-    '.': TokenType.DOT,
+    '<': TokenType.LESS_THAN,
+    '>': TokenType.GREATER_THAN,
+
+    # 算术运算符
+    '+': TokenType.PLUS,
+    '-': TokenType.MINUS,
+    '*': TokenType.MULTIPLY,  # 注意：这里用MULTIPLY，ASTERISK保留给SELECT *
+    '/': TokenType.DIVIDE,
 }
 
 

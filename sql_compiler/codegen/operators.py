@@ -263,3 +263,48 @@ class OrderByOp(Operator):
         # 模拟排序（实际实现会更复杂）
         for row in sorted(all_rows, key=lambda x: str(x)):
             yield row
+
+
+class InOp(Operator):
+    """IN操作符"""
+
+    def __init__(self, left_expr: Expression, right_expr: Expression, is_not: bool, children: List[Operator]):
+        super().__init__(children)
+        self.left_expr = left_expr
+        self.right_expr = right_expr
+        self.is_not = is_not
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": "InOp",
+            "left_expr": self.left_expr.to_dict(),
+            "right_expr": self.right_expr.to_dict(),
+            "is_not": self.is_not,
+            "children": [child.to_dict() for child in self.children]
+        }
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        # 模拟IN操作
+        for child in self.children:
+            for row in child.execute():
+                yield row
+
+
+class SubqueryOp(Operator):
+    """子查询操作符"""
+
+    def __init__(self, select_plan: Operator):
+        super().__init__([select_plan])
+        self.select_plan = select_plan
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": "SubqueryOp",
+            "select_plan": self.select_plan.to_dict(),
+            "children": [child.to_dict() for child in self.children]
+        }
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        # 执行子查询
+        for row in self.select_plan.execute():
+            yield row
