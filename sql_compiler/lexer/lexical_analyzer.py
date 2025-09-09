@@ -166,3 +166,35 @@ class LexicalAnalyzer:
             return True
 
         return False
+
+    def _scan_symbol(self) -> Token:
+        """扫描符号"""
+        start_column = self.column
+        char = self.text[self.current]
+
+        # 处理双字符符号（必须在单字符之前检查）
+        if self.current + 1 < len(self.text):
+            two_char = char + self.text[self.current + 1]
+            if two_char in SYMBOLS:
+                self.current += 2
+                self.column += 2
+                return Token(SYMBOLS[two_char], two_char, self.line, start_column)
+
+        # 处理单字符符号
+        if char in SYMBOLS:
+            self.current += 1
+            self.column += 1
+            token_type = SYMBOLS[char]
+
+            # 特殊处理 * 符号
+            if char == '*':
+                # 在 SELECT 上下文中使用 ASTERISK，在表达式中使用 MULTIPLY
+                # 这里简化处理，都返回 ASTERISK，在语法分析阶段区分
+                token_type = TokenType.ASTERISK
+
+            return Token(token_type, char, self.line, start_column)
+
+        # 未识别的字符
+        self.current += 1
+        self.column += 1
+        raise LexicalError(f"未识别的字符: '{char}'", self.line, start_column)

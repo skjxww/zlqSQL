@@ -70,6 +70,10 @@ class CatalogManager:
         """检查表是否存在"""
         return table_name in self.catalog_data["tables"]
 
+    def get_table(self, table_name: str) -> Optional[Dict[str, Any]]:
+        """获取表信息 - 修复缺失的方法"""
+        return self.catalog_data["tables"].get(table_name)
+
     def get_table_schema(self, table_name: str) -> Optional[List[tuple]]:
         """获取表结构"""
         if table_name not in self.catalog_data["tables"]:
@@ -90,6 +94,14 @@ class CatalogManager:
             if col["name"] == column_name:
                 return col
         return None
+
+    def get_table_columns(self, table_name: str) -> List[str]:
+        """获取表的所有列名"""
+        table_info = self.get_table(table_name)
+        if not table_info:
+            return []
+
+        return [col["name"] for col in table_info["columns"]]
 
     def get_all_tables(self) -> List[str]:
         """获取所有表名"""
@@ -133,3 +145,43 @@ class CatalogManager:
     def to_dict(self) -> Dict[str, Any]:
         """转换为字典格式"""
         return self.catalog_data.copy()
+
+    def clear_all_tables(self):
+        """清空所有表（用于测试）"""
+        self.catalog_data["tables"] = {}
+        self._save_catalog()
+
+    def print_catalog_info(self):
+        """打印目录信息（用于调试）"""
+        stats = self.get_catalog_stats()
+        print(f"目录统计:")
+        print(f"  总表数: {stats['total_tables']}")
+        print(f"  总列数: {stats['total_columns']}")
+        print(f"  总行数: {stats['total_rows']}")
+
+        if stats['tables']:
+            print(f"  表列表: {', '.join(stats['tables'])}")
+
+            for table_name in stats['tables']:
+                table_info = self.get_table(table_name)
+                columns = [col['name'] for col in table_info['columns']]
+                print(f"    {table_name}: [{', '.join(columns)}]")
+
+    def get_column_type(self, table_name: str, column_name: str) -> Optional[str]:
+        """获取列的数据类型"""
+        column_info = self.get_column_info(table_name, column_name)
+        if column_info:
+            return column_info.get("type")
+        return None
+
+    def get_table_column_types(self, table_name: str) -> Dict[str, str]:
+        """获取表的所有列及其类型"""
+        table_info = self.get_table(table_name)
+        if not table_info:
+            return {}
+
+        column_types = {}
+        for col in table_info["columns"]:
+            column_types[col["name"]] = col["type"]
+
+        return column_types

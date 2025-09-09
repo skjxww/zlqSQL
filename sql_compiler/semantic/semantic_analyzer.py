@@ -1,4 +1,4 @@
-from typing import List, Any
+from typing import List, Any, Dict, Union
 from sql_compiler.parser.ast_nodes import *
 from sql_compiler.semantic.symbol_table import SymbolTable
 from sql_compiler.catalog.catalog_manager import CatalogManager
@@ -6,199 +6,575 @@ from sql_compiler.exceptions.compiler_errors import SemanticError
 
 
 class SemanticAnalyzer:
+    """语义分析器 - 扩展支持新语法和类型检查"""
+
     def __init__(self, catalog: CatalogManager):
         self.catalog = catalog
         self.symbol_table = SymbolTable()
-        # 加载已有的表信息到符号表
-        self._load_existing_tables()
 
-    def _load_existing_tables(self):
-        """从catalog加载已存在的表信息"""
-        for table_name in self.catalog.get_all_tables():
-            columns = self.catalog.get_table_schema(table_name)
-            if columns:
-                self.symbol_table.add_table(table_name, columns)
+    def analyze(self, stmt: Statement):
+        """分析语句"""
+        if isinstance(stmt, CreateTableStmt):
+            self._analyze_create_table(stmt)
+        elif isinstance(stmt, InsertStmt):
+            self._analyze_insert(stmt)
+        elif isinstance(stmt, SelectStmt):
+            self._analyze_select(stmt)
+        elif isinstance(stmt, UpdateStmt):
+            self._analyze_update(stmt)
+        elif isinstance(stmt, DeleteStmt):
+            self._analyze_delete(stmt)
+        else:
+            raise SemanticError(f"不支持的语句类型: {type(stmt).__name__}")
 
-    def analyze(self, ast: Statement):
-        """语义分析入口"""
-        return ast.accept(self)
-
-    def visit_create_table_stmt(self, stmt: CreateTableStmt):
+    def _analyze_create_table(self, stmt: CreateTableStmt):
         """分析CREATE TABLE语句"""
         # 检查表是否已存在
-        if self.symbol_table.table_exists(stmt.table_name):
-            raise SemanticError(f"表 '{stmt.table_name}' 已存在", 0, 0)
+        if self.catalog.table_exists(stmt.table_name):
+            raise SemanticError(f"表 '{stmt.table_name}' 已存在")
 
-        # 检查列名重复
+        # 检查列名是否重复
         column_names = [col[0] for col in stmt.columns]
         if len(column_names) != len(set(column_names)):
-            raise SemanticError(f"表 '{stmt.table_name}' 中存在重复的列名", 0, 0)
+            raise SemanticError("表定义中存在重复的列名")
 
-        # 验证列类型
+        # 验证数据类型
         for column_name, column_type, constraints in stmt.columns:
-            if not self._is_valid_column_type(column_type):
-                raise SemanticError(f"无效的列类型: {column_type}", 0, 0)
+            if not self._is_valid_data_type(column_type):
+                raise SemanticError(f"无效的数据类型: {column_type}")
 
-        # 添加到符号表
-        success = self.symbol_table.add_table(stmt.table_name, stmt.columns)
+        # 添加到目录
+        success = self.catalog.create_table(stmt.table_name, stmt.columns)
         if not success:
-            raise SemanticError(f"无法创建表 '{stmt.table_name}'", 0, 0)
+            raise SemanticError(f"创建表 '{stmt.table_name}' 失败")
 
-        # 添加到catalog
-        self.catalog.create_table(stmt.table_name, stmt.columns)
-
-    def visit_insert_stmt(self, stmt: InsertStmt):
+    def _analyze_insert(self, stmt: InsertStmt):
         """分析INSERT语句"""
         # 检查表是否存在
-        if not self.symbol_table.table_exists(stmt.table_name):
-            raise SemanticError(f"表 '{stmt.table_name}' 不存在", 0, 0)
+        if not self.catalog.table_exists(stmt.table_name):
+            raise SemanticError(f"表 '{stmt.table_name}' 不存在")
 
-        table_columns = self.symbol_table.get_table_columns(stmt.table_name)
+        table_info = self.catalog.get_table(stmt.table_name)
+        if not table_info:
+            raise SemanticError(f"无法获取表 '{stmt.table_name}' 的信息")
 
-        # 如果指定了列名
+        table_columns = [col["name"] for col in table_info["columns"]]
+        column_types = self.catalog.get_table_column_types(stmt.table_name)
+
+        # 检查列名
         if stmt.columns:
-            # 检查列是否存在
-            for column_name in stmt.columns:
-                if not self.symbol_table.column_exists(stmt.table_name, column_name):
-                    raise SemanticError(f"列 '{column_name}' 在表 '{stmt.table_name}' 中不存在", 0, 0)
-
-            # 检查列数和值数是否匹配
-            if len(stmt.columns) != len(stmt.values):
-                raise SemanticError(f"列数({len(stmt.columns)})与值数({len(stmt.values)})不匹配", 0, 0)
-
-            # 类型检查
-            for i, column_name in enumerate(stmt.columns):
-                column_type = self.symbol_table.get_column_type(stmt.table_name, column_name)
-                value_type = self._get_expression_type(stmt.values[i])
-
-                if not self._types_compatible(column_type, value_type):
-                    raise SemanticError(f"列 '{column_name}' 类型({column_type})与值类型({value_type})不兼容", 0, 0)
+            for col in stmt.columns:
+                if col not in table_columns:
+                    raise SemanticError(f"表 '{stmt.table_name}' 中不存在列 '{col}'")
+            target_columns = stmt.columns
         else:
-            # 未指定列名，使用表的所有列
-            if len(table_columns) != len(stmt.values):
-                raise SemanticError(f"表列数({len(table_columns)})与值数({len(stmt.values)})不匹配", 0, 0)
+            target_columns = table_columns
+
+        # 检查值的数量
+        if len(stmt.values) != len(target_columns):
+            raise SemanticError(f"值的数量({len(stmt.values)})与列的数量({len(target_columns)})不匹配")
+
+        # 检查类型匹配
+        for i, (column, value_expr) in enumerate(zip(target_columns, stmt.values)):
+            expected_type = column_types.get(column)
+            if expected_type:
+                value_type = self._get_expression_type(value_expr, {stmt.table_name: table_columns})
+                if not self._is_type_compatible(value_type, expected_type):
+                    raise SemanticError(f"列 '{column}' 期望类型 '{expected_type}'，但得到 '{value_type}'")
+
+        # 分析每个值表达式
+        available_tables = {stmt.table_name: table_columns}
+        for value in stmt.values:
+            self._analyze_expression(value, available_tables)
+
+    def _analyze_select(self, stmt: SelectStmt):
+        """分析SELECT语句 - 增强列引用验证"""
+        # 分析FROM子句
+        available_tables = self._analyze_from_clause(stmt.from_clause)
+
+        # 分析选择列表
+        if stmt.columns != ["*"]:
+            for col in stmt.columns:
+                if not self._is_valid_column_reference(col, available_tables):
+                    # 提供更具体的错误信息
+                    if self._is_aggregate_function_call(col):
+                        func_name, args_str = self._parse_function_call(col)
+                        args = self._parse_function_arguments(args_str)
+                        for arg in args:
+                            arg = arg.strip()
+                            if arg != "*" and not arg.isdigit() and not (arg.startswith("'") and arg.endswith("'")):
+                                if not self._is_valid_simple_column_reference(arg, available_tables):
+                                    raise SemanticError(f"聚合函数 {func_name} 中的列引用无效: {arg}")
+                        raise SemanticError(f"聚合函数调用无效: {col}")
+                    else:
+                        raise SemanticError(f"无效的列引用: {col}")
+
+            # 验证GROUP BY规则
+            self._validate_group_by_rules(stmt, available_tables)
+
+        # 分析WHERE子句
+        if stmt.where_clause:
+            self._analyze_expression(stmt.where_clause, available_tables)
+
+        # 分析GROUP BY子句
+        if stmt.group_by:
+            for col in stmt.group_by:
+                if not self._is_valid_column_reference(col, available_tables):
+                    raise SemanticError(f"GROUP BY中的无效列引用: {col}")
+
+        # 分析HAVING子句
+        if stmt.having_clause:
+            if not stmt.group_by:
+                raise SemanticError("HAVING子句只能与GROUP BY一起使用")
+            self._analyze_expression(stmt.having_clause, available_tables)
+
+        # 分析ORDER BY子句
+        if stmt.order_by:
+            for col, direction in stmt.order_by:
+                if not self._is_valid_column_reference(col, available_tables):
+                    raise SemanticError(f"ORDER BY中的无效列引用: {col}")
+                if direction not in ["ASC", "DESC"]:
+                    raise SemanticError(f"无效的排序方向: {direction}")
+
+    def _validate_group_by_rules(self, stmt: SelectStmt, available_tables: Dict[str, List[str]]):
+        """验证GROUP BY规则"""
+        if stmt.columns == ["*"]:
+            # SELECT * 的情况特殊处理
+            if stmt.group_by:
+                # SELECT * 不能和 GROUP BY 一起使用
+                raise SemanticError("SELECT * 不能与GROUP BY一起使用")
+            return
+
+        # 分析选择列表中的列类型
+        aggregate_columns = []
+        non_aggregate_columns = []
+
+        for col in stmt.columns:
+            if self._is_aggregate_function_call(col):
+                aggregate_columns.append(col)
+            else:
+                # 检查是否是简单的列引用
+                if self._is_simple_column_reference(col, available_tables):
+                    non_aggregate_columns.append(col)
+                # 其他情况（如计算表达式）暂时允许
+
+        # 如果既有聚合列又有非聚合列
+        if aggregate_columns and non_aggregate_columns:
+            if not stmt.group_by:
+                # 没有GROUP BY，但有混合列类型
+                non_agg_list = ', '.join(non_aggregate_columns)
+                raise SemanticError(f"查询包含聚合函数和非聚合列，必须使用GROUP BY。非聚合列: {non_agg_list}")
+            else:
+                # 有GROUP BY，检查所有非聚合列是否都在GROUP BY中
+                for col in non_aggregate_columns:
+                    if col not in stmt.group_by:
+                        raise SemanticError(f"列 '{col}' 必须出现在GROUP BY子句中，或者在聚合函数中使用")
+
+    def _is_aggregate_function_call(self, column_ref: str) -> bool:
+        """检查是否是聚合函数调用"""
+        if not isinstance(column_ref, str):
+            return False
+
+        upper_col = column_ref.upper().strip()
+        aggregate_functions = ["COUNT(", "SUM(", "AVG(", "MAX(", "MIN("]
+        return any(upper_col.startswith(func) or func in upper_col for func in aggregate_functions)
+
+    def _is_simple_column_reference(self, column_ref: str, available_tables: Dict[str, List[str]]) -> bool:
+        """检查是否是简单的列引用（非聚合函数）"""
+        if not isinstance(column_ref, str):
+            return False
+
+        # 如果包含聚合函数，就不是简单列引用
+        if self._is_aggregate_function_call(column_ref):
+            return False
+
+        # 检查是否包含复杂表达式（简化版本）
+        # 如果包含运算符，认为是复杂表达式
+        if any(op in column_ref for op in ['+', '-', '*', '/', '(', ')']):
+            return False
+
+        # 检查是否是有效的列引用
+        return self._is_valid_column_reference(column_ref, available_tables)
+
+    def _analyze_update(self, stmt: UpdateStmt):
+        """分析UPDATE语句 - 增强类型检查"""
+        # 检查表是否存在
+        if not self.catalog.table_exists(stmt.table_name):
+            raise SemanticError(f"表 '{stmt.table_name}' 不存在")
+
+        table_info = self.catalog.get_table(stmt.table_name)
+        if not table_info:
+            raise SemanticError(f"无法获取表 '{stmt.table_name}' 的信息")
+
+        table_columns = [col["name"] for col in table_info["columns"]]
+        column_types = self.catalog.get_table_column_types(stmt.table_name)
+        available_tables = {stmt.table_name: table_columns}
+
+        # 分析赋值语句，包括类型检查
+        for column, expression in stmt.assignments:
+            if column not in table_columns:
+                raise SemanticError(f"表 '{stmt.table_name}' 中不存在列 '{column}'")
 
             # 类型检查
-            for i, column in enumerate(table_columns):
-                column_type = column.data_type
-                value_type = self._get_expression_type(stmt.values[i])
+            expected_type = column_types.get(column)
+            if expected_type:
+                expression_type = self._get_expression_type(expression, available_tables)
+                if not self._is_type_compatible(expression_type, expected_type):
+                    raise SemanticError(
+                        f"列 '{column}' 期望类型 '{expected_type}'，但表达式返回类型 '{expression_type}'")
 
-                if not self._types_compatible(column_type, value_type):
-                    raise SemanticError(f"列 '{column.name}' 类型({column_type})与值类型({value_type})不兼容", 0, 0)
+            self._analyze_expression(expression, available_tables)
 
-        # 验证表达式
-        for value_expr in stmt.values:
-            self._validate_expression(value_expr, stmt.table_name)
-
-    def visit_select_stmt(self, stmt: SelectStmt):
-        """分析SELECT语句"""
-        # 检查表是否存在
-        if not self.symbol_table.table_exists(stmt.table_name):
-            raise SemanticError(f"表 '{stmt.table_name}' 不存在", 0, 0)
-
-        # 检查选择的列
-        if stmt.columns != ["*"]:
-            for column_name in stmt.columns:
-                if not self.symbol_table.column_exists(stmt.table_name, column_name):
-                    raise SemanticError(f"列 '{column_name}' 在表 '{stmt.table_name}' 中不存在", 0, 0)
-
-        # 验证WHERE子句
+        # 分析WHERE子句
         if stmt.where_clause:
-            self._validate_expression(stmt.where_clause, stmt.table_name)
+            self._analyze_expression(stmt.where_clause, available_tables)
 
-    def visit_delete_stmt(self, stmt: DeleteStmt):
+    def _analyze_delete(self, stmt: DeleteStmt):
         """分析DELETE语句"""
         # 检查表是否存在
-        if not self.symbol_table.table_exists(stmt.table_name):
-            raise SemanticError(f"表 '{stmt.table_name}' 不存在", 0, 0)
+        if not self.catalog.table_exists(stmt.table_name):
+            raise SemanticError(f"表 '{stmt.table_name}' 不存在")
 
-        # 验证WHERE子句
         if stmt.where_clause:
-            self._validate_expression(stmt.where_clause, stmt.table_name)
+            table_info = self.catalog.get_table(stmt.table_name)
+            if not table_info:
+                raise SemanticError(f"无法获取表 '{stmt.table_name}' 的信息")
 
-    def visit_binary_expr(self, expr: BinaryExpr):
-        """分析二元表达式"""
-        left_type = expr.left.accept(self)
-        right_type = expr.right.accept(self)
+            table_columns = [col["name"] for col in table_info["columns"]]
+            available_tables = {stmt.table_name: table_columns}
+            self._analyze_expression(stmt.where_clause, available_tables)
 
-        # 类型兼容性检查
-        if not self._types_compatible(left_type, right_type):
-            raise SemanticError(f"二元表达式两侧类型不兼容: {left_type} {expr.operator} {right_type}", 0, 0)
-
-        # 返回结果类型
-        if expr.operator in ['=', '<>', '<', '>', '<=', '>=', 'AND', 'OR']:
-            return 'BOOLEAN'
-        else:
-            return left_type
-
-    def visit_identifier_expr(self, expr: IdentifierExpr):
-        """分析标识符表达式"""
-        return 'IDENTIFIER'  # 具体类型需要结合上下文确定
-
-    def visit_literal_expr(self, expr: LiteralExpr):
-        """分析字面量表达式"""
-        if isinstance(expr.value, int):
-            return 'INT'
-        elif isinstance(expr.value, str):
-            return 'VARCHAR'
-        else:
-            return 'UNKNOWN'
-
-    def _validate_expression(self, expr: Expression, table_name: str):
-        """验证表达式中的标识符"""
-        if isinstance(expr, IdentifierExpr):
-            if not self.symbol_table.column_exists(table_name, expr.name):
-                raise SemanticError(f"列 '{expr.name}' 在表 '{table_name}' 中不存在", 0, 0)
-        elif isinstance(expr, BinaryExpr):
-            self._validate_expression(expr.left, table_name)
-            self._validate_expression(expr.right, table_name)
-
-    def _get_expression_type(self, expr: Expression) -> str:
-        """获取表达式类型"""
+    def _get_expression_type(self, expr: Expression, available_tables: Dict[str, List[str]]) -> str:
+        """获取表达式的类型"""
         if isinstance(expr, LiteralExpr):
             if isinstance(expr.value, int):
-                return 'INT'
+                return "INT"
             elif isinstance(expr.value, str):
-                return 'VARCHAR'
+                return "VARCHAR"
+            elif isinstance(expr.value, float):
+                return "FLOAT"  # 如果支持浮点数
+            else:
+                return "UNKNOWN"
+
         elif isinstance(expr, IdentifierExpr):
-            return 'IDENTIFIER'  # 需要结合上下文
+            # 查找列的类型
+            for table_name, columns in available_tables.items():
+                if expr.name in columns:
+                    # 获取该列的实际类型
+                    column_type = self.catalog.get_column_type(table_name, expr.name)
+                    return column_type if column_type else "UNKNOWN"
+            return "UNKNOWN"
+
         elif isinstance(expr, BinaryExpr):
-            return 'BOOLEAN'  # 假设二元表达式返回布尔值
+            # 二元表达式的类型推断
+            left_type = self._get_expression_type(expr.left, available_tables)
+            right_type = self._get_expression_type(expr.right, available_tables)
 
-        return 'UNKNOWN'
+            # 算术运算结果通常是数值类型
+            if expr.operator in ['+', '-', '*', '/']:
+                if left_type == "INT" and right_type == "INT":
+                    return "INT"
+                else:
+                    return "NUMERIC"  # 通用数值类型
 
-    def _is_valid_column_type(self, column_type: str) -> bool:
-        """验证列类型是否有效"""
-        base_types = ['INT', 'VARCHAR', 'CHAR']
-        if column_type in base_types:
+            # 比较运算结果是布尔类型
+            elif expr.operator in ['=', '<>', '<', '>', '<=', '>=']:
+                return "BOOLEAN"
+
+            # 逻辑运算结果是布尔类型
+            elif expr.operator in ['AND', 'OR']:
+                return "BOOLEAN"
+
+            return "UNKNOWN"
+
+        elif isinstance(expr, FunctionExpr):
+            # 聚合函数的类型推断
+            if expr.function_name.upper() == "COUNT":
+                return "INT"
+            elif expr.function_name.upper() in ["SUM", "AVG"]:
+                return "NUMERIC"
+            elif expr.function_name.upper() in ["MAX", "MIN"]:
+                # MAX/MIN 的类型取决于参数类型
+                if expr.arguments:
+                    return self._get_expression_type(expr.arguments[0], available_tables)
+                return "UNKNOWN"
+            return "UNKNOWN"
+
+        elif isinstance(expr, InExpr):
+            return "BOOLEAN"
+
+        elif isinstance(expr, SubqueryExpr):
+            # 子查询的类型取决于其选择的列
+            return "UNKNOWN"  # 简化处理
+
+        elif isinstance(expr, ValueListExpr):
+            # 值列表的类型取决于第一个值的类型
+            if expr.values:
+                return self._get_expression_type(expr.values[0], available_tables)
+            return "UNKNOWN"
+
+        return "UNKNOWN"
+
+    def _is_type_compatible(self, actual_type: str, expected_type: str) -> bool:
+        """检查类型是否兼容"""
+        if actual_type == "UNKNOWN" or expected_type == "UNKNOWN":
+            return True  # 未知类型暂时允许
+
+        # 完全匹配
+        if actual_type == expected_type:
             return True
 
-        # 检查带长度的类型
-        for base_type in ['VARCHAR', 'CHAR']:
-            if column_type.startswith(f"{base_type}(") and column_type.endswith(")"):
-                try:
-                    size_str = column_type[len(base_type) + 1:-1]
-                    size = int(size_str)
-                    return size > 0
-                except ValueError:
-                    return False
+        # VARCHAR 和 CHAR 兼容
+        if (actual_type.startswith("VARCHAR") and expected_type.startswith("CHAR")) or \
+                (actual_type.startswith("CHAR") and expected_type.startswith("VARCHAR")):
+            return True
+
+        # 字符串字面量可以赋值给任何字符串类型
+        if actual_type == "VARCHAR" and (expected_type.startswith("VARCHAR") or expected_type.startswith("CHAR")):
+            return True
+
+        # 数值类型兼容
+        numeric_types = {"INT", "NUMERIC", "FLOAT"}
+        if actual_type in numeric_types and expected_type in numeric_types:
+            return True
 
         return False
 
-    def _types_compatible(self, type1: str, type2: str) -> bool:
-        """检查类型兼容性"""
-        if type1 == type2:
+    # 其他现有方法保持不变...
+    def _analyze_from_clause(self, from_clause: FromClause) -> Dict[str, List[str]]:
+        """分析FROM子句，返回可用的表和列"""
+        if isinstance(from_clause, TableRef):
+            if not self.catalog.table_exists(from_clause.table_name):
+                raise SemanticError(f"表 '{from_clause.table_name}' 不存在")
+
+            table_info = self.catalog.get_table(from_clause.table_name)
+            if not table_info:
+                raise SemanticError(f"无法获取表 '{from_clause.table_name}' 的信息")
+
+            table_columns = [col["name"] for col in table_info["columns"]]
+
+            # 构建结果字典
+            result = {}
+
+            # 如果有别名，使用别名作为主键
+            if from_clause.alias:
+                result[from_clause.alias] = table_columns
+                # 同时也保留原表名的映射，以防某些地方需要用到
+                result[from_clause.table_name] = table_columns
+            else:
+                result[from_clause.table_name] = table_columns
+
+            return result
+
+        elif isinstance(from_clause, JoinExpr):
+            # 递归分析JOIN的左右两边
+            left_tables = self._analyze_from_clause(from_clause.left)
+            right_tables = self._analyze_from_clause(from_clause.right)
+
+            # 合并可用的表
+            available_tables = {**left_tables, **right_tables}
+
+            # 分析ON条件
+            if from_clause.on_condition:
+                self._analyze_expression(from_clause.on_condition, available_tables)
+
+            return available_tables
+
+        else:
+            raise SemanticError(f"不支持的FROM子句类型: {type(from_clause).__name__}")
+
+    def _analyze_expression(self, expr: Expression, available_tables: Dict[str, List[str]]):
+        """分析表达式"""
+        if isinstance(expr, LiteralExpr):
+            # 字面量总是有效的
+            pass
+        elif isinstance(expr, IdentifierExpr):
+            # 检查标识符引用是否有效
+            if not self._is_valid_identifier(expr, available_tables):
+                if expr.table_name:
+                    raise SemanticError(f"无效的列引用: {expr.table_name}.{expr.name}")
+                else:
+                    raise SemanticError(f"无效的列引用: {expr.name}")
+        elif isinstance(expr, BinaryExpr):
+            # 递归分析左右操作数
+            self._analyze_expression(expr.left, available_tables)
+            self._analyze_expression(expr.right, available_tables)
+        elif isinstance(expr, FunctionExpr):
+            # 分析函数参数
+            for arg in expr.arguments:
+                if not isinstance(arg, LiteralExpr) or arg.value != "*":
+                    self._analyze_expression(arg, available_tables)
+        elif isinstance(expr, InExpr):
+            # 分析 IN 表达式
+            self._analyze_expression(expr.left_expr, available_tables)
+            self._analyze_expression(expr.right_expr, available_tables)
+        elif isinstance(expr, SubqueryExpr):
+            # 分析子查询
+            self.analyze(expr.select_stmt)
+        elif isinstance(expr, ValueListExpr):
+            # 分析值列表
+            for value in expr.values:
+                self._analyze_expression(value, available_tables)
+        else:
+            raise SemanticError(f"不支持的表达式类型: {type(expr).__name__}")
+
+    def _is_valid_column_reference(self, col_ref: str, available_tables: Dict[str, List[str]]) -> bool:
+        """检查列引用是否有效 - 增强聚合函数参数验证"""
+
+        # 检查是否是聚合函数调用
+        if self._is_aggregate_function_call(col_ref):
+            return self._validate_aggregate_function_arguments(col_ref, available_tables)
+
+        if "." in col_ref:
+            # table.column 格式
+            parts = col_ref.split(".", 1)
+            if len(parts) != 2:
+                return False
+            table_name, column_name = parts
+
+            # 检查表名（可能是别名）是否存在
+            if table_name not in available_tables:
+                return False
+
+            # 检查列名是否在该表中
+            return column_name in available_tables[table_name]
+        else:
+            # 简单列名，在所有可用表中查找
+            for columns in available_tables.values():
+                if col_ref in columns:
+                    return True
+            return False
+
+    def _validate_aggregate_function_arguments(self, func_call: str, available_tables: Dict[str, List[str]]) -> bool:
+        """验证聚合函数的参数"""
+        try:
+            # 解析函数调用
+            func_name, args_str = self._parse_function_call(func_call)
+
+            if not func_name:
+                return False
+
+            # 解析参数
+            args = self._parse_function_arguments(args_str)
+
+            # 验证每个参数
+            for arg in args:
+                arg = arg.strip()
+                if arg == "*":
+                    # COUNT(*) 总是有效的
+                    continue
+                elif arg.isdigit() or (arg.startswith("'") and arg.endswith("'")):
+                    # 字面量总是有效的
+                    continue
+                else:
+                    # 检查列引用是否存在
+                    if not self._is_valid_simple_column_reference(arg, available_tables):
+                        return False
+
             return True
 
-        # VARCHAR和CHAR兼容
-        if (type1.startswith('VARCHAR') or type1.startswith('CHAR')) and \
-                (type2.startswith('VARCHAR') or type2.startswith('CHAR')):
-            return True
+        except Exception:
+            # 解析失败，认为无效
+            return False
 
-        # 字符串字面量与字符串类型兼容
-        if type1 == 'VARCHAR' and type2 in ['VARCHAR', 'CHAR']:
-            return True
-        if type2 == 'VARCHAR' and type1 in ['VARCHAR', 'CHAR']:
-            return True
+    def _parse_function_call(self, func_call: str) -> tuple:
+        """解析函数调用，返回(函数名, 参数字符串)"""
+        func_call = func_call.strip()
+
+        # 查找左括号
+        paren_pos = func_call.find('(')
+        if paren_pos == -1:
+            return None, None
+
+        func_name = func_call[:paren_pos].strip().upper()
+
+        # 查找匹配的右括号
+        paren_count = 0
+        start_pos = paren_pos + 1
+        end_pos = len(func_call) - 1
+
+        for i in range(paren_pos, len(func_call)):
+            if func_call[i] == '(':
+                paren_count += 1
+            elif func_call[i] == ')':
+                paren_count -= 1
+                if paren_count == 0:
+                    end_pos = i
+                    break
+
+        args_str = func_call[start_pos:end_pos].strip()
+        return func_name, args_str
+
+    def _parse_function_arguments(self, args_str: str) -> list:
+        """解析函数参数列表"""
+        if not args_str:
+            return []
+
+        # 简单的参数分割（不处理嵌套函数）
+        args = []
+        current_arg = ""
+        paren_count = 0
+
+        for char in args_str:
+            if char == ',' and paren_count == 0:
+                args.append(current_arg.strip())
+                current_arg = ""
+            else:
+                if char == '(':
+                    paren_count += 1
+                elif char == ')':
+                    paren_count -= 1
+                current_arg += char
+
+        if current_arg.strip():
+            args.append(current_arg.strip())
+
+        return args
+
+    def _is_valid_simple_column_reference(self, col_ref: str, available_tables: Dict[str, List[str]]) -> bool:
+        """检查简单的列引用是否有效（不包含聚合函数）"""
+        col_ref = col_ref.strip()
+
+        if "." in col_ref:
+            # table.column 格式
+            parts = col_ref.split(".", 1)
+            if len(parts) != 2:
+                return False
+            table_name, column_name = parts
+
+            # 检查表名（可能是别名）是否存在
+            if table_name not in available_tables:
+                return False
+
+            # 检查列名是否在该表中
+            return column_name in available_tables[table_name]
+        else:
+            # 简单列名，在所有可用表中查找
+            for columns in available_tables.values():
+                if col_ref in columns:
+                    return True
+            return False
+
+    def _is_valid_identifier(self, expr: IdentifierExpr, available_tables: Dict[str, List[str]]) -> bool:
+        """检查标识符是否有效"""
+        if expr.table_name:
+            # table.column 格式
+            if expr.table_name not in available_tables:
+                return False
+            return expr.name in available_tables[expr.table_name]
+        else:
+            # 简单列名，在所有可用表中查找
+            for columns in available_tables.values():
+                if expr.name in columns:
+                    return True
+            return False
+
+    def _is_valid_data_type(self, data_type: str) -> bool:
+        """检查数据类型是否有效"""
+        base_types = ["INT", "VARCHAR", "CHAR"]
+
+        for base_type in base_types:
+            if data_type == base_type or data_type.startswith(f"{base_type}("):
+                return True
 
         return False
