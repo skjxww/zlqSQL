@@ -3,25 +3,52 @@ from sql_compiler.parser.ast_nodes import *
 from sql_compiler.codegen.operators import *
 from sql_compiler.exceptions.compiler_errors import SemanticError
 
+# 安全导入优化器
+try:
+    from sql_compiler.optimizer.optimizer import QueryOptimizer
+    OPTIMIZER_AVAILABLE = True
+except ImportError:
+    OPTIMIZER_AVAILABLE = False
+    print("⚠️ 优化器模块未找到，将跳过查询优化")
+
 
 class PlanGenerator:
-    """执行计划生成器 """
+    """执行计划生成器"""
+
+    def __init__(self, enable_optimization=True):
+        """初始化计划生成器"""
+        self.enable_optimization = enable_optimization and OPTIMIZER_AVAILABLE
+        self.optimizer = QueryOptimizer() if self.enable_optimization else None
 
     def generate(self, stmt: Statement) -> Operator:
         """生成执行计划"""
+        # 生成基础执行计划（保持你原有的逻辑）
         if isinstance(stmt, CreateTableStmt):
-            return self._generate_create_table_plan(stmt)
+            plan = self._generate_create_table_plan(stmt)
         elif isinstance(stmt, InsertStmt):
-            return self._generate_insert_plan(stmt)
+            plan = self._generate_insert_plan(stmt)
         elif isinstance(stmt, SelectStmt):
-            return self._generate_select_plan(stmt)
+            plan = self._generate_select_plan(stmt)
         elif isinstance(stmt, UpdateStmt):
-            return self._generate_update_plan(stmt)
+            plan = self._generate_update_plan(stmt)
         elif isinstance(stmt, DeleteStmt):
-            return self._generate_delete_plan(stmt)
+            plan = self._generate_delete_plan(stmt)
         else:
             raise SemanticError(f"不支持的语句类型: {type(stmt).__name__}")
 
+        # 只对SELECT语句应用优化
+        if (self.optimizer and
+            self.enable_optimization and
+            isinstance(stmt, SelectStmt)):
+            try:
+                optimized_plan = self.optimizer.optimize(plan)
+                return optimized_plan
+            except Exception as e:
+                print(f"⚠️ 查询优化失败: {e}，使用原始计划")
+
+        return plan
+
+    # 保持你所有现有的方法完全不变
     def _generate_create_table_plan(self, stmt: CreateTableStmt) -> Operator:
         """生成CREATE TABLE执行计划"""
         return CreateTableOp(stmt.table_name, stmt.columns)
