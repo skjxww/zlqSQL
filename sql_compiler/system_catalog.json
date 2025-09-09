@@ -1,7 +1,7 @@
 {
   "tables": {
-    "users": {
-      "name": "users",
+    "customers": {
+      "name": "customers",
       "columns": [
         {
           "name": "id",
@@ -14,12 +14,66 @@
           "constraints": null
         },
         {
-          "name": "email",
-          "type": "VARCHAR(100)",
+          "name": "city",
+          "type": "VARCHAR(30)",
+          "constraints": null
+        },
+        {
+          "name": "age",
+          "type": "INT",
           "constraints": null
         }
       ],
-      "created_at": "2025-09-09T16:45:17.370085",
+      "created_at": "2025-09-10T00:28:06.290444",
+      "row_count": 0
+    },
+    "orders": {
+      "name": "orders",
+      "columns": [
+        {
+          "name": "order_id",
+          "type": "INT",
+          "constraints": null
+        },
+        {
+          "name": "customer_id",
+          "type": "INT",
+          "constraints": null
+        },
+        {
+          "name": "amount",
+          "type": "INT",
+          "constraints": null
+        },
+        {
+          "name": "status",
+          "type": "VARCHAR(20)",
+          "constraints": null
+        }
+      ],
+      "created_at": "2025-09-10T00:28:06.291451",
+      "row_count": 0
+    },
+    "products": {
+      "name": "products",
+      "columns": [
+        {
+          "name": "product_id",
+          "type": "INT",
+          "constraints": null
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR(50)",
+          "constraints": null
+        },
+        {
+          "name": "price",
+          "type": "INT",
+          "constraints": null
+        }
+      ],
+      "created_at": "2025-09-10T00:28:06.292518",
       "row_count": 0
     }
   },

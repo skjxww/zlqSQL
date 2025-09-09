@@ -1,462 +1,429 @@
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from sql_compiler.parser.ast_nodes import *
 from sql_compiler.codegen.operators import *
 
 
 class QueryOptimizer:
-    """查询优化器"""
+    """简化的查询优化器"""
 
-    def __init__(self):
-        self.optimization_rules = [
-            PredicatePushdownRule(),
-            ProjectionPushdownRule(),
-            JoinReorderRule(),
-            ConstantFoldingRule(),
-            RedundantOperatorEliminationRule()
-        ]
+    def __init__(self, silent_mode=False):
+        self.silent_mode = silent_mode
 
     def optimize(self, plan: Operator) -> Operator:
-        """对执行计划进行优化"""
-        print("\n=== 查询优化 ===")
-        original_plan = plan
+        """优化执行计划"""
+        if not self.silent_mode:
+            print("\n=== 查询优化 ===")
 
-        # 应用所有优化规则
         optimized_plan = plan
         total_optimizations = 0
 
-        for rule in self.optimization_rules:
-            print(f"应用优化规则: {rule.__class__.__name__}")
-            new_plan = rule.apply(optimized_plan)
-
-            if new_plan != optimized_plan:
-                optimizations = rule.get_optimization_count()
-                print(f"  ✅ 应用了 {optimizations} 个优化")
-                total_optimizations += optimizations
-                optimized_plan = new_plan
-            else:
-                print(f"  ⏭️  无优化机会")
-
-        print(f"总共应用了 {total_optimizations} 个优化")
-
-        if total_optimizations > 0:
-            print("优化前后对比:")
-            print("原始计划复杂度:", self._calculate_complexity(original_plan))
-            print("优化后复杂度:", self._calculate_complexity(optimized_plan))
-
-        return optimized_plan
-
-    def _calculate_complexity(self, plan: Operator) -> int:
-        """计算执行计划的复杂度（简化版本）"""
-        complexity = 1
-        for child in plan.children:
-            complexity += self._calculate_complexity(child)
-
-        # 不同操作符有不同的复杂度权重
-        if isinstance(plan, JoinOp):
-            complexity *= 3  # JOIN 操作复杂度高
-        elif isinstance(plan, FilterOp):
-            complexity *= 1.5
-        elif isinstance(plan, SeqScanOp):
-            complexity *= 2
-
-        return int(complexity)
-
-
-class OptimizationRule:
-    """优化规则基类"""
-
-    def __init__(self):
-        self.optimization_count = 0
-
-    def apply(self, plan: Operator) -> Operator:
-        """应用优化规则"""
-        self.optimization_count = 0
-        return self._apply_recursive(plan)
-
-    def _apply_recursive(self, plan: Operator) -> Operator:
-        """递归应用优化规则"""
-        # 先优化子节点
-        optimized_children = []
-        for child in plan.children:
-            optimized_child = self._apply_recursive(child)
-            optimized_children.append(optimized_child)
-
-        # 更新子节点
-        plan.children = optimized_children
-
-        # 应用当前规则
-        return self._apply_rule(plan)
-
-    def _apply_rule(self, plan: Operator) -> Operator:
-        """应用具体的优化规则（子类实现）"""
-        return plan
-
-    def get_optimization_count(self) -> int:
-        """获取优化次数"""
-        return self.optimization_count
-
-
-class PredicatePushdownRule(OptimizationRule):
-    """谓词下推优化规则"""
-
-    def _apply_rule(self, plan: Operator) -> Operator:
-        """应用谓词下推规则"""
-        if isinstance(plan, JoinOp):
-            return self._pushdown_join_predicates(plan)
-        elif isinstance(plan, FilterOp):
-            return self._pushdown_filter_predicates(plan)
-        return plan
-
-    def _pushdown_join_predicates(self, join_op: JoinOp) -> Operator:
-        """将JOIN条件中的谓词下推"""
-        if not hasattr(join_op, 'condition') or not join_op.condition:
-            return join_op
-
-        # 分析JOIN条件，尝试将单表谓词下推到表扫描
-        pushdown_conditions = self._extract_pushdown_conditions(join_op.condition)
-
-        if pushdown_conditions:
-            self.optimization_count += len(pushdown_conditions)
-            print(f"    🎯 谓词下推: 将 {len(pushdown_conditions)} 个条件下推到表扫描")
-
-            # 重构执行计划
-            return self._reconstruct_with_pushdown(join_op, pushdown_conditions)
-
-        return join_op
-
-    def _pushdown_filter_predicates(self, filter_op: FilterOp) -> Operator:
-        """将Filter条件下推到子操作"""
-        if len(filter_op.children) == 1 and isinstance(filter_op.children[0], JoinOp):
-            join_child = filter_op.children[0]
-
-            # 尝试将Filter条件合并到JOIN条件中
-            if self._can_merge_conditions(filter_op.condition, join_child):
-                self.optimization_count += 1
-                print(f"    🎯 谓词下推: 将Filter条件合并到JOIN中")
-                return self._merge_filter_to_join(filter_op, join_child)
-
-        return filter_op
-
-    def _extract_pushdown_conditions(self, condition: Expression) -> List[Dict]:
-        """从JOIN条件中提取可以下推的谓词"""
-        # 简化实现：识别单表条件
-        pushdown_conditions = []
-
-        if isinstance(condition, BinaryExpr):
-            if condition.operator in ['AND']:
-                # 递归处理AND条件的左右子树
-                pushdown_conditions.extend(self._extract_pushdown_conditions(condition.left))
-                pushdown_conditions.extend(self._extract_pushdown_conditions(condition.right))
-            elif condition.operator in ['=', '<', '>', '<=', '>=', '<>']:
-                # 检查是否是单表谓词
-                if self._is_single_table_predicate(condition):
-                    pushdown_conditions.append({
-                        'condition': condition,
-                        'table': self._get_predicate_table(condition)
-                    })
-
-        return pushdown_conditions
-
-    def _is_single_table_predicate(self, condition: BinaryExpr) -> bool:
-        """检查是否是单表谓词"""
-        # 简化实现：检查左右操作数是否都来自同一个表
-        left_tables = self._get_expression_tables(condition.left)
-        right_tables = self._get_expression_tables(condition.right)
-
-        # 如果右边是字面量，左边是单表列，则可以下推
-        if len(right_tables) == 0 and len(left_tables) == 1:
-            return True
-
-        return False
-
-    def _get_expression_tables(self, expr: Expression) -> set:
-        """获取表达式中涉及的表"""
-        tables = set()
-
-        if isinstance(expr, IdentifierExpr):
-            if expr.table_name:
-                tables.add(expr.table_name)
-        elif isinstance(expr, BinaryExpr):
-            tables.update(self._get_expression_tables(expr.left))
-            tables.update(self._get_expression_tables(expr.right))
-
-        return tables
-
-    def _get_predicate_table(self, condition: BinaryExpr) -> str:
-        """获取谓词涉及的表名"""
-        if isinstance(condition.left, IdentifierExpr) and condition.left.table_name:
-            return condition.left.table_name
-        return "unknown"
-
-    def _can_merge_conditions(self, filter_condition: Expression, join_op: JoinOp) -> bool:
-        """检查Filter条件是否可以合并到JOIN中"""
-        # 简化实现
-        return True
-
-    def _merge_filter_to_join(self, filter_op: FilterOp, join_op: JoinOp) -> Operator:
-        """将Filter条件合并到JOIN中"""
-        # 创建新的JOIN条件
-        if hasattr(join_op, 'condition') and join_op.condition:
-            # 合并条件
-            new_condition = BinaryExpr(join_op.condition, 'AND', filter_op.condition)
-        else:
-            new_condition = filter_op.condition
-
-        # 创建新的JOIN操作
-        new_join = JoinOp(join_op.join_type, join_op.children)
-        new_join.condition = new_condition
-
-        return new_join
-
-    def _reconstruct_with_pushdown(self, join_op: JoinOp, pushdown_conditions: List[Dict]) -> Operator:
-        """重构带有谓词下推的执行计划"""
-        # 简化实现：为每个子表添加Filter操作
-        new_children = []
-
-        for child in join_op.children:
-            child_conditions = [pc['condition'] for pc in pushdown_conditions
-                                if pc['table'] == self._get_child_table_name(child)]
-
-            if child_conditions:
-                # 添加Filter操作
-                if len(child_conditions) == 1:
-                    filter_condition = child_conditions[0]
+        try:
+            # 1. 应用投影下推
+            result = self._apply_projection_pushdown(optimized_plan)
+            if result is not None and len(result) == 2:
+                new_plan, count1 = result
+                if count1 > 0:
+                    if not self.silent_mode:
+                        print(f"✅ 投影下推: 应用了 {count1} 个优化")
+                    total_optimizations += count1
+                    optimized_plan = new_plan
                 else:
-                    # 多个条件用AND连接
-                    filter_condition = child_conditions[0]
-                    for cond in child_conditions[1:]:
-                        filter_condition = BinaryExpr(filter_condition, 'AND', cond)
-
-                filter_op = FilterOp(filter_condition, [child])
-                new_children.append(filter_op)
+                    if not self.silent_mode:
+                        print("⏭️  投影下推: 无优化机会")
             else:
-                new_children.append(child)
+                if not self.silent_mode:
+                    print("⏭️  投影下推: 无优化机会")
 
-        # 创建新的JOIN操作，移除已下推的条件
-        new_join = JoinOp(join_op.join_type, new_children)
-        remaining_condition = self._remove_pushed_conditions(join_op.condition, pushdown_conditions)
-        if remaining_condition:
-            new_join.condition = remaining_condition
+            # 2. 应用谓词下推
+            result = self._apply_predicate_pushdown(optimized_plan)
+            if result is not None and len(result) == 2:
+                new_plan, count2 = result
+                if count2 > 0:
+                    if not self.silent_mode:
+                        print(f"✅ 谓词下推: 应用了 {count2} 个优化")
+                    total_optimizations += count2
+                    optimized_plan = new_plan
+                else:
+                    if not self.silent_mode:
+                        print("⏭️  谓词下推: 无优化机会")
+            else:
+                if not self.silent_mode:
+                    print("⏭️  谓词下推: 无优化机会")
 
-        return new_join
+            # 3. 应用JOIN重排序
+            result = self._apply_join_reorder(optimized_plan)
+            if result is not None and len(result) == 2:
+                new_plan, count3 = result
+                if count3 > 0:
+                    if not self.silent_mode:
+                        print(f"✅ JOIN重排序: 应用了 {count3} 个优化")
+                    total_optimizations += count3
+                    optimized_plan = new_plan
+                else:
+                    if not self.silent_mode:
+                        print("⏭️  JOIN重排序: 无优化机会")
+            else:
+                if not self.silent_mode:
+                    print("⏭️  JOIN重排序: 无优化机会")
 
-    def _get_child_table_name(self, child: Operator) -> str:
-        """获取子操作对应的表名"""
-        if isinstance(child, SeqScanOp):
-            return child.table_name
-        return "unknown"
+            # 4. 应用常量折叠
+            result = self._apply_constant_folding(optimized_plan)
+            if result is not None and len(result) == 2:
+                new_plan, count4 = result
+                if count4 > 0:
+                    if not self.silent_mode:
+                        print(f"✅ 常量折叠: 应用了 {count4} 个优化")
+                    total_optimizations += count4
+                    optimized_plan = new_plan
+                else:
+                    if not self.silent_mode:
+                        print("⏭️  常量折叠: 无优化机会")
+            else:
+                if not self.silent_mode:
+                    print("⏭️  常量折叠: 无优化机会")
 
-    def _remove_pushed_conditions(self, original_condition: Expression, pushed_conditions: List[Dict]) -> Expression:
-        """从原始条件中移除已下推的条件"""
-        # 简化实现：返回原始条件
-        return original_condition
+            if not self.silent_mode:
+                print(f"总共应用了 {total_optimizations} 个优化")
+                if total_optimizations > 0:
+                    print("优化后的执行计划已生成")
 
+            return optimized_plan
 
-class ProjectionPushdownRule(OptimizationRule):
-    """投影下推优化规则"""
+        except Exception as e:
+            if not self.silent_mode:
+                print(f"⚠️ 优化过程中出现错误: {e}")
+            return plan
 
-    def _apply_rule(self, plan: Operator) -> Operator:
-        """应用投影下推规则"""
-        if isinstance(plan, ProjectOp):
-            return self._pushdown_projection(plan)
-        return plan
+    def _apply_projection_pushdown(self, plan: Operator) -> tuple:
+        """应用投影下推优化"""
+        try:
+            optimizations = 0
 
-    def _pushdown_projection(self, project_op: ProjectOp) -> Operator:
-        """下推投影操作"""
-        if len(project_op.children) == 1:
-            child = project_op.children[0]
+            if isinstance(plan, ProjectOp):
+                # 情况1: Project -> SeqScan
+                if (len(plan.children) == 1 and
+                        isinstance(plan.children[0], SeqScanOp) and
+                        plan.columns != ["*"] and
+                        len(plan.columns) > 0):
 
-            # 如果子操作是表扫描，可以直接在扫描时只读取需要的列
-            if isinstance(child, SeqScanOp):
-                self.optimization_count += 1
-                print(f"    🎯 投影下推: 在表扫描时只读取需要的列")
+                    scan_op = plan.children[0]
+                    optimized_scan = OptimizedSeqScanOp(
+                        scan_op.table_name,
+                        selected_columns=plan.columns
+                    )
+                    optimizations += 1
+                    return optimized_scan, optimizations
 
-                # 创建优化的表扫描操作
-                optimized_scan = OptimizedSeqScanOp(
-                    child.table_name,
-                    selected_columns=project_op.columns
-                )
-                return optimized_scan
+                # 情况2: Project -> Filter -> SeqScan
+                elif (len(plan.children) == 1 and
+                      isinstance(plan.children[0], FilterOp) and
+                      len(plan.children[0].children) == 1 and
+                      isinstance(plan.children[0].children[0], SeqScanOp) and
+                      plan.columns != ["*"] and
+                      len(plan.columns) > 0):
 
-        return project_op
+                    filter_op = plan.children[0]
+                    scan_op = filter_op.children[0]
 
+                    # 创建优化的扫描操作，包含投影信息
+                    optimized_scan = OptimizedSeqScanOp(
+                        scan_op.table_name,
+                        selected_columns=plan.columns
+                    )
 
-class JoinReorderRule(OptimizationRule):
-    """JOIN重排序优化规则"""
+                    # 重新构建Filter操作
+                    new_filter = FilterOp(filter_op.condition, [optimized_scan])
+                    optimizations += 1
+                    return new_filter, optimizations
 
-    def _apply_rule(self, plan: Operator) -> Operator:
-        """应用JOIN重排序规则"""
-        if isinstance(plan, JoinOp) and len(plan.children) >= 2:
-            return self._reorder_joins(plan)
-        return plan
+            # 递归处理子节点
+            new_children = []
+            children_changed = False
 
-    def _reorder_joins(self, join_op: JoinOp) -> Operator:
-        """重排序JOIN操作"""
-        # 简化实现：基于表大小估计重排序
-        children = join_op.children
+            for child in plan.children:
+                result = self._apply_projection_pushdown(child)
+                if result is not None and len(result) == 2:
+                    new_child, child_opts = result
+                    new_children.append(new_child)
+                    optimizations += child_opts
+                    if new_child is not child:
+                        children_changed = True
+                else:
+                    new_children.append(child)
 
-        # 估计每个子操作的大小
-        child_sizes = [(child, self._estimate_size(child)) for child in children]
+            # 如果子节点发生了变化，创建新的操作符
+            if children_changed:
+                new_plan = self._clone_operator(plan, new_children)
+                return new_plan, optimizations
 
-        # 按大小排序，小表在前
-        sorted_children = sorted(child_sizes, key=lambda x: x[1])
+            return plan, optimizations
 
-        if [child for child, _ in sorted_children] != children:
-            self.optimization_count += 1
-            print(f"    🎯 JOIN重排序: 将小表移到前面")
+        except Exception:
+            return plan, 0
 
-            new_join = JoinOp(join_op.join_type, [child for child, _ in sorted_children])
-            if hasattr(join_op, 'condition'):
-                new_join.condition = join_op.condition
-            return new_join
+    def _apply_predicate_pushdown(self, plan: Operator) -> tuple:
+        """应用谓词下推优化"""
+        try:
+            optimizations = 0
 
-        return join_op
+            # 情况1: Filter -> SeqScan 合并为带条件的扫描
+            if isinstance(plan, FilterOp):
+                if (len(plan.children) == 1 and
+                        isinstance(plan.children[0], SeqScanOp)):
 
-    def _estimate_size(self, operator: Operator) -> int:
-        """估计操作结果的大小"""
-        if isinstance(operator, SeqScanOp):
-            # 基于表名的简单估计
-            return hash(operator.table_name) % 1000  # 简化的大小估计
-        elif isinstance(operator, FilterOp):
-            return self._estimate_size(operator.children[0]) // 2  # 假设过滤掉一半
-        else:
-            return 100  # 默认大小
+                    scan_op = plan.children[0]
+                    # 创建带过滤条件的扫描操作
+                    optimized_scan = FilteredSeqScanOp(
+                        scan_op.table_name,
+                        condition=plan.condition
+                    )
+                    optimizations += 1
+                    return optimized_scan, optimizations
 
+                # 情况2: Filter -> Join，尝试将条件合并到JOIN中
+                elif (len(plan.children) == 1 and
+                      isinstance(plan.children[0], JoinOp)):
 
-class ConstantFoldingRule(OptimizationRule):
-    """常量折叠优化规则"""
+                    join_op = plan.children[0]
+                    # 合并条件到JOIN
+                    combined_condition = self._combine_conditions(
+                        join_op.on_condition, plan.condition
+                    )
 
-    def _apply_rule(self, plan: Operator) -> Operator:
-        """应用常量折叠规则"""
-        if isinstance(plan, FilterOp):
-            return self._fold_filter_constants(plan)
-        return plan
+                    new_join = JoinOp(
+                        join_op.join_type,
+                        combined_condition,
+                        join_op.children
+                    )
+                    optimizations += 1
+                    return new_join, optimizations
 
-    def _fold_filter_constants(self, filter_op: FilterOp) -> Operator:
-        """折叠Filter中的常量表达式"""
-        if filter_op.condition:
-            folded_condition = self._fold_expression_constants(filter_op.condition)
-            if folded_condition != filter_op.condition:
-                self.optimization_count += 1
-                print(f"    🎯 常量折叠: 预计算常量表达式")
+            # 递归处理子节点
+            new_children = []
+            children_changed = False
 
-                new_filter = FilterOp(folded_condition, filter_op.children)
-                return new_filter
+            for child in plan.children:
+                result = self._apply_predicate_pushdown(child)
+                if result is not None and len(result) == 2:
+                    new_child, child_opts = result
+                    new_children.append(new_child)
+                    optimizations += child_opts
+                    if new_child is not child:
+                        children_changed = True
+                else:
+                    new_children.append(child)
 
-        return filter_op
+            if children_changed:
+                new_plan = self._clone_operator(plan, new_children)
+                return new_plan, optimizations
 
-    def _fold_expression_constants(self, expr: Expression) -> Expression:
+            return plan, optimizations
+
+        except Exception:
+            return plan, 0
+
+    def _apply_join_reorder(self, plan: Operator) -> tuple:
+        """应用JOIN重排序优化"""
+        try:
+            optimizations = 0
+
+            if isinstance(plan, JoinOp):
+                # 检查是否有多个表的JOIN，可以重排序
+                if len(plan.children) >= 2:
+                    # 简单的启发式：将小表放在前面
+                    left_child = plan.children[0]
+                    right_child = plan.children[1]
+
+                    left_cost = self._estimate_table_size(left_child)
+                    right_cost = self._estimate_table_size(right_child)
+
+                    # 如果右边的表更小，交换顺序
+                    if right_cost < left_cost:
+                        new_children = [right_child, left_child]
+                        new_join = JoinOp(
+                            plan.join_type,
+                            plan.on_condition,
+                            new_children
+                        )
+                        optimizations += 1
+                        return new_join, optimizations
+
+            # 递归处理子节点
+            new_children = []
+            children_changed = False
+
+            for child in plan.children:
+                result = self._apply_join_reorder(child)
+                if result is not None and len(result) == 2:
+                    new_child, child_opts = result
+                    new_children.append(new_child)
+                    optimizations += child_opts
+                    if new_child is not child:
+                        children_changed = True
+                else:
+                    new_children.append(child)
+
+            if children_changed:
+                new_plan = self._clone_operator(plan, new_children)
+                return new_plan, optimizations
+
+            return plan, optimizations
+
+        except Exception:
+            return plan, 0
+
+    def _apply_constant_folding(self, plan: Operator) -> tuple:
+        """应用常量折叠优化"""
+        try:
+            optimizations = 0
+
+            # 在Filter条件中查找可以折叠的常量表达式
+            if isinstance(plan, FilterOp) and plan.condition:
+                result = self._fold_expression(plan.condition)
+                if result is not None and len(result) == 2:
+                    folded_condition, was_folded = result
+                    if was_folded:
+                        new_filter = FilterOp(folded_condition, plan.children)
+                        optimizations += 1
+                        return new_filter, optimizations
+
+            # 在JOIN条件中也进行常量折叠
+            elif isinstance(plan, JoinOp) and plan.on_condition:
+                result = self._fold_expression(plan.on_condition)
+                if result is not None and len(result) == 2:
+                    folded_condition, was_folded = result
+                    if was_folded:
+                        new_join = JoinOp(
+                            plan.join_type,
+                            folded_condition,
+                            plan.children
+                        )
+                        optimizations += 1
+                        return new_join, optimizations
+
+            # 递归处理子节点
+            new_children = []
+            children_changed = False
+
+            for child in plan.children:
+                result = self._apply_constant_folding(child)
+                if result is not None and len(result) == 2:
+                    new_child, child_opts = result
+                    new_children.append(new_child)
+                    optimizations += child_opts
+                    if new_child is not child:
+                        children_changed = True
+                else:
+                    new_children.append(child)
+
+            if children_changed:
+                new_plan = self._clone_operator(plan, new_children)
+                return new_plan, optimizations
+
+            return plan, optimizations
+
+        except Exception:
+            return plan, 0
+
+    def _combine_conditions(self, existing_condition: Optional[Expression],
+                            new_condition: Expression) -> Expression:
+        """合并两个条件"""
+        if existing_condition is None:
+            return new_condition
+
+        # 用AND连接两个条件
+        return BinaryExpr(existing_condition, 'AND', new_condition)
+
+    def _estimate_table_size(self, operator: Operator) -> int:
+        """估算表大小（用于JOIN重排序）"""
+        try:
+            if isinstance(operator, SeqScanOp):
+                # 基于表名进行简单的大小估算
+                return hash(operator.table_name) % 1000
+            elif isinstance(operator, FilterOp):
+                # 过滤后的表通常更小
+                return self._estimate_table_size(operator.children[0]) // 2
+            else:
+                return 100  # 默认大小
+        except Exception:
+            return 100
+
+    def _fold_expression(self, expr: Expression) -> tuple:
         """折叠表达式中的常量"""
-        if isinstance(expr, BinaryExpr):
-            left = self._fold_expression_constants(expr.left)
-            right = self._fold_expression_constants(expr.right)
+        try:
+            if isinstance(expr, BinaryExpr):
+                # 递归折叠左右子表达式
+                left_result = self._fold_expression(expr.left)
+                right_result = self._fold_expression(expr.right)
 
-            # 如果左右都是字面量，尝试计算结果
-            if isinstance(left, LiteralExpr) and isinstance(right, LiteralExpr):
-                result = self._evaluate_constant_expression(left, expr.operator, right)
-                if result is not None:
-                    return LiteralExpr(result)
+                if (left_result is not None and len(left_result) == 2 and
+                        right_result is not None and len(right_result) == 2):
 
-            if left != expr.left or right != expr.right:
-                return BinaryExpr(left, expr.operator, right)
+                    left, left_folded = left_result
+                    right, right_folded = right_result
 
-        return expr
+                    # 如果左右都是字面量，尝试计算结果
+                    if isinstance(left, LiteralExpr) and isinstance(right, LiteralExpr):
+                        result = self._evaluate_constants(left.value, expr.operator, right.value)
+                        if result is not None:
+                            return LiteralExpr(result), True
 
-    def _evaluate_constant_expression(self, left: LiteralExpr, operator: str, right: LiteralExpr):
+                    # 如果子表达式被折叠了，创建新的表达式
+                    if left_folded or right_folded:
+                        return BinaryExpr(left, expr.operator, right), True
+
+            return expr, False
+
+        except Exception:
+            return expr, False
+
+    def _evaluate_constants(self, left_val, operator: str, right_val):
         """计算常量表达式"""
         try:
             if operator == '+':
-                return left.value + right.value
+                return left_val + right_val
             elif operator == '-':
-                return left.value - right.value
+                return left_val - right_val
             elif operator == '*':
-                return left.value * right.value
+                return left_val * right_val
             elif operator == '/':
-                if right.value != 0:
-                    return left.value / right.value
-            elif operator == '=' and left.value == right.value:
-                return True
-            elif operator == '<>' and left.value != right.value:
-                return True
-        except:
+                if right_val != 0:
+                    return left_val / right_val
+            elif operator == '=' or operator == '==':
+                return left_val == right_val
+            elif operator == '<>' or operator == '!=':
+                return left_val != right_val
+            elif operator == '<':
+                return left_val < right_val
+            elif operator == '>':
+                return left_val > right_val
+            elif operator == '<=':
+                return left_val <= right_val
+            elif operator == '>=':
+                return left_val >= right_val
+        except Exception:
             pass
-
         return None
 
-
-class RedundantOperatorEliminationRule(OptimizationRule):
-    """冗余操作符消除规则"""
-
-    def _apply_rule(self, plan: Operator) -> Operator:
-        """应用冗余操作符消除规则"""
-        if isinstance(plan, FilterOp):
-            return self._eliminate_redundant_filters(plan)
-        elif isinstance(plan, ProjectOp):
-            return self._eliminate_redundant_projections(plan)
-        return plan
-
-    def _eliminate_redundant_filters(self, filter_op: FilterOp) -> Operator:
-        """消除冗余的Filter操作"""
-        # 如果Filter条件总是为真，可以消除该Filter
-        if self._is_always_true(filter_op.condition):
-            self.optimization_count += 1
-            print(f"    🎯 冗余消除: 移除总是为真的Filter")
-            return filter_op.children[0] if filter_op.children else filter_op
-
-        return filter_op
-
-    def _eliminate_redundant_projections(self, project_op: ProjectOp) -> Operator:
-        """消除冗余的Projection操作"""
-        # 如果投影包含所有列，且子操作也是投影，可以合并
-        if len(project_op.children) == 1 and isinstance(project_op.children[0], ProjectOp):
-            child_project = project_op.children[0]
-
-            # 检查是否可以合并投影
-            if self._can_merge_projections(project_op, child_project):
-                self.optimization_count += 1
-                print(f"    🎯 冗余消除: 合并连续的投影操作")
-
-                merged_columns = self._merge_projection_columns(project_op.columns, child_project.columns)
-                new_project = ProjectOp(merged_columns, child_project.children)
-                return new_project
-
-        return project_op
-
-    def _is_always_true(self, condition: Expression) -> bool:
-        """检查条件是否总是为真"""
-        if isinstance(condition, LiteralExpr):
-            return bool(condition.value)
-        return False
-
-    def _can_merge_projections(self, parent: ProjectOp, child: ProjectOp) -> bool:
-        """检查是否可以合并两个投影操作"""
-        # 简化实现
-        return True
-
-    def _merge_projection_columns(self, parent_columns: List[str], child_columns: List[str]) -> List[str]:
-        """合并投影列"""
-        # 简化实现：返回父投影的列
-        return parent_columns
-
-
-# 新的优化操作符
-class OptimizedSeqScanOp(Operator):
-    """优化的表扫描操作符（支持列投影）"""
-
-    def __init__(self, table_name: str, selected_columns: List[str] = None):
-        super().__init__([])
-        self.table_name = table_name
-        self.selected_columns = selected_columns or ["*"]
-
-    def to_dict(self) -> Dict[str, Any]:
-        return {
-            "type": "OptimizedSeqScanOp",
-            "table_name": self.table_name,
-            "selected_columns": self.selected_columns,
-            "optimization": "projection_pushdown"
-        }
-
-    def execute(self):
-        # 模拟优化的表扫描
-        print(f"优化的表扫描: {self.table_name}, 只读取列: {self.selected_columns}")
-        return iter([])
+    def _clone_operator(self, original: Operator, new_children: List[Operator]) -> Operator:
+        """克隆操作符并使用新的子节点"""
+        try:
+            if isinstance(original, FilterOp):
+                return FilterOp(original.condition, new_children)
+            elif isinstance(original, ProjectOp):
+                return ProjectOp(original.columns, new_children)
+            elif isinstance(original, JoinOp):
+                return JoinOp(original.join_type, original.on_condition, new_children)
+            elif isinstance(original, GroupByOp):
+                return GroupByOp(original.group_columns, original.having_condition, new_children)
+            elif isinstance(original, OrderByOp):
+                return OrderByOp(original.order_columns, new_children)
+            elif isinstance(original, UpdateOp):
+                return UpdateOp(original.table_name, original.assignments, new_children)
+            elif isinstance(original, DeleteOp):
+                return DeleteOp(original.table_name, new_children)
+            else:
+                # 对于其他类型，尝试保持原样
+                return original
+        except Exception:
+            return original

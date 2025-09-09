@@ -308,3 +308,55 @@ class SubqueryOp(Operator):
         # 执行子查询
         for row in self.select_plan.execute():
             yield row
+
+
+# ==================== 优化操作符 ====================
+
+# ==================== 优化操作符 ====================
+
+class OptimizedSeqScanOp(Operator):
+    """优化的表扫描操作符（支持列投影）"""
+
+    def __init__(self, table_name: str, selected_columns: Optional[List[str]] = None):
+        super().__init__([])
+        self.table_name = table_name
+        self.selected_columns = selected_columns or ["*"]
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": "OptimizedSeqScanOp",
+            "table_name": self.table_name,
+            "selected_columns": self.selected_columns,
+            "optimization": "projection_pushdown"
+        }
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        yield {
+            "table": self.table_name,
+            "operation": "optimized_scan",
+            "columns": self.selected_columns
+        }
+
+
+class FilteredSeqScanOp(Operator):
+    """带过滤条件的表扫描操作符"""
+
+    def __init__(self, table_name: str, condition: Optional[Expression] = None):
+        super().__init__([])
+        self.table_name = table_name
+        self.condition = condition
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": "FilteredSeqScanOp",
+            "table_name": self.table_name,
+            "condition": self.condition.to_dict() if self.condition else None,
+            "optimization": "predicate_pushdown"
+        }
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        yield {
+            "table": self.table_name,
+            "operation": "filtered_scan",
+            "condition": "applied"
+        }

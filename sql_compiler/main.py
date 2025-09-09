@@ -68,6 +68,62 @@ class SQLCompiler:
             print(f"\n❌ 系统错误: {e}")
             return None
 
+    def compile_silent(self, sql_text: str):
+        """静默编译（不打印详细信息，用于生产环境）"""
+        try:
+            # 词法分析
+            lexer = LexicalAnalyzer(sql_text)
+            tokens = lexer.tokenize()
+
+            # 语法分析
+            parser = SyntaxAnalyzer(tokens)
+            ast = parser.parse()
+
+            # 语义分析
+            semantic = SemanticAnalyzer(self.catalog)
+            semantic.analyze(ast)
+
+            # 执行计划生成（静默模式）
+            codegen = PlanGenerator(enable_optimization=True, silent_mode=True)
+            plan = codegen.generate(ast)
+
+            return plan
+
+        except CompilerError:
+            return None
+        except Exception:
+            return None
+
+    def compile_multiple_silent(self, sql_statements: list):
+        """静默批量编译（用于生产环境）"""
+        results = []
+        for sql in sql_statements:
+            result = self.compile_silent(sql)
+            results.append(result)
+        return results
+
+    def reset_database(self):
+        """重置数据库状态（用于测试）"""
+        if hasattr(self.catalog, 'reset_for_testing'):
+            self.catalog.reset_for_testing()
+        else:
+            # 如果没有 reset_for_testing 方法，使用 clear_all_tables
+            if hasattr(self.catalog, 'clear_all_tables'):
+                self.catalog.clear_all_tables()
+
+    def validate_sql(self, sql: str) -> bool:
+        """验证SQL是否有效"""
+        result = self.compile_silent(sql)
+        return result is not None
+
+    def get_table_info(self, table_name: str):
+        """获取表信息"""
+        return self.catalog.get_table(table_name)
+
+    def get_all_tables_info(self):
+        """获取所有表信息"""
+        return self.catalog.get_all_tables()
+
     def compile_multiple(self, sql_statements: list):
         """编译多条SQL语句"""
         results = []

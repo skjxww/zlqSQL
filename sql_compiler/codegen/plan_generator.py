@@ -11,18 +11,21 @@ except ImportError:
     OPTIMIZER_AVAILABLE = False
     print("⚠️ 优化器模块未找到，将跳过查询优化")
 
-
 class PlanGenerator:
     """执行计划生成器"""
 
-    def __init__(self, enable_optimization=True):
+    def __init__(self, enable_optimization=True, silent_mode=False):
         """初始化计划生成器"""
         self.enable_optimization = enable_optimization and OPTIMIZER_AVAILABLE
-        self.optimizer = QueryOptimizer() if self.enable_optimization else None
+        self.silent_mode = silent_mode
+        if self.enable_optimization:
+            self.optimizer = QueryOptimizer(silent_mode=silent_mode)
+        else:
+            self.optimizer = None
 
     def generate(self, stmt: Statement) -> Operator:
         """生成执行计划"""
-        # 生成基础执行计划（保持你原有的逻辑）
+        # 生成基础执行计划
         if isinstance(stmt, CreateTableStmt):
             plan = self._generate_create_table_plan(stmt)
         elif isinstance(stmt, InsertStmt):
@@ -44,11 +47,11 @@ class PlanGenerator:
                 optimized_plan = self.optimizer.optimize(plan)
                 return optimized_plan
             except Exception as e:
-                print(f"⚠️ 查询优化失败: {e}，使用原始计划")
+                if not self.silent_mode:
+                    print(f"⚠️ 查询优化失败: {e}，使用原始计划")
 
         return plan
 
-    # 保持你所有现有的方法完全不变
     def _generate_create_table_plan(self, stmt: CreateTableStmt) -> Operator:
         """生成CREATE TABLE执行计划"""
         return CreateTableOp(stmt.table_name, stmt.columns)

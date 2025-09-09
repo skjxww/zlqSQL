@@ -74,6 +74,81 @@ class CatalogManager:
         """获取表信息 - 修复缺失的方法"""
         return self.catalog_data["tables"].get(table_name)
 
+    def get_all_tables(self) -> Dict[str, Dict[str, Any]]:
+        """获取所有表的完整信息"""
+        return self.catalog_data["tables"].copy()
+
+    def get_all_table_names(self) -> List[str]:
+        """获取所有表名"""
+        return list(self.catalog_data["tables"].keys())
+
+    def get_tables_info(self) -> Dict[str, Dict[str, Any]]:
+        """获取所有表的完整信息（别名方法）"""
+        return self.get_all_tables()
+
+    def reset_for_testing(self):
+        """重置数据库状态（专用于测试）"""
+        self.clear_all_tables()
+
+    def table_count(self) -> int:
+        """获取表的数量"""
+        return len(self.catalog_data["tables"])
+
+    def is_empty(self) -> bool:
+        """检查目录是否为空"""
+        return len(self.catalog_data["tables"]) == 0
+
+    def export_schema(self) -> str:
+        """导出数据库结构为SQL"""
+        sql_statements = []
+
+        for table_name, table_info in self.catalog_data["tables"].items():
+            columns_def = []
+            for col in table_info["columns"]:
+                col_def = f"{col['name']} {col['type']}"
+                if col.get('constraints'):
+                    col_def += f" {col['constraints']}"
+                columns_def.append(col_def)
+
+            create_sql = f"CREATE TABLE {table_name} ({', '.join(columns_def)});"
+            sql_statements.append(create_sql)
+
+        return '\n'.join(sql_statements)
+
+    def validate_catalog(self) -> bool:
+        """验证目录数据的完整性"""
+        try:
+            # 检查基本结构
+            if "tables" not in self.catalog_data:
+                return False
+
+            if not isinstance(self.catalog_data["tables"], dict):
+                return False
+
+            # 检查每个表的结构
+            for table_name, table_info in self.catalog_data["tables"].items():
+                if not isinstance(table_info, dict):
+                    return False
+
+                if "columns" not in table_info:
+                    return False
+
+                if not isinstance(table_info["columns"], list):
+                    return False
+
+                # 检查每个列的结构
+                for col in table_info["columns"]:
+                    if not isinstance(col, dict):
+                        return False
+
+                    if "name" not in col or "type" not in col:
+                        return False
+
+            return True
+
+        except Exception:
+            return False
+
     def get_table_schema(self, table_name: str) -> Optional[List[tuple]]:
         """获取表结构"""
         if table_name not in self.catalog_data["tables"]:
@@ -102,14 +177,6 @@ class CatalogManager:
             return []
 
         return [col["name"] for col in table_info["columns"]]
-
-    def get_all_tables(self) -> List[str]:
-        """获取所有表名"""
-        return list(self.catalog_data["tables"].keys())
-
-    def get_table_info(self, table_name: str) -> Optional[Dict[str, Any]]:
-        """获取完整表信息"""
-        return self.catalog_data["tables"].get(table_name)
 
     def update_row_count(self, table_name: str, delta: int):
         """更新表行数"""
