@@ -1,10 +1,10 @@
 {
   "tables": {
-    "student": {
-      "name": "student",
+    "customers": {
+      "name": "customers",
       "columns": [
         {
-          "name": "id",
+          "name": "customer_id",
           "type": "INT",
           "constraints": null
         },
@@ -14,34 +14,44 @@
           "constraints": null
         },
         {
+          "name": "city",
+          "type": "VARCHAR(30)",
+          "constraints": null
+        },
+        {
           "name": "age",
           "type": "INT",
           "constraints": null
         }
       ],
-      "created_at": "2025-09-08T19:49:38.377907",
+      "created_at": "2025-09-09T16:08:19.562736",
       "row_count": 0
     },
-    "users": {
-      "name": "users",
+    "orders": {
+      "name": "orders",
       "columns": [
         {
-          "name": "user_id",
+          "name": "order_id",
           "type": "INT",
           "constraints": null
         },
         {
-          "name": "username",
-          "type": "VARCHAR(50)",
+          "name": "customer_id",
+          "type": "INT",
           "constraints": null
         },
         {
-          "name": "email",
-          "type": "VARCHAR(100)",
+          "name": "amount",
+          "type": "INT",
+          "constraints": null
+        },
+        {
+          "name": "order_date",
+          "type": "VARCHAR(20)",
           "constraints": null
         }
       ],
-      "created_at": "2025-09-08T21:08:16.266596",
+      "created_at": "2025-09-09T16:08:19.562736",
       "row_count": 0
     },
     "products": {
@@ -54,7 +64,12 @@
         },
         {
           "name": "name",
-          "type": "VARCHAR(100)",
+          "type": "VARCHAR(50)",
+          "constraints": null
+        },
+        {
+          "name": "category",
+          "type": "VARCHAR(30)",
           "constraints": null
         },
         {
@@ -63,38 +78,11 @@
           "constraints": null
         }
       ],
-      "created_at": "2025-09-08T21:08:16.282740",
+      "created_at": "2025-09-09T16:08:19.562736",
       "row_count": 0
     },
-    "orders": {
-      "name": "orders",
-      "columns": [
-        {
-          "name": "order_id",
-          "type": "INT",
-          "constraints": null
-        },
-        {
-          "name": "user_id",
-          "type": "INT",
-          "constraints": null
-        },
-        {
-          "name": "product_id",
-          "type": "INT",
-          "constraints": null
-        },
-        {
-          "name": "quantity",
-          "type": "INT",
-          "constraints": null
-        }
-      ],
-      "created_at": "2025-09-08T21:08:16.282740",
-      "row_count": 0
-    },
-    "employees": {
-      "name": "employees",
+    "students": {
+      "name": "students",
       "columns": [
         {
           "name": "id",
@@ -107,142 +95,61 @@
           "constraints": null
         },
         {
-          "name": "salary",
-          "type": "INT",
-          "constraints": null
-        },
-        {
-          "name": "department",
-          "type": "VARCHAR(30)",
-          "constraints": null
-        }
-      ],
-      "created_at": "2025-09-09T00:11:20.719286",
-      "row_count": 0
-    },
-    "departments": {
-      "name": "departments",
-      "columns": [
-        {
-          "name": "dept_id",
-          "type": "INT",
-          "constraints": null
-        },
-        {
-          "name": "dept_name",
+          "name": "major",
           "type": "VARCHAR(30)",
           "constraints": null
         },
         {
-          "name": "manager",
-          "type": "VARCHAR(50)",
-          "constraints": null
-        }
-      ],
-      "created_at": "2025-09-09T00:11:20.731111",
-      "row_count": 0
-    },
-    "projects": {
-      "name": "projects",
-      "columns": [
-        {
-          "name": "proj_id",
-          "type": "INT",
-          "constraints": null
-        },
-        {
-          "name": "proj_name",
-          "type": "VARCHAR(100)",
-          "constraints": null
-        },
-        {
-          "name": "dept_id",
+          "name": "gpa",
           "type": "INT",
           "constraints": null
         }
       ],
-      "created_at": "2025-09-09T00:11:20.733117",
+      "created_at": "2025-09-09T16:08:19.612483",
       "row_count": 0
     },
-    "customers": {
-      "name": "customers",
+    "courses": {
+      "name": "courses",
       "columns": [
         {
-          "name": "customer_id",
+          "name": "course_id",
           "type": "INT",
           "constraints": null
         },
         {
-          "name": "name",
-          "type": "VARCHAR(100)",
-          "constraints": null
-        },
-        {
-          "name": "city",
+          "name": "course_name",
           "type": "VARCHAR(50)",
           "constraints": null
         },
         {
-          "name": "age",
+          "name": "credits",
           "type": "INT",
           "constraints": null
         }
       ],
-      "created_at": "2025-09-09T00:11:20.780024",
+      "created_at": "2025-09-09T16:08:19.612483",
       "row_count": 0
     },
-    "order_items": {
-      "name": "order_items",
+    "enrollments": {
+      "name": "enrollments",
       "columns": [
         {
-          "name": "item_id",
+          "name": "student_id",
           "type": "INT",
           "constraints": null
         },
         {
-          "name": "order_id",
+          "name": "course_id",
           "type": "INT",
           "constraints": null
         },
         {
-          "name": "product_name",
-          "type": "VARCHAR(100)",
-          "constraints": null
-        },
-        {
-          "name": "quantity",
-          "type": "INT",
-          "constraints": null
-        },
-        {
-          "name": "price",
-          "type": "INT",
+          "name": "grade",
+          "type": "VARCHAR(2)",
           "constraints": null
         }
       ],
-      "created_at": "2025-09-09T00:11:20.780024",
-      "row_count": 0
-    },
-    "test_table": {
-      "name": "test_table",
-      "columns": [
-        {
-          "name": "id",
-          "type": "INT",
-          "constraints": null
-        },
-        {
-          "name": "name",
-          "type": "VARCHAR(50)",
-          "constraints": null
-        },
-        {
-          "name": "value",
-          "type": "INT",
-          "constraints": null
-        }
-      ],
-      "created_at": "2025-09-09T00:11:20.814033",
+      "created_at": "2025-09-09T16:08:19.612483",
       "row_count": 0
     }
   },
