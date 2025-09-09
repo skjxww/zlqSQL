@@ -1,0 +1,50 @@
+2025-09-09 20:18:04,280 - storage - INFO - _log_with_context:97 - StorageManager initialized successfully | Context: buffer_size=10 | data_file=C:\Users\q1520\AppData\Local\Temp\tmpe6ockqpy/database.db | meta_file=C:\Users\q1520\AppData\Local\Temp\tmpe6ockqpy/metadata.json | auto_flush_interval=30
+2025-09-09 20:18:04,281 - storage - INFO - _log_with_context:97 - No existing table storage catalog found
+2025-09-09 20:18:04,281 - storage - INFO - _log_with_context:97 - TableStorage initialized with 0 tables
+2025-09-09 20:18:04,282 - storage - INFO - _log_with_context:97 - Performance: page_allocation:allocate_page completed in 0.0010s | Context: avg_time=0.0010s
+2025-09-09 20:18:04,282 - storage - INFO - _log_with_context:97 - Allocated new page 1
+2025-09-09 20:18:04,283 - storage - INFO - _log_with_context:97 - Performance: allocate_page:allocate_page completed in 0.0020s | Context: avg_time=0.0015s
+2025-09-09 20:18:04,284 - storage - INFO - _log_with_context:97 - Performance: page_allocation:allocate_page completed in 0.0010s | Context: avg_time=0.0013s
+2025-09-09 20:18:04,284 - storage - INFO - _log_with_context:97 - Allocated new page 2
+2025-09-09 20:18:04,284 - storage - INFO - _log_with_context:97 - Performance: allocate_page:allocate_page completed in 0.0010s | Context: avg_time=0.0012s
+2025-09-09 20:18:04,284 - storage - INFO - _log_with_context:97 - Performance: buffer_put:put completed in 0.0000s | Context: avg_time=0.0010s
+2025-09-09 20:18:04,284 - storage - INFO - _log_with_context:97 - Performance: write_page:write_page completed in 0.0000s | Context: avg_time=0.0008s
+2025-09-09 20:18:04,284 - storage - INFO - _log_with_context:97 - Performance: buffer_get:get completed in 0.0000s | Context: avg_time=0.0007s
+2025-09-09 20:18:04,285 - storage - INFO - _log_with_context:97 - Performance: read_page:read_page completed in 0.0010s | Context: avg_time=0.0007s
+2025-09-09 20:18:04,286 - storage - INFO - _log_with_context:97 - Performance: page_allocation:allocate_page completed in 0.0012s | Context: avg_time=0.0008s
+2025-09-09 20:18:04,286 - storage - INFO - _log_with_context:97 - Allocated new page 3
+2025-09-09 20:18:04,286 - storage - INFO - _log_with_context:97 - Performance: allocate_page:allocate_page completed in 0.0012s | Context: avg_time=0.0008s
+2025-09-09 20:18:04,286 - storage - INFO - _log_with_context:97 - Performance: buffer_put:put completed in 0.0000s | Context: avg_time=0.0008s
+2025-09-09 20:18:04,286 - storage - INFO - _log_with_context:97 - Performance: write_page:write_page completed in 0.0000s | Context: avg_time=0.0007s
+2025-09-09 20:18:04,288 - storage - INFO - _log_with_context:97 - Created storage for table 'test_table' with initial page 3
+2025-09-09 20:18:04,290 - storage - INFO - _log_with_context:97 - Performance: page_deallocation:deallocate_page completed in 0.0020s | Context: avg_time=0.0008s
+2025-09-09 20:18:04,290 - storage - INFO - _log_with_context:97 - Deallocated page 2
+2025-09-09 20:18:04,290 - storage - INFO - _log_with_context:97 - Performance: deallocate_page:deallocate_page completed in 0.0020s | Context: avg_time=0.0009s
+2025-09-09 20:18:04,291 - storage - INFO - _log_with_context:97 - TableStorage shutdown completed
+2025-09-09 20:18:04,291 - storage - INFO - _log_with_context:97 - Starting StorageManager shutdown
+2025-09-09 20:18:04,295 - storage - INFO - _log_with_context:97 - Performance: page_write:write_page_to_disk completed in 0.0042s | Context: avg_time=0.0011s
+2025-09-09 20:18:04,298 - storage - INFO - _log_with_context:97 - Performance: page_write:write_page_to_disk completed in 0.0030s | Context: avg_time=0.0012s
+2025-09-09 20:18:04,298 - storage - INFO - _log_with_context:97 - Flushed all dirty pages | Context: pages_flushed=2 | flush_count=1
+2025-09-09 20:18:04,298 - storage - INFO - _log_with_context:97 - Performance: flush_all_pages:flush_all_pages completed in 0.0072s | Context: avg_time=0.0016s
+2025-09-09 20:18:04,300 - storage - INFO - _log_with_context:97 - StorageManager shutdown completed successfully | Context: pages_flushed=2 | total_operations=3 | total_flushes=1 | final_cache_hit_rate=100.0 | uptime_seconds=0.02
+2025-09-09 20:18:04,303 - storage - INFO - _log_with_context:97 - StorageManager initialized successfully | Context: buffer_size=15 | data_file=C:\Users\q1520\AppData\Local\Temp\tmpe6ockqpy/direct_test.db | meta_file=C:\Users\q1520\AppData\Local\Temp\tmpe6ockqpy/direct_meta.json | auto_flush_interval=30
+2025-09-09 20:18:04,304 - storage - INFO - _log_with_context:97 - Performance: page_allocation:allocate_page completed in 0.0010s | Context: avg_time=0.0015s
+2025-09-09 20:18:04,304 - storage - INFO - _log_with_context:97 - Allocated new page 1
+2025-09-09 20:18:04,304 - storage - INFO - _log_with_context:97 - Performance: allocate_page:allocate_page completed in 0.0010s | Context: avg_time=0.0015s
+2025-09-09 20:18:04,306 - storage - INFO - _log_with_context:97 - Performance: page_allocation:allocate_page completed in 0.0010s | Context: avg_time=0.0015s
+2025-09-09 20:18:04,306 - storage - INFO - _log_with_context:97 - Allocated new page 2
+2025-09-09 20:18:04,306 - storage - INFO - _log_with_context:97 - Performance: allocate_page:allocate_page completed in 0.0010s | Context: avg_time=0.0015s
+2025-09-09 20:18:04,306 - storage - INFO - _log_with_context:97 - Performance: buffer_put:put completed in 0.0000s | Context: avg_time=0.0014s
+2025-09-09 20:18:04,306 - storage - INFO - _log_with_context:97 - Performance: write_page:write_page completed in 0.0000s | Context: avg_time=0.0013s
+2025-09-09 20:18:04,306 - storage - INFO - _log_with_context:97 - Performance: buffer_get:get completed in 0.0000s | Context: avg_time=0.0013s
+2025-09-09 20:18:04,306 - storage - INFO - _log_with_context:97 - Performance: read_page:read_page completed in 0.0000s | Context: avg_time=0.0012s
+2025-09-09 20:18:04,306 - storage - INFO - _log_with_context:97 - Starting StorageManager shutdown
+2025-09-09 20:18:04,310 - storage - INFO - _log_with_context:97 - Performance: page_write:write_page_to_disk completed in 0.0030s | Context: avg_time=0.0013s
+2025-09-09 20:18:04,310 - storage - INFO - _log_with_context:97 - Flushed all dirty pages | Context: pages_flushed=1 | flush_count=1
+2025-09-09 20:18:04,310 - storage - INFO - _log_with_context:97 - Performance: flush_all_pages:flush_all_pages completed in 0.0040s | Context: avg_time=0.0014s
+2025-09-09 20:18:04,312 - storage - INFO - _log_with_context:97 - StorageManager shutdown completed successfully | Context: pages_flushed=1 | total_operations=2 | total_flushes=1 | final_cache_hit_rate=100.0 | uptime_seconds=0.01
+2025-09-09 20:18:04,325 - storage - INFO - _log_with_context:97 - Performance: page_allocation:allocate_page completed in 0.0018s | Context: avg_time=0.0014s
+2025-09-09 20:18:04,328 - storage - INFO - _log_with_context:97 - Performance: page_write:write_page_to_disk completed in 0.0031s | Context: avg_time=0.0015s
+2025-09-09 20:18:04,328 - storage - INFO - _log_with_context:97 - Performance: page_read:read_page_from_disk completed in 0.0000s | Context: avg_time=0.0014s
+2025-09-09 20:18:04,331 - storage - INFO - _log_with_context:97 - Performance: buffer_put:put completed in 0.0000s | Context: avg_time=0.0014s
+2025-09-09 20:18:04,332 - storage - INFO - _log_with_context:97 - Performance: buffer_get:get completed in 0.0000s | Context: avg_time=0.0013s

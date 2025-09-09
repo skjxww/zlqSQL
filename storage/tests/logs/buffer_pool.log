@@ -1,0 +1,13 @@
+2025-09-09 20:18:04,279 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized | Context: capacity=10 | max_size=1000 | min_size=10
+2025-09-09 20:18:04,284 - buffer_pool - DEBUG - _log_with_context:97 - Added new cache entry for page 1 | Context: page_id=1 | is_dirty=True | cache_size=1 | data_size=4096
+2025-09-09 20:18:04,284 - buffer_pool - DEBUG - _log_with_context:97 - Cache hit for page 1 | Context: page_id=1 | hit_rate=100.0
+2025-09-09 20:18:04,286 - buffer_pool - DEBUG - _log_with_context:97 - Added new cache entry for page 3 | Context: page_id=3 | is_dirty=True | cache_size=2 | data_size=4096
+2025-09-09 20:18:04,288 - buffer_pool - DEBUG - _log_with_context:97 - Page 2 not in cache | Context: page_id=2
+2025-09-09 20:18:04,291 - buffer_pool - INFO - _log_with_context:97 - Flushed 2 dirty pages
+2025-09-09 20:18:04,302 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized | Context: capacity=15 | max_size=1000 | min_size=10
+2025-09-09 20:18:04,306 - buffer_pool - DEBUG - _log_with_context:97 - Added new cache entry for page 1 | Context: page_id=1 | is_dirty=True | cache_size=1 | data_size=4096
+2025-09-09 20:18:04,306 - buffer_pool - DEBUG - _log_with_context:97 - Cache hit for page 1 | Context: page_id=1 | hit_rate=100.0
+2025-09-09 20:18:04,306 - buffer_pool - INFO - _log_with_context:97 - Flushed 1 dirty pages
+2025-09-09 20:18:04,331 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized | Context: capacity=10 | max_size=1000 | min_size=10
+2025-09-09 20:18:04,331 - buffer_pool - DEBUG - _log_with_context:97 - Added new cache entry for page 1 | Context: page_id=1 | is_dirty=False | cache_size=1 | data_size=115
+2025-09-09 20:18:04,331 - buffer_pool - DEBUG - _log_with_context:97 - Cache hit for page 1 | Context: page_id=1 | hit_rate=100.0

@@ -1,0 +1,45 @@
+2025-09-09 20:18:04,276 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=C:\Users\q1520\AppData\Local\Temp\tmpe6ockqpy | meta_dir=C:\Users\q1520\AppData\Local\Temp\tmpe6ockqpy
+2025-09-09 20:18:04,276 - page_manager - INFO - _log_with_context:97 - Metadata file not found, using default configuration
+2025-09-09 20:18:04,277 - page_manager - INFO - _log_with_context:97 - Created new data file | Context: file_path=C:\Users\q1520\AppData\Local\Temp\tmpe6ockqpy\database.db
+2025-09-09 20:18:04,277 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=C:\Users\q1520\AppData\Local\Temp\tmpe6ockqpy\database.db | meta_file=C:\Users\q1520\AppData\Local\Temp\tmpe6ockqpy\metadata.json | allocated_pages=0
+2025-09-09 20:18:04,281 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 1
+2025-09-09 20:18:04,282 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 20:18:04,282 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | total_allocated=1
+2025-09-09 20:18:04,283 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 2
+2025-09-09 20:18:04,284 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 20:18:04,284 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=2 | total_allocated=2
+2025-09-09 20:18:04,285 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 3
+2025-09-09 20:18:04,286 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 20:18:04,286 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=3 | total_allocated=3
+2025-09-09 20:18:04,290 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 20:18:04,290 - page_manager - INFO - _log_with_context:97 - Page deallocated | Context: page_id=2 | total_allocated=2
+2025-09-09 20:18:04,292 - page_manager - DEBUG - _log_with_context:97 - Extended data file to 4096 bytes
+2025-09-09 20:18:04,295 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=1 | data_length=4096 | file_offset=0
+2025-09-09 20:18:04,295 - page_manager - DEBUG - _log_with_context:97 - Extended data file to 12288 bytes
+2025-09-09 20:18:04,298 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=3 | data_length=4096 | file_offset=8192
+2025-09-09 20:18:04,300 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 20:18:04,300 - page_manager - INFO - _log_with_context:97 - PageManager cleanup completed
+2025-09-09 20:18:04,301 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=C:\Users\q1520\AppData\Local\Temp\tmpe6ockqpy | meta_dir=C:\Users\q1520\AppData\Local\Temp\tmpe6ockqpy
+2025-09-09 20:18:04,301 - page_manager - INFO - _log_with_context:97 - Metadata file not found, using default configuration
+2025-09-09 20:18:04,302 - page_manager - INFO - _log_with_context:97 - Created new data file | Context: file_path=C:\Users\q1520\AppData\Local\Temp\tmpe6ockqpy\direct_test.db
+2025-09-09 20:18:04,302 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=C:\Users\q1520\AppData\Local\Temp\tmpe6ockqpy\direct_test.db | meta_file=C:\Users\q1520\AppData\Local\Temp\tmpe6ockqpy\direct_meta.json | allocated_pages=0
+2025-09-09 20:18:04,303 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 1
+2025-09-09 20:18:04,304 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 20:18:04,304 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | total_allocated=1
+2025-09-09 20:18:04,305 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 2
+2025-09-09 20:18:04,306 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 20:18:04,306 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=2 | total_allocated=2
+2025-09-09 20:18:04,307 - page_manager - DEBUG - _log_with_context:97 - Extended data file to 4096 bytes
+2025-09-09 20:18:04,309 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=1 | data_length=4096 | file_offset=0
+2025-09-09 20:18:04,311 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 20:18:04,312 - page_manager - INFO - _log_with_context:97 - PageManager cleanup completed
+2025-09-09 20:18:04,322 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=C:\Users\q1520\AppData\Local\Temp\tmpfnn_ubc7 | meta_dir=C:\Users\q1520\AppData\Local\Temp\tmpfnn_ubc7
+2025-09-09 20:18:04,322 - page_manager - INFO - _log_with_context:97 - Metadata file not found, using default configuration
+2025-09-09 20:18:04,323 - page_manager - INFO - _log_with_context:97 - Created new data file | Context: file_path=C:\Users\q1520\AppData\Local\Temp\tmpfnn_ubc7\test_pages.db
+2025-09-09 20:18:04,323 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=C:\Users\q1520\AppData\Local\Temp\tmpfnn_ubc7\test_pages.db | meta_file=C:\Users\q1520\AppData\Local\Temp\tmpfnn_ubc7\test_meta.json | allocated_pages=0
+2025-09-09 20:18:04,323 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 1
+2025-09-09 20:18:04,324 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 20:18:04,325 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | total_allocated=1
+2025-09-09 20:18:04,325 - page_manager - DEBUG - _log_with_context:97 - Extended data file to 4096 bytes
+2025-09-09 20:18:04,328 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=1 | data_length=4096 | file_offset=0
+2025-09-09 20:18:04,328 - page_manager - DEBUG - _log_with_context:97 - Read page from disk | Context: page_id=1 | data_length=4096 | file_offset=0

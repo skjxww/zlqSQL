@@ -1,0 +1,1501 @@
+2025-09-09 15:37:05,771 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=C:\Users\q1520\AppData\Local\Temp\tmpxevtjs9j | meta_dir=C:\Users\q1520\AppData\Local\Temp\tmpxevtjs9j
+2025-09-09 15:37:05,771 - page_manager - INFO - _log_with_context:97 - Metadata file not found, using default configuration
+2025-09-09 15:37:05,772 - page_manager - INFO - _log_with_context:97 - Created new data file | Context: file_path=C:\Users\q1520\AppData\Local\Temp\tmpxevtjs9j\database.db
+2025-09-09 15:37:05,772 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=C:\Users\q1520\AppData\Local\Temp\tmpxevtjs9j\database.db | meta_file=C:\Users\q1520\AppData\Local\Temp\tmpxevtjs9j\metadata.json | allocated_pages=0
+2025-09-09 15:37:05,778 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 1
+2025-09-09 15:37:05,780 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:37:05,780 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | total_allocated=1
+2025-09-09 15:37:05,860 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=C:\Users\q1520\AppData\Local\Temp\tmpcmcjjauk | meta_dir=C:\Users\q1520\AppData\Local\Temp\tmpcmcjjauk
+2025-09-09 15:37:05,860 - page_manager - INFO - _log_with_context:97 - Metadata file not found, using default configuration
+2025-09-09 15:37:05,861 - page_manager - INFO - _log_with_context:97 - Created new data file | Context: file_path=C:\Users\q1520\AppData\Local\Temp\tmpcmcjjauk\database.db
+2025-09-09 15:37:05,861 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=C:\Users\q1520\AppData\Local\Temp\tmpcmcjjauk\database.db | meta_file=C:\Users\q1520\AppData\Local\Temp\tmpcmcjjauk\metadata.json | allocated_pages=0
+2025-09-09 15:37:05,863 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 1
+2025-09-09 15:37:05,865 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:37:05,865 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | total_allocated=1
+2025-09-09 15:37:05,876 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 2
+2025-09-09 15:37:05,877 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:37:05,877 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=2 | total_allocated=2
+2025-09-09 15:37:05,880 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 3
+2025-09-09 15:37:05,882 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:37:05,882 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=3 | total_allocated=3
+2025-09-09 15:37:05,962 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=C:\Users\q1520\AppData\Local\Temp\tmpopdcifpw | meta_dir=C:\Users\q1520\AppData\Local\Temp\tmpopdcifpw
+2025-09-09 15:37:05,963 - page_manager - INFO - _log_with_context:97 - Metadata file not found, using default configuration
+2025-09-09 15:37:05,964 - page_manager - INFO - _log_with_context:97 - Created new data file | Context: file_path=C:\Users\q1520\AppData\Local\Temp\tmpopdcifpw\database.db
+2025-09-09 15:37:05,964 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=C:\Users\q1520\AppData\Local\Temp\tmpopdcifpw\database.db | meta_file=C:\Users\q1520\AppData\Local\Temp\tmpopdcifpw\metadata.json | allocated_pages=0
+2025-09-09 15:37:05,964 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 1
+2025-09-09 15:37:05,966 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:37:05,966 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | total_allocated=1
+2025-09-09 15:37:06,085 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 2
+2025-09-09 15:37:06,086 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:37:06,086 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=2 | total_allocated=2
+2025-09-09 15:37:06,185 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 3
+2025-09-09 15:37:06,187 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:37:06,187 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=3 | total_allocated=3
+2025-09-09 15:37:06,307 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 4
+2025-09-09 15:37:06,314 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:37:06,314 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=4 | total_allocated=4
+2025-09-09 15:37:06,419 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 5
+2025-09-09 15:37:06,421 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:37:06,422 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=5 | total_allocated=5
+2025-09-09 15:37:06,546 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 6
+2025-09-09 15:37:06,548 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:37:06,548 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=6 | total_allocated=6
+2025-09-09 15:37:06,680 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 7
+2025-09-09 15:37:06,683 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:37:06,683 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=7 | total_allocated=7
+2025-09-09 15:37:06,846 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 8
+2025-09-09 15:37:06,848 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:37:06,849 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=8 | total_allocated=8
+2025-09-09 15:37:07,046 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 9
+2025-09-09 15:37:07,226 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:37:07,226 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=9 | total_allocated=9
+2025-09-09 15:37:07,418 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 10
+2025-09-09 15:37:07,420 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:37:07,420 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=10 | total_allocated=10
+2025-09-09 15:37:07,728 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 11
+2025-09-09 15:37:07,730 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:37:07,730 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=11 | total_allocated=11
+2025-09-09 15:37:07,887 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 12
+2025-09-09 15:37:07,890 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:37:07,890 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=12 | total_allocated=12
+2025-09-09 15:37:08,115 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 13
+2025-09-09 15:37:08,118 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:37:08,118 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=13 | total_allocated=13
+2025-09-09 15:37:08,545 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 14
+2025-09-09 15:37:08,548 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:37:08,548 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=14 | total_allocated=14
+2025-09-09 15:37:08,754 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 15
+2025-09-09 15:37:08,757 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:37:08,757 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=15 | total_allocated=15
+2025-09-09 15:37:09,095 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 16
+2025-09-09 15:37:09,097 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:37:09,097 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=16 | total_allocated=16
+2025-09-09 15:37:09,351 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 17
+2025-09-09 15:37:09,354 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:37:09,355 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=17 | total_allocated=17
+2025-09-09 15:37:09,614 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 18
+2025-09-09 15:37:09,616 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:37:09,617 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=18 | total_allocated=18
+2025-09-09 15:37:09,906 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 19
+2025-09-09 15:37:09,907 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:37:09,907 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=19 | total_allocated=19
+2025-09-09 15:37:10,278 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 20
+2025-09-09 15:37:10,280 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:37:10,280 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=20 | total_allocated=20
+2025-09-09 15:37:10,599 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 21
+2025-09-09 15:37:10,601 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:37:10,601 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=21 | total_allocated=21
+2025-09-09 15:37:10,849 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 22
+2025-09-09 15:37:10,851 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:37:10,851 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=22 | total_allocated=22
+2025-09-09 15:37:11,221 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 23
+2025-09-09 15:37:11,224 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:37:11,224 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=23 | total_allocated=23
+2025-09-09 15:37:11,493 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 24
+2025-09-09 15:37:11,495 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:37:11,495 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=24 | total_allocated=24
+2025-09-09 15:37:11,880 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 25
+2025-09-09 15:37:11,883 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:37:11,883 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=25 | total_allocated=25
+2025-09-09 15:37:12,175 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 26
+2025-09-09 15:37:12,178 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:37:12,179 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=26 | total_allocated=26
+2025-09-09 15:37:12,663 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 27
+2025-09-09 15:37:12,666 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:37:12,666 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=27 | total_allocated=27
+2025-09-09 15:37:13,013 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 28
+2025-09-09 15:37:13,016 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:37:13,016 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=28 | total_allocated=28
+2025-09-09 15:48:04,214 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=C:\Users\q1520\AppData\Local\Temp\tmpeemra8f9 | meta_dir=C:\Users\q1520\AppData\Local\Temp\tmpeemra8f9
+2025-09-09 15:48:04,214 - page_manager - INFO - _log_with_context:97 - Metadata file not found, using default configuration
+2025-09-09 15:48:04,215 - page_manager - INFO - _log_with_context:97 - Created new data file | Context: file_path=C:\Users\q1520\AppData\Local\Temp\tmpeemra8f9\database.db
+2025-09-09 15:48:04,215 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=C:\Users\q1520\AppData\Local\Temp\tmpeemra8f9\database.db | meta_file=C:\Users\q1520\AppData\Local\Temp\tmpeemra8f9\metadata.json | allocated_pages=0
+2025-09-09 15:48:04,218 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 1
+2025-09-09 15:48:04,220 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:48:04,220 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | total_allocated=1
+2025-09-09 15:48:04,249 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=C:\Users\q1520\AppData\Local\Temp\tmpmiau4wb9 | meta_dir=C:\Users\q1520\AppData\Local\Temp\tmpmiau4wb9
+2025-09-09 15:48:04,249 - page_manager - INFO - _log_with_context:97 - Metadata file not found, using default configuration
+2025-09-09 15:48:04,250 - page_manager - INFO - _log_with_context:97 - Created new data file | Context: file_path=C:\Users\q1520\AppData\Local\Temp\tmpmiau4wb9\database.db
+2025-09-09 15:48:04,250 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=C:\Users\q1520\AppData\Local\Temp\tmpmiau4wb9\database.db | meta_file=C:\Users\q1520\AppData\Local\Temp\tmpmiau4wb9\metadata.json | allocated_pages=0
+2025-09-09 15:48:04,251 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 1
+2025-09-09 15:48:04,253 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:48:04,253 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | total_allocated=1
+2025-09-09 15:48:04,256 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 2
+2025-09-09 15:48:04,257 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:48:04,257 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=2 | total_allocated=2
+2025-09-09 15:48:04,259 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 3
+2025-09-09 15:48:04,261 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:48:04,261 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=3 | total_allocated=3
+2025-09-09 15:48:04,301 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=C:\Users\q1520\AppData\Local\Temp\tmp6sy6ny3s | meta_dir=C:\Users\q1520\AppData\Local\Temp\tmp6sy6ny3s
+2025-09-09 15:48:04,301 - page_manager - INFO - _log_with_context:97 - Metadata file not found, using default configuration
+2025-09-09 15:48:04,302 - page_manager - INFO - _log_with_context:97 - Created new data file | Context: file_path=C:\Users\q1520\AppData\Local\Temp\tmp6sy6ny3s\database.db
+2025-09-09 15:48:04,302 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=C:\Users\q1520\AppData\Local\Temp\tmp6sy6ny3s\database.db | meta_file=C:\Users\q1520\AppData\Local\Temp\tmp6sy6ny3s\metadata.json | allocated_pages=0
+2025-09-09 15:48:04,303 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 1
+2025-09-09 15:48:04,304 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:48:04,304 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | total_allocated=1
+2025-09-09 15:48:04,388 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 2
+2025-09-09 15:48:04,390 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:48:04,390 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=2 | total_allocated=2
+2025-09-09 15:48:04,498 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 3
+2025-09-09 15:48:04,500 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:48:04,500 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=3 | total_allocated=3
+2025-09-09 15:48:04,610 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 4
+2025-09-09 15:48:04,614 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:48:04,614 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=4 | total_allocated=4
+2025-09-09 15:48:04,732 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 5
+2025-09-09 15:48:04,734 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:48:04,734 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=5 | total_allocated=5
+2025-09-09 15:48:04,853 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 6
+2025-09-09 15:48:04,855 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:48:04,855 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=6 | total_allocated=6
+2025-09-09 15:48:04,986 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 7
+2025-09-09 15:48:04,988 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:48:04,988 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=7 | total_allocated=7
+2025-09-09 15:48:05,138 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 8
+2025-09-09 15:48:05,140 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:48:05,140 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=8 | total_allocated=8
+2025-09-09 15:48:05,279 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 9
+2025-09-09 15:48:05,281 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:48:05,281 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=9 | total_allocated=9
+2025-09-09 15:48:05,439 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 10
+2025-09-09 15:48:05,441 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:48:05,441 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=10 | total_allocated=10
+2025-09-09 15:48:05,626 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 11
+2025-09-09 15:48:05,628 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:48:05,628 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=11 | total_allocated=11
+2025-09-09 15:48:05,831 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 12
+2025-09-09 15:48:05,833 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:48:05,833 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=12 | total_allocated=12
+2025-09-09 15:48:06,027 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 13
+2025-09-09 15:48:06,029 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:48:06,029 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=13 | total_allocated=13
+2025-09-09 15:48:06,251 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 14
+2025-09-09 15:48:06,252 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:48:06,252 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=14 | total_allocated=14
+2025-09-09 15:48:06,450 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 15
+2025-09-09 15:48:06,451 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:48:06,451 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=15 | total_allocated=15
+2025-09-09 15:48:06,682 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 16
+2025-09-09 15:48:06,684 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:48:06,684 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=16 | total_allocated=16
+2025-09-09 15:48:06,937 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 17
+2025-09-09 15:48:06,939 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:48:06,939 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=17 | total_allocated=17
+2025-09-09 15:48:07,163 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 18
+2025-09-09 15:48:07,165 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:48:07,166 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=18 | total_allocated=18
+2025-09-09 15:49:11,359 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=C:\Users\q1520\AppData\Local\Temp\tmplsjf4k_k | meta_dir=C:\Users\q1520\AppData\Local\Temp\tmplsjf4k_k
+2025-09-09 15:49:11,360 - page_manager - INFO - _log_with_context:97 - Metadata file not found, using default configuration
+2025-09-09 15:49:11,360 - page_manager - INFO - _log_with_context:97 - Created new data file | Context: file_path=C:\Users\q1520\AppData\Local\Temp\tmplsjf4k_k\database.db
+2025-09-09 15:49:11,360 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=C:\Users\q1520\AppData\Local\Temp\tmplsjf4k_k\database.db | meta_file=C:\Users\q1520\AppData\Local\Temp\tmplsjf4k_k\metadata.json | allocated_pages=0
+2025-09-09 15:49:11,364 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 1
+2025-09-09 15:49:11,365 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:49:11,365 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | total_allocated=1
+2025-09-09 15:49:11,393 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=C:\Users\q1520\AppData\Local\Temp\tmpncol2_yc | meta_dir=C:\Users\q1520\AppData\Local\Temp\tmpncol2_yc
+2025-09-09 15:49:11,393 - page_manager - INFO - _log_with_context:97 - Metadata file not found, using default configuration
+2025-09-09 15:49:11,394 - page_manager - INFO - _log_with_context:97 - Created new data file | Context: file_path=C:\Users\q1520\AppData\Local\Temp\tmpncol2_yc\database.db
+2025-09-09 15:49:11,394 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=C:\Users\q1520\AppData\Local\Temp\tmpncol2_yc\database.db | meta_file=C:\Users\q1520\AppData\Local\Temp\tmpncol2_yc\metadata.json | allocated_pages=0
+2025-09-09 15:49:11,395 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 1
+2025-09-09 15:49:11,397 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:49:11,397 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | total_allocated=1
+2025-09-09 15:49:11,399 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 2
+2025-09-09 15:49:11,400 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:49:11,400 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=2 | total_allocated=2
+2025-09-09 15:49:11,402 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 3
+2025-09-09 15:49:11,404 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:49:11,404 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=3 | total_allocated=3
+2025-09-09 15:49:11,443 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=C:\Users\q1520\AppData\Local\Temp\tmpuzhg84lm | meta_dir=C:\Users\q1520\AppData\Local\Temp\tmpuzhg84lm
+2025-09-09 15:49:11,444 - page_manager - INFO - _log_with_context:97 - Metadata file not found, using default configuration
+2025-09-09 15:49:11,444 - page_manager - INFO - _log_with_context:97 - Created new data file | Context: file_path=C:\Users\q1520\AppData\Local\Temp\tmpuzhg84lm\database.db
+2025-09-09 15:49:11,445 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=C:\Users\q1520\AppData\Local\Temp\tmpuzhg84lm\database.db | meta_file=C:\Users\q1520\AppData\Local\Temp\tmpuzhg84lm\metadata.json | allocated_pages=0
+2025-09-09 15:49:11,446 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 1
+2025-09-09 15:49:11,447 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:49:11,447 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | total_allocated=1
+2025-09-09 15:49:11,531 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 2
+2025-09-09 15:49:11,533 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:49:11,533 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=2 | total_allocated=2
+2025-09-09 15:49:11,637 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 3
+2025-09-09 15:49:11,638 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:49:11,638 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=3 | total_allocated=3
+2025-09-09 15:49:11,735 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 4
+2025-09-09 15:49:11,738 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:49:11,738 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=4 | total_allocated=4
+2025-09-09 15:49:11,863 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 5
+2025-09-09 15:49:11,865 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:49:11,865 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=5 | total_allocated=5
+2025-09-09 15:49:11,987 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 6
+2025-09-09 15:49:11,989 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:49:11,989 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=6 | total_allocated=6
+2025-09-09 15:49:12,112 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 7
+2025-09-09 15:49:12,113 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:49:12,114 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=7 | total_allocated=7
+2025-09-09 15:49:12,313 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 8
+2025-09-09 15:49:12,315 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:49:12,315 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=8 | total_allocated=8
+2025-09-09 15:49:12,486 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 9
+2025-09-09 15:49:12,488 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:49:12,488 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=9 | total_allocated=9
+2025-09-09 15:49:12,664 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 10
+2025-09-09 15:49:12,666 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:49:12,666 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=10 | total_allocated=10
+2025-09-09 15:49:12,802 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 11
+2025-09-09 15:49:12,805 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:49:12,805 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=11 | total_allocated=11
+2025-09-09 15:49:12,963 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 12
+2025-09-09 15:49:12,965 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:49:12,965 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=12 | total_allocated=12
+2025-09-09 15:49:13,153 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 13
+2025-09-09 15:49:13,155 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:49:13,155 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=13 | total_allocated=13
+2025-09-09 15:49:13,437 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 14
+2025-09-09 15:49:13,439 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:49:13,439 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=14 | total_allocated=14
+2025-09-09 15:49:13,706 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 15
+2025-09-09 15:49:13,708 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:49:13,708 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=15 | total_allocated=15
+2025-09-09 15:49:13,948 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 16
+2025-09-09 15:49:13,950 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:49:13,950 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=16 | total_allocated=16
+2025-09-09 15:49:14,158 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 17
+2025-09-09 15:49:14,160 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:49:14,160 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=17 | total_allocated=17
+2025-09-09 15:49:14,381 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 18
+2025-09-09 15:49:14,383 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:49:14,383 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=18 | total_allocated=18
+2025-09-09 15:49:14,600 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 19
+2025-09-09 15:49:14,601 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:49:14,601 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=19 | total_allocated=19
+2025-09-09 15:49:14,814 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 20
+2025-09-09 15:49:14,816 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:49:14,816 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=20 | total_allocated=20
+2025-09-09 15:49:15,069 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 21
+2025-09-09 15:49:15,072 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:49:15,072 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=21 | total_allocated=21
+2025-09-09 15:49:15,342 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 22
+2025-09-09 15:49:15,345 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:49:15,345 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=22 | total_allocated=22
+2025-09-09 15:49:15,614 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 23
+2025-09-09 15:49:15,616 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:49:15,616 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=23 | total_allocated=23
+2025-09-09 15:49:15,876 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 24
+2025-09-09 15:49:15,879 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:49:15,879 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=24 | total_allocated=24
+2025-09-09 15:49:16,138 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 25
+2025-09-09 15:49:16,140 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:49:16,141 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=25 | total_allocated=25
+2025-09-09 15:49:16,429 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 26
+2025-09-09 15:49:16,431 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:49:16,431 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=26 | total_allocated=26
+2025-09-09 15:49:16,713 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 27
+2025-09-09 15:49:16,716 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:49:16,716 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=27 | total_allocated=27
+2025-09-09 15:49:17,013 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 28
+2025-09-09 15:49:17,016 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:49:17,016 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=28 | total_allocated=28
+2025-09-09 15:54:56,560 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=C:\Users\q1520\AppData\Local\Temp\tmpxk4br2vs | meta_dir=C:\Users\q1520\AppData\Local\Temp\tmpxk4br2vs
+2025-09-09 15:54:56,560 - page_manager - INFO - _log_with_context:97 - Metadata file not found, using default configuration
+2025-09-09 15:54:56,560 - page_manager - INFO - _log_with_context:97 - Created new data file | Context: file_path=C:\Users\q1520\AppData\Local\Temp\tmpxk4br2vs\database.db
+2025-09-09 15:54:56,560 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=C:\Users\q1520\AppData\Local\Temp\tmpxk4br2vs\database.db | meta_file=C:\Users\q1520\AppData\Local\Temp\tmpxk4br2vs\metadata.json | allocated_pages=0
+2025-09-09 15:54:56,564 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 1
+2025-09-09 15:54:56,565 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:54:56,565 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | total_allocated=1
+2025-09-09 15:54:56,593 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=C:\Users\q1520\AppData\Local\Temp\tmpf15leyjt | meta_dir=C:\Users\q1520\AppData\Local\Temp\tmpf15leyjt
+2025-09-09 15:54:56,593 - page_manager - INFO - _log_with_context:97 - Metadata file not found, using default configuration
+2025-09-09 15:54:56,594 - page_manager - INFO - _log_with_context:97 - Created new data file | Context: file_path=C:\Users\q1520\AppData\Local\Temp\tmpf15leyjt\database.db
+2025-09-09 15:54:56,594 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=C:\Users\q1520\AppData\Local\Temp\tmpf15leyjt\database.db | meta_file=C:\Users\q1520\AppData\Local\Temp\tmpf15leyjt\metadata.json | allocated_pages=0
+2025-09-09 15:54:56,595 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 1
+2025-09-09 15:54:56,597 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:54:56,597 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | total_allocated=1
+2025-09-09 15:54:56,600 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 2
+2025-09-09 15:54:56,601 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:54:56,601 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=2 | total_allocated=2
+2025-09-09 15:54:56,604 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 3
+2025-09-09 15:54:56,606 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:54:56,606 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=3 | total_allocated=3
+2025-09-09 15:54:56,642 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=C:\Users\q1520\AppData\Local\Temp\tmp5w6o_7ys | meta_dir=C:\Users\q1520\AppData\Local\Temp\tmp5w6o_7ys
+2025-09-09 15:54:56,642 - page_manager - INFO - _log_with_context:97 - Metadata file not found, using default configuration
+2025-09-09 15:54:56,643 - page_manager - INFO - _log_with_context:97 - Created new data file | Context: file_path=C:\Users\q1520\AppData\Local\Temp\tmp5w6o_7ys\database.db
+2025-09-09 15:54:56,643 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=C:\Users\q1520\AppData\Local\Temp\tmp5w6o_7ys\database.db | meta_file=C:\Users\q1520\AppData\Local\Temp\tmp5w6o_7ys\metadata.json | allocated_pages=0
+2025-09-09 15:54:56,644 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 1
+2025-09-09 15:54:56,645 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:54:56,645 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | total_allocated=1
+2025-09-09 15:54:56,723 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 2
+2025-09-09 15:54:56,724 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:54:56,724 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=2 | total_allocated=2
+2025-09-09 15:54:56,826 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 3
+2025-09-09 15:54:56,828 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:54:56,828 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=3 | total_allocated=3
+2025-09-09 15:54:56,932 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 4
+2025-09-09 15:54:56,935 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:54:56,935 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=4 | total_allocated=4
+2025-09-09 15:54:57,056 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 5
+2025-09-09 15:54:57,058 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:54:57,058 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=5 | total_allocated=5
+2025-09-09 15:54:57,181 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 6
+2025-09-09 15:54:57,184 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:54:57,184 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=6 | total_allocated=6
+2025-09-09 15:54:57,314 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 7
+2025-09-09 15:54:57,315 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:54:57,315 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=7 | total_allocated=7
+2025-09-09 15:54:57,450 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 8
+2025-09-09 15:54:57,452 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:54:57,452 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=8 | total_allocated=8
+2025-09-09 15:54:57,571 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 9
+2025-09-09 15:54:57,574 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:54:57,574 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=9 | total_allocated=9
+2025-09-09 15:54:57,738 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 10
+2025-09-09 15:54:57,740 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:54:57,740 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=10 | total_allocated=10
+2025-09-09 15:54:57,916 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 11
+2025-09-09 15:54:57,917 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:54:57,917 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=11 | total_allocated=11
+2025-09-09 15:54:58,100 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 12
+2025-09-09 15:54:58,102 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:54:58,102 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=12 | total_allocated=12
+2025-09-09 15:54:58,308 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 13
+2025-09-09 15:54:58,311 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:54:58,312 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=13 | total_allocated=13
+2025-09-09 15:54:58,562 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 14
+2025-09-09 15:54:58,564 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:54:58,564 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=14 | total_allocated=14
+2025-09-09 15:54:58,790 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 15
+2025-09-09 15:54:58,791 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:54:58,791 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=15 | total_allocated=15
+2025-09-09 15:54:58,993 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 16
+2025-09-09 15:54:58,995 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:54:58,995 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=16 | total_allocated=16
+2025-09-09 15:54:59,246 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 17
+2025-09-09 15:54:59,248 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:54:59,248 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=17 | total_allocated=17
+2025-09-09 15:54:59,488 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 18
+2025-09-09 15:54:59,491 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:54:59,491 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=18 | total_allocated=18
+2025-09-09 15:54:59,741 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 19
+2025-09-09 15:54:59,744 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:54:59,744 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=19 | total_allocated=19
+2025-09-09 15:55:00,004 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 20
+2025-09-09 15:55:00,006 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:55:00,006 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=20 | total_allocated=20
+2025-09-09 15:55:00,259 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 21
+2025-09-09 15:55:00,261 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:55:00,261 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=21 | total_allocated=21
+2025-09-09 15:55:00,531 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 22
+2025-09-09 15:55:00,533 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:55:00,533 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=22 | total_allocated=22
+2025-09-09 15:55:00,866 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 23
+2025-09-09 15:55:00,868 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:55:00,868 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=23 | total_allocated=23
+2025-09-09 15:55:01,156 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 24
+2025-09-09 15:55:01,158 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:55:01,158 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=24 | total_allocated=24
+2025-09-09 15:55:01,483 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 25
+2025-09-09 15:55:01,485 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:55:01,485 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=25 | total_allocated=25
+2025-09-09 15:55:01,823 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 26
+2025-09-09 15:55:01,826 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:55:01,826 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=26 | total_allocated=26
+2025-09-09 15:55:02,146 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 27
+2025-09-09 15:55:02,149 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:55:02,150 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=27 | total_allocated=27
+2025-09-09 15:55:02,501 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 28
+2025-09-09 15:55:02,503 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 15:55:02,503 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=28 | total_allocated=28
+2025-09-09 16:05:06,063 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=C:\Users\q1520\AppData\Local\Temp\tmps8_dm8b4 | meta_dir=C:\Users\q1520\AppData\Local\Temp\tmps8_dm8b4
+2025-09-09 16:05:06,063 - page_manager - INFO - _log_with_context:97 - Metadata file not found, using default configuration
+2025-09-09 16:05:06,065 - page_manager - INFO - _log_with_context:97 - Created new data file | Context: file_path=C:\Users\q1520\AppData\Local\Temp\tmps8_dm8b4\database.db
+2025-09-09 16:05:06,065 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=C:\Users\q1520\AppData\Local\Temp\tmps8_dm8b4\database.db | meta_file=C:\Users\q1520\AppData\Local\Temp\tmps8_dm8b4\metadata.json | allocated_pages=0
+2025-09-09 16:05:06,068 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 1
+2025-09-09 16:05:06,070 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:05:06,070 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | total_allocated=1
+2025-09-09 16:05:06,097 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=C:\Users\q1520\AppData\Local\Temp\tmp0jtp4jol | meta_dir=C:\Users\q1520\AppData\Local\Temp\tmp0jtp4jol
+2025-09-09 16:05:06,097 - page_manager - INFO - _log_with_context:97 - Metadata file not found, using default configuration
+2025-09-09 16:05:06,098 - page_manager - INFO - _log_with_context:97 - Created new data file | Context: file_path=C:\Users\q1520\AppData\Local\Temp\tmp0jtp4jol\database.db
+2025-09-09 16:05:06,098 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=C:\Users\q1520\AppData\Local\Temp\tmp0jtp4jol\database.db | meta_file=C:\Users\q1520\AppData\Local\Temp\tmp0jtp4jol\metadata.json | allocated_pages=0
+2025-09-09 16:05:06,099 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 1
+2025-09-09 16:05:06,100 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:05:06,100 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | total_allocated=1
+2025-09-09 16:05:06,104 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 2
+2025-09-09 16:05:06,107 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:05:06,107 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=2 | total_allocated=2
+2025-09-09 16:05:06,109 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 3
+2025-09-09 16:05:06,110 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:05:06,111 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=3 | total_allocated=3
+2025-09-09 16:05:06,152 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=C:\Users\q1520\AppData\Local\Temp\tmp0_cj777i | meta_dir=C:\Users\q1520\AppData\Local\Temp\tmp0_cj777i
+2025-09-09 16:05:06,152 - page_manager - INFO - _log_with_context:97 - Metadata file not found, using default configuration
+2025-09-09 16:05:06,153 - page_manager - INFO - _log_with_context:97 - Created new data file | Context: file_path=C:\Users\q1520\AppData\Local\Temp\tmp0_cj777i\database.db
+2025-09-09 16:05:06,153 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=C:\Users\q1520\AppData\Local\Temp\tmp0_cj777i\database.db | meta_file=C:\Users\q1520\AppData\Local\Temp\tmp0_cj777i\metadata.json | allocated_pages=0
+2025-09-09 16:05:06,154 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 1
+2025-09-09 16:05:06,155 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:05:06,155 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | total_allocated=1
+2025-09-09 16:05:06,240 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 2
+2025-09-09 16:05:06,242 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:05:06,242 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=2 | total_allocated=2
+2025-09-09 16:05:06,357 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 3
+2025-09-09 16:05:06,358 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:05:06,358 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=3 | total_allocated=3
+2025-09-09 16:05:06,468 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 4
+2025-09-09 16:05:06,471 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:05:06,471 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=4 | total_allocated=4
+2025-09-09 16:05:06,594 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 5
+2025-09-09 16:05:06,597 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:05:06,597 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=5 | total_allocated=5
+2025-09-09 16:05:06,716 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 6
+2025-09-09 16:05:06,717 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:05:06,717 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=6 | total_allocated=6
+2025-09-09 16:05:06,840 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 7
+2025-09-09 16:05:06,842 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:05:06,842 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=7 | total_allocated=7
+2025-09-09 16:05:06,996 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 8
+2025-09-09 16:05:06,997 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:05:06,997 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=8 | total_allocated=8
+2025-09-09 16:05:07,161 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 9
+2025-09-09 16:05:07,163 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:05:07,163 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=9 | total_allocated=9
+2025-09-09 16:05:07,320 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 10
+2025-09-09 16:05:07,322 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:05:07,322 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=10 | total_allocated=10
+2025-09-09 16:05:07,489 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 11
+2025-09-09 16:05:07,491 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:05:07,491 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=11 | total_allocated=11
+2025-09-09 16:05:07,654 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 12
+2025-09-09 16:05:07,655 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:05:07,655 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=12 | total_allocated=12
+2025-09-09 16:05:07,882 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 13
+2025-09-09 16:05:07,884 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:05:07,884 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=13 | total_allocated=13
+2025-09-09 16:05:08,099 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 14
+2025-09-09 16:05:08,101 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:05:08,101 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=14 | total_allocated=14
+2025-09-09 16:05:08,305 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 15
+2025-09-09 16:05:08,307 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:05:08,307 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=15 | total_allocated=15
+2025-09-09 16:05:08,529 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 16
+2025-09-09 16:05:08,531 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:05:08,531 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=16 | total_allocated=16
+2025-09-09 16:05:08,773 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 17
+2025-09-09 16:05:08,775 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:05:08,775 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=17 | total_allocated=17
+2025-09-09 16:05:09,033 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 18
+2025-09-09 16:05:09,036 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:05:09,036 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=18 | total_allocated=18
+2025-09-09 16:05:09,305 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 19
+2025-09-09 16:05:09,307 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:05:09,307 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=19 | total_allocated=19
+2025-09-09 16:05:09,552 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 20
+2025-09-09 16:05:09,554 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:05:09,554 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=20 | total_allocated=20
+2025-09-09 16:05:09,805 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 21
+2025-09-09 16:05:09,807 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:05:09,807 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=21 | total_allocated=21
+2025-09-09 16:05:10,063 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 22
+2025-09-09 16:05:10,065 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:05:10,065 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=22 | total_allocated=22
+2025-09-09 16:05:10,298 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 23
+2025-09-09 16:05:10,299 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:05:10,300 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=23 | total_allocated=23
+2025-09-09 16:05:10,559 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 24
+2025-09-09 16:05:10,561 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:05:10,561 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=24 | total_allocated=24
+2025-09-09 16:05:10,887 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 25
+2025-09-09 16:05:10,889 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:05:10,889 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=25 | total_allocated=25
+2025-09-09 16:05:11,160 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 26
+2025-09-09 16:05:11,162 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:05:11,162 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=26 | total_allocated=26
+2025-09-09 16:05:11,465 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 27
+2025-09-09 16:05:11,468 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:05:11,468 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=27 | total_allocated=27
+2025-09-09 16:05:11,772 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 28
+2025-09-09 16:05:11,774 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:05:11,774 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=28 | total_allocated=28
+2025-09-09 16:09:29,436 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=C:\Users\q1520\AppData\Local\Temp\tmp1dcbovht | meta_dir=C:\Users\q1520\AppData\Local\Temp\tmp1dcbovht
+2025-09-09 16:09:29,436 - page_manager - INFO - _log_with_context:97 - Metadata file not found, using default configuration
+2025-09-09 16:09:29,437 - page_manager - INFO - _log_with_context:97 - Created new data file | Context: file_path=C:\Users\q1520\AppData\Local\Temp\tmp1dcbovht\database.db
+2025-09-09 16:09:29,437 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=C:\Users\q1520\AppData\Local\Temp\tmp1dcbovht\database.db | meta_file=C:\Users\q1520\AppData\Local\Temp\tmp1dcbovht\metadata.json | allocated_pages=0
+2025-09-09 16:09:29,439 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 1
+2025-09-09 16:09:29,441 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:09:29,441 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | total_allocated=1
+2025-09-09 16:09:29,467 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=C:\Users\q1520\AppData\Local\Temp\tmpmkyoi_52 | meta_dir=C:\Users\q1520\AppData\Local\Temp\tmpmkyoi_52
+2025-09-09 16:09:29,467 - page_manager - INFO - _log_with_context:97 - Metadata file not found, using default configuration
+2025-09-09 16:09:29,467 - page_manager - INFO - _log_with_context:97 - Created new data file | Context: file_path=C:\Users\q1520\AppData\Local\Temp\tmpmkyoi_52\database.db
+2025-09-09 16:09:29,468 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=C:\Users\q1520\AppData\Local\Temp\tmpmkyoi_52\database.db | meta_file=C:\Users\q1520\AppData\Local\Temp\tmpmkyoi_52\metadata.json | allocated_pages=0
+2025-09-09 16:09:29,469 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 1
+2025-09-09 16:09:29,470 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:09:29,471 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | total_allocated=1
+2025-09-09 16:09:29,473 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 2
+2025-09-09 16:09:29,475 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:09:29,475 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=2 | total_allocated=2
+2025-09-09 16:09:29,477 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 3
+2025-09-09 16:09:29,479 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:09:29,479 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=3 | total_allocated=3
+2025-09-09 16:09:29,521 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=C:\Users\q1520\AppData\Local\Temp\tmpxjoupkjt | meta_dir=C:\Users\q1520\AppData\Local\Temp\tmpxjoupkjt
+2025-09-09 16:09:29,521 - page_manager - INFO - _log_with_context:97 - Metadata file not found, using default configuration
+2025-09-09 16:09:29,522 - page_manager - INFO - _log_with_context:97 - Created new data file | Context: file_path=C:\Users\q1520\AppData\Local\Temp\tmpxjoupkjt\database.db
+2025-09-09 16:09:29,522 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=C:\Users\q1520\AppData\Local\Temp\tmpxjoupkjt\database.db | meta_file=C:\Users\q1520\AppData\Local\Temp\tmpxjoupkjt\metadata.json | allocated_pages=0
+2025-09-09 16:09:29,523 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 1
+2025-09-09 16:09:29,525 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:09:29,526 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | total_allocated=1
+2025-09-09 16:09:29,616 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 2
+2025-09-09 16:09:29,617 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:09:29,617 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=2 | total_allocated=2
+2025-09-09 16:09:29,731 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 3
+2025-09-09 16:09:29,733 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:09:29,733 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=3 | total_allocated=3
+2025-09-09 16:09:29,853 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 4
+2025-09-09 16:09:29,856 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:09:29,856 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=4 | total_allocated=4
+2025-09-09 16:09:29,971 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 5
+2025-09-09 16:09:29,972 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:09:29,973 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=5 | total_allocated=5
+2025-09-09 16:09:30,106 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 6
+2025-09-09 16:09:30,109 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:09:30,109 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=6 | total_allocated=6
+2025-09-09 16:09:30,241 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 7
+2025-09-09 16:09:30,242 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:09:30,243 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=7 | total_allocated=7
+2025-09-09 16:09:30,399 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 8
+2025-09-09 16:09:30,401 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:09:30,401 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=8 | total_allocated=8
+2025-09-09 16:09:30,575 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 9
+2025-09-09 16:09:30,577 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:09:30,577 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=9 | total_allocated=9
+2025-09-09 16:09:30,727 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 10
+2025-09-09 16:09:30,730 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:09:30,730 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=10 | total_allocated=10
+2025-09-09 16:09:30,892 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 11
+2025-09-09 16:09:30,895 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:09:30,895 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=11 | total_allocated=11
+2025-09-09 16:09:31,092 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 12
+2025-09-09 16:09:31,093 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:09:31,094 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=12 | total_allocated=12
+2025-09-09 16:09:31,268 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 13
+2025-09-09 16:09:31,270 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:09:31,270 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=13 | total_allocated=13
+2025-09-09 16:09:31,460 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 14
+2025-09-09 16:09:31,462 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:09:31,462 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=14 | total_allocated=14
+2025-09-09 16:09:31,749 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 15
+2025-09-09 16:09:31,751 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:09:31,751 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=15 | total_allocated=15
+2025-09-09 16:09:31,967 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 16
+2025-09-09 16:09:31,969 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:09:31,970 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=16 | total_allocated=16
+2025-09-09 16:09:32,214 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 17
+2025-09-09 16:09:32,216 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:09:32,216 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=17 | total_allocated=17
+2025-09-09 16:09:32,430 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 18
+2025-09-09 16:09:32,432 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:09:32,432 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=18 | total_allocated=18
+2025-09-09 16:09:32,661 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 19
+2025-09-09 16:09:32,663 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:09:32,663 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=19 | total_allocated=19
+2025-09-09 16:09:32,896 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 20
+2025-09-09 16:09:32,897 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:09:32,897 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=20 | total_allocated=20
+2025-09-09 16:09:33,149 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 21
+2025-09-09 16:09:33,151 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:09:33,151 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=21 | total_allocated=21
+2025-09-09 16:09:33,439 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 22
+2025-09-09 16:09:33,442 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:09:33,442 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=22 | total_allocated=22
+2025-09-09 16:09:33,708 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 23
+2025-09-09 16:09:33,710 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:09:33,710 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=23 | total_allocated=23
+2025-09-09 16:09:33,985 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 24
+2025-09-09 16:09:33,987 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:09:33,987 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=24 | total_allocated=24
+2025-09-09 16:09:34,279 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 25
+2025-09-09 16:09:34,282 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:09:34,282 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=25 | total_allocated=25
+2025-09-09 16:09:34,593 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 26
+2025-09-09 16:09:34,596 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:09:34,596 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=26 | total_allocated=26
+2025-09-09 16:09:34,864 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 27
+2025-09-09 16:09:34,867 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:09:34,867 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=27 | total_allocated=27
+2025-09-09 16:09:35,121 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 28
+2025-09-09 16:09:35,123 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:09:35,123 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=28 | total_allocated=28
+2025-09-09 16:10:58,246 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=C:\Users\q1520\AppData\Local\Temp\tmpgtx0od7g | meta_dir=C:\Users\q1520\AppData\Local\Temp\tmpgtx0od7g
+2025-09-09 16:10:58,246 - page_manager - INFO - _log_with_context:97 - Metadata file not found, using default configuration
+2025-09-09 16:10:58,246 - page_manager - INFO - _log_with_context:97 - Created new data file | Context: file_path=C:\Users\q1520\AppData\Local\Temp\tmpgtx0od7g\database.db
+2025-09-09 16:10:58,247 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=C:\Users\q1520\AppData\Local\Temp\tmpgtx0od7g\database.db | meta_file=C:\Users\q1520\AppData\Local\Temp\tmpgtx0od7g\metadata.json | allocated_pages=0
+2025-09-09 16:10:58,250 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 1
+2025-09-09 16:10:58,252 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:10:58,252 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | total_allocated=1
+2025-09-09 16:10:58,300 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=C:\Users\q1520\AppData\Local\Temp\tmp0gq3rviy | meta_dir=C:\Users\q1520\AppData\Local\Temp\tmp0gq3rviy
+2025-09-09 16:10:58,300 - page_manager - INFO - _log_with_context:97 - Metadata file not found, using default configuration
+2025-09-09 16:10:58,301 - page_manager - INFO - _log_with_context:97 - Created new data file | Context: file_path=C:\Users\q1520\AppData\Local\Temp\tmp0gq3rviy\database.db
+2025-09-09 16:10:58,301 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=C:\Users\q1520\AppData\Local\Temp\tmp0gq3rviy\database.db | meta_file=C:\Users\q1520\AppData\Local\Temp\tmp0gq3rviy\metadata.json | allocated_pages=0
+2025-09-09 16:10:58,302 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 1
+2025-09-09 16:10:58,304 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:10:58,304 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | total_allocated=1
+2025-09-09 16:10:58,306 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 2
+2025-09-09 16:10:58,308 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:10:58,309 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=2 | total_allocated=2
+2025-09-09 16:10:58,312 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 3
+2025-09-09 16:10:58,314 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:10:58,314 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=3 | total_allocated=3
+2025-09-09 16:10:58,383 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=C:\Users\q1520\AppData\Local\Temp\tmph4fc7o14 | meta_dir=C:\Users\q1520\AppData\Local\Temp\tmph4fc7o14
+2025-09-09 16:10:58,383 - page_manager - INFO - _log_with_context:97 - Metadata file not found, using default configuration
+2025-09-09 16:10:58,384 - page_manager - INFO - _log_with_context:97 - Created new data file | Context: file_path=C:\Users\q1520\AppData\Local\Temp\tmph4fc7o14\database.db
+2025-09-09 16:10:58,384 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=C:\Users\q1520\AppData\Local\Temp\tmph4fc7o14\database.db | meta_file=C:\Users\q1520\AppData\Local\Temp\tmph4fc7o14\metadata.json | allocated_pages=0
+2025-09-09 16:10:58,385 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 1
+2025-09-09 16:10:58,386 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:10:58,386 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | total_allocated=1
+2025-09-09 16:10:58,477 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 2
+2025-09-09 16:10:58,479 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:10:58,480 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=2 | total_allocated=2
+2025-09-09 16:10:58,588 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 3
+2025-09-09 16:10:58,590 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:10:58,590 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=3 | total_allocated=3
+2025-09-09 16:10:58,712 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 4
+2025-09-09 16:10:58,714 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:10:58,714 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=4 | total_allocated=4
+2025-09-09 16:10:58,857 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 5
+2025-09-09 16:10:58,860 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:10:58,860 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=5 | total_allocated=5
+2025-09-09 16:10:58,999 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 6
+2025-09-09 16:10:59,000 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:10:59,000 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=6 | total_allocated=6
+2025-09-09 16:10:59,150 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 7
+2025-09-09 16:10:59,153 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:10:59,153 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=7 | total_allocated=7
+2025-09-09 16:10:59,394 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 8
+2025-09-09 16:10:59,396 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:10:59,396 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=8 | total_allocated=8
+2025-09-09 16:10:59,646 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 9
+2025-09-09 16:10:59,648 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:10:59,648 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=9 | total_allocated=9
+2025-09-09 16:10:59,816 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 10
+2025-09-09 16:10:59,818 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:10:59,818 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=10 | total_allocated=10
+2025-09-09 16:11:00,008 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 11
+2025-09-09 16:11:00,010 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:11:00,010 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=11 | total_allocated=11
+2025-09-09 16:11:00,267 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 12
+2025-09-09 16:11:00,269 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:11:00,269 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=12 | total_allocated=12
+2025-09-09 16:11:00,528 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 13
+2025-09-09 16:11:00,531 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:11:00,531 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=13 | total_allocated=13
+2025-09-09 16:11:00,845 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 14
+2025-09-09 16:11:00,848 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:11:00,848 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=14 | total_allocated=14
+2025-09-09 16:11:01,165 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 15
+2025-09-09 16:11:01,167 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:11:01,168 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=15 | total_allocated=15
+2025-09-09 16:11:01,431 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 16
+2025-09-09 16:11:01,433 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:11:01,433 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=16 | total_allocated=16
+2025-09-09 16:11:01,708 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 17
+2025-09-09 16:11:01,709 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:11:01,709 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=17 | total_allocated=17
+2025-09-09 16:11:01,996 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 18
+2025-09-09 16:11:01,998 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:11:01,998 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=18 | total_allocated=18
+2025-09-09 16:11:02,349 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 19
+2025-09-09 16:11:02,351 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:11:02,352 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=19 | total_allocated=19
+2025-09-09 16:11:02,673 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 20
+2025-09-09 16:11:02,675 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:11:02,675 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=20 | total_allocated=20
+2025-09-09 16:11:03,020 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 21
+2025-09-09 16:11:03,023 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:11:03,024 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=21 | total_allocated=21
+2025-09-09 16:11:03,375 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 22
+2025-09-09 16:11:03,378 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:11:03,378 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=22 | total_allocated=22
+2025-09-09 16:11:03,772 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 23
+2025-09-09 16:11:03,775 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:11:03,775 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=23 | total_allocated=23
+2025-09-09 16:11:04,133 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 24
+2025-09-09 16:11:04,137 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:11:04,137 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=24 | total_allocated=24
+2025-09-09 16:11:04,470 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 25
+2025-09-09 16:11:04,474 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:11:04,474 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=25 | total_allocated=25
+2025-09-09 16:11:04,855 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 26
+2025-09-09 16:11:04,860 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:11:04,860 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=26 | total_allocated=26
+2025-09-09 16:11:05,229 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 27
+2025-09-09 16:11:05,233 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:11:05,233 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=27 | total_allocated=27
+2025-09-09 16:11:05,600 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 28
+2025-09-09 16:11:05,603 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:11:05,604 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=28 | total_allocated=28
+2025-09-09 16:15:35,243 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=C:\Users\q1520\AppData\Local\Temp\tmpgvkqs9gi | meta_dir=C:\Users\q1520\AppData\Local\Temp\tmpgvkqs9gi
+2025-09-09 16:15:35,243 - page_manager - INFO - _log_with_context:97 - Metadata file not found, using default configuration
+2025-09-09 16:15:35,243 - page_manager - INFO - _log_with_context:97 - Created new data file | Context: file_path=C:\Users\q1520\AppData\Local\Temp\tmpgvkqs9gi\database.db
+2025-09-09 16:15:35,243 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=C:\Users\q1520\AppData\Local\Temp\tmpgvkqs9gi\database.db | meta_file=C:\Users\q1520\AppData\Local\Temp\tmpgvkqs9gi\metadata.json | allocated_pages=0
+2025-09-09 16:15:35,246 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 1
+2025-09-09 16:15:35,248 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:15:35,248 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | total_allocated=1
+2025-09-09 16:15:35,266 - page_manager - DEBUG - _log_with_context:97 - Extended data file to 4096 bytes
+2025-09-09 16:15:35,270 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=1 | data_length=4096 | file_offset=0
+2025-09-09 16:15:35,272 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:15:35,272 - page_manager - INFO - _log_with_context:97 - Page deallocated | Context: page_id=1 | total_allocated=0
+2025-09-09 16:15:35,272 - page_manager - DEBUG - _log_with_context:97 - Reusing freed page 1
+2025-09-09 16:15:35,273 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:15:35,273 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | total_allocated=1
+2025-09-09 16:15:35,292 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=C:\Users\q1520\AppData\Local\Temp\tmp43twos5i | meta_dir=C:\Users\q1520\AppData\Local\Temp\tmp43twos5i
+2025-09-09 16:15:35,292 - page_manager - INFO - _log_with_context:97 - Metadata file not found, using default configuration
+2025-09-09 16:15:35,293 - page_manager - INFO - _log_with_context:97 - Created new data file | Context: file_path=C:\Users\q1520\AppData\Local\Temp\tmp43twos5i\database.db
+2025-09-09 16:15:35,293 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=C:\Users\q1520\AppData\Local\Temp\tmp43twos5i\database.db | meta_file=C:\Users\q1520\AppData\Local\Temp\tmp43twos5i\metadata.json | allocated_pages=0
+2025-09-09 16:15:35,294 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 1
+2025-09-09 16:15:35,295 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:15:35,295 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | total_allocated=1
+2025-09-09 16:15:35,297 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 2
+2025-09-09 16:15:35,299 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:15:35,299 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=2 | total_allocated=2
+2025-09-09 16:15:35,301 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 3
+2025-09-09 16:15:35,302 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:15:35,302 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=3 | total_allocated=3
+2025-09-09 16:15:35,340 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=C:\Users\q1520\AppData\Local\Temp\tmporftdw6m | meta_dir=C:\Users\q1520\AppData\Local\Temp\tmporftdw6m
+2025-09-09 16:15:35,340 - page_manager - INFO - _log_with_context:97 - Metadata file not found, using default configuration
+2025-09-09 16:15:35,341 - page_manager - INFO - _log_with_context:97 - Created new data file | Context: file_path=C:\Users\q1520\AppData\Local\Temp\tmporftdw6m\database.db
+2025-09-09 16:15:35,341 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=C:\Users\q1520\AppData\Local\Temp\tmporftdw6m\database.db | meta_file=C:\Users\q1520\AppData\Local\Temp\tmporftdw6m\metadata.json | allocated_pages=0
+2025-09-09 16:15:35,342 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 1
+2025-09-09 16:15:35,343 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:15:35,344 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | total_allocated=1
+2025-09-09 16:15:35,420 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 2
+2025-09-09 16:15:35,421 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:15:35,421 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=2 | total_allocated=2
+2025-09-09 16:15:35,523 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 3
+2025-09-09 16:15:35,525 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:15:35,525 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=3 | total_allocated=3
+2025-09-09 16:15:35,628 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 4
+2025-09-09 16:15:35,630 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:15:35,630 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=4 | total_allocated=4
+2025-09-09 16:15:35,756 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 5
+2025-09-09 16:15:35,758 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:15:35,758 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=5 | total_allocated=5
+2025-09-09 16:15:35,858 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 6
+2025-09-09 16:15:35,860 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:15:35,860 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=6 | total_allocated=6
+2025-09-09 16:15:35,969 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 7
+2025-09-09 16:15:35,972 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:15:35,972 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=7 | total_allocated=7
+2025-09-09 16:15:36,093 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 8
+2025-09-09 16:15:36,094 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:15:36,094 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=8 | total_allocated=8
+2025-09-09 16:15:36,240 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 9
+2025-09-09 16:15:36,242 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:15:36,242 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=9 | total_allocated=9
+2025-09-09 16:15:36,388 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 10
+2025-09-09 16:15:36,390 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:15:36,390 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=10 | total_allocated=10
+2025-09-09 16:15:36,531 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 11
+2025-09-09 16:15:36,533 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:15:36,534 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=11 | total_allocated=11
+2025-09-09 16:15:36,697 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 12
+2025-09-09 16:15:36,699 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:15:36,699 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=12 | total_allocated=12
+2025-09-09 16:15:36,865 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 13
+2025-09-09 16:15:36,867 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:15:36,867 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=13 | total_allocated=13
+2025-09-09 16:15:37,062 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 14
+2025-09-09 16:15:37,064 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:15:37,064 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=14 | total_allocated=14
+2025-09-09 16:15:37,276 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 15
+2025-09-09 16:15:37,278 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:15:37,278 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=15 | total_allocated=15
+2025-09-09 16:15:37,459 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 16
+2025-09-09 16:15:37,461 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:15:37,461 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=16 | total_allocated=16
+2025-09-09 16:15:37,677 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 17
+2025-09-09 16:15:37,679 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:15:37,679 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=17 | total_allocated=17
+2025-09-09 16:15:37,896 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 18
+2025-09-09 16:15:37,898 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:15:37,898 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=18 | total_allocated=18
+2025-09-09 16:15:38,095 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 19
+2025-09-09 16:15:38,098 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:15:38,098 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=19 | total_allocated=19
+2025-09-09 16:15:38,336 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 20
+2025-09-09 16:15:38,338 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:15:38,338 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=20 | total_allocated=20
+2025-09-09 16:15:38,589 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 21
+2025-09-09 16:15:38,591 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:15:38,591 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=21 | total_allocated=21
+2025-09-09 16:15:38,850 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 22
+2025-09-09 16:15:38,851 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:15:38,851 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=22 | total_allocated=22
+2025-09-09 16:15:39,078 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 23
+2025-09-09 16:15:39,079 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:15:39,079 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=23 | total_allocated=23
+2025-09-09 16:15:39,349 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 24
+2025-09-09 16:15:39,351 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:15:39,351 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=24 | total_allocated=24
+2025-09-09 16:15:39,615 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 25
+2025-09-09 16:15:39,617 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:15:39,617 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=25 | total_allocated=25
+2025-09-09 16:15:39,878 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 26
+2025-09-09 16:15:39,880 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:15:39,880 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=26 | total_allocated=26
+2025-09-09 16:15:40,164 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 27
+2025-09-09 16:15:40,166 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:15:40,166 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=27 | total_allocated=27
+2025-09-09 16:15:40,431 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 28
+2025-09-09 16:15:40,432 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:15:40,432 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=28 | total_allocated=28
+2025-09-09 16:15:40,695 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 29
+2025-09-09 16:15:40,696 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:15:40,696 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=29 | total_allocated=29
+2025-09-09 16:17:06,565 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=C:\Users\q1520\AppData\Local\Temp\tmpe63ghglr | meta_dir=C:\Users\q1520\AppData\Local\Temp\tmpe63ghglr
+2025-09-09 16:17:06,566 - page_manager - INFO - _log_with_context:97 - Metadata file not found, using default configuration
+2025-09-09 16:17:06,567 - page_manager - INFO - _log_with_context:97 - Created new data file | Context: file_path=C:\Users\q1520\AppData\Local\Temp\tmpe63ghglr\database.db
+2025-09-09 16:17:06,567 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=C:\Users\q1520\AppData\Local\Temp\tmpe63ghglr\database.db | meta_file=C:\Users\q1520\AppData\Local\Temp\tmpe63ghglr\metadata.json | allocated_pages=0
+2025-09-09 16:17:06,570 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 1
+2025-09-09 16:17:06,572 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:17:06,572 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | total_allocated=1
+2025-09-09 16:17:06,595 - page_manager - DEBUG - _log_with_context:97 - Extended data file to 4096 bytes
+2025-09-09 16:17:06,598 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=1 | data_length=4096 | file_offset=0
+2025-09-09 16:17:06,600 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:17:06,600 - page_manager - INFO - _log_with_context:97 - Page deallocated | Context: page_id=1 | total_allocated=0
+2025-09-09 16:17:06,600 - page_manager - DEBUG - _log_with_context:97 - Reusing freed page 1
+2025-09-09 16:17:06,602 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:17:06,602 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | total_allocated=1
+2025-09-09 16:17:06,624 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=C:\Users\q1520\AppData\Local\Temp\tmp186yl8ct | meta_dir=C:\Users\q1520\AppData\Local\Temp\tmp186yl8ct
+2025-09-09 16:17:06,624 - page_manager - INFO - _log_with_context:97 - Metadata file not found, using default configuration
+2025-09-09 16:17:06,625 - page_manager - INFO - _log_with_context:97 - Created new data file | Context: file_path=C:\Users\q1520\AppData\Local\Temp\tmp186yl8ct\database.db
+2025-09-09 16:17:06,626 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=C:\Users\q1520\AppData\Local\Temp\tmp186yl8ct\database.db | meta_file=C:\Users\q1520\AppData\Local\Temp\tmp186yl8ct\metadata.json | allocated_pages=0
+2025-09-09 16:17:06,627 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 1
+2025-09-09 16:17:06,629 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:17:06,629 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | total_allocated=1
+2025-09-09 16:17:06,631 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 2
+2025-09-09 16:17:06,633 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:17:06,633 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=2 | total_allocated=2
+2025-09-09 16:17:06,635 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 3
+2025-09-09 16:17:06,637 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:17:06,637 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=3 | total_allocated=3
+2025-09-09 16:17:06,683 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=C:\Users\q1520\AppData\Local\Temp\tmpy_xrspo0 | meta_dir=C:\Users\q1520\AppData\Local\Temp\tmpy_xrspo0
+2025-09-09 16:17:06,683 - page_manager - INFO - _log_with_context:97 - Metadata file not found, using default configuration
+2025-09-09 16:17:06,684 - page_manager - INFO - _log_with_context:97 - Created new data file | Context: file_path=C:\Users\q1520\AppData\Local\Temp\tmpy_xrspo0\database.db
+2025-09-09 16:17:06,684 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=C:\Users\q1520\AppData\Local\Temp\tmpy_xrspo0\database.db | meta_file=C:\Users\q1520\AppData\Local\Temp\tmpy_xrspo0\metadata.json | allocated_pages=0
+2025-09-09 16:17:06,685 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 1
+2025-09-09 16:17:06,686 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:17:06,686 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | total_allocated=1
+2025-09-09 16:17:06,782 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 2
+2025-09-09 16:17:06,783 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:17:06,783 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=2 | total_allocated=2
+2025-09-09 16:17:06,895 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 3
+2025-09-09 16:17:06,896 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:17:06,896 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=3 | total_allocated=3
+2025-09-09 16:17:07,012 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 4
+2025-09-09 16:17:07,016 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:17:07,016 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=4 | total_allocated=4
+2025-09-09 16:17:07,131 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 5
+2025-09-09 16:17:07,132 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:17:07,132 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=5 | total_allocated=5
+2025-09-09 16:17:07,267 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 6
+2025-09-09 16:17:07,269 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:17:07,269 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=6 | total_allocated=6
+2025-09-09 16:17:07,401 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 7
+2025-09-09 16:17:07,403 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:17:07,403 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=7 | total_allocated=7
+2025-09-09 16:17:07,585 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 8
+2025-09-09 16:17:07,588 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:17:07,588 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=8 | total_allocated=8
+2025-09-09 16:17:07,772 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 9
+2025-09-09 16:17:07,774 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:17:07,774 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=9 | total_allocated=9
+2025-09-09 16:17:07,952 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 10
+2025-09-09 16:17:07,953 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:17:07,953 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=10 | total_allocated=10
+2025-09-09 16:17:08,183 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 11
+2025-09-09 16:17:08,185 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:17:08,185 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=11 | total_allocated=11
+2025-09-09 16:17:08,428 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 12
+2025-09-09 16:17:08,430 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:17:08,431 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=12 | total_allocated=12
+2025-09-09 16:17:08,693 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 13
+2025-09-09 16:17:08,696 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:17:08,696 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=13 | total_allocated=13
+2025-09-09 16:17:08,949 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 14
+2025-09-09 16:17:08,951 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:17:08,952 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=14 | total_allocated=14
+2025-09-09 16:17:09,194 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 15
+2025-09-09 16:17:09,196 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:17:09,196 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=15 | total_allocated=15
+2025-09-09 16:17:09,458 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 16
+2025-09-09 16:17:09,460 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:17:09,460 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=16 | total_allocated=16
+2025-09-09 16:17:09,724 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 17
+2025-09-09 16:17:09,727 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:17:09,727 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=17 | total_allocated=17
+2025-09-09 16:17:09,993 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 18
+2025-09-09 16:17:09,995 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:17:09,995 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=18 | total_allocated=18
+2025-09-09 16:17:10,251 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 19
+2025-09-09 16:17:10,254 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:17:10,254 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=19 | total_allocated=19
+2025-09-09 16:17:10,545 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 20
+2025-09-09 16:17:10,548 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:17:10,548 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=20 | total_allocated=20
+2025-09-09 16:17:10,845 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 21
+2025-09-09 16:17:10,848 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:17:10,848 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=21 | total_allocated=21
+2025-09-09 16:17:11,190 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 22
+2025-09-09 16:17:11,193 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:17:11,193 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=22 | total_allocated=22
+2025-09-09 16:17:11,491 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 23
+2025-09-09 16:17:11,493 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:17:11,493 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=23 | total_allocated=23
+2025-09-09 16:17:11,838 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 24
+2025-09-09 16:17:11,840 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:17:11,840 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=24 | total_allocated=24
+2025-09-09 16:17:12,211 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 25
+2025-09-09 16:17:12,214 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:17:12,214 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=25 | total_allocated=25
+2025-09-09 16:17:12,632 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 26
+2025-09-09 16:17:12,636 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:17:12,636 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=26 | total_allocated=26
+2025-09-09 16:17:13,096 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 27
+2025-09-09 16:17:13,101 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:17:13,102 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=27 | total_allocated=27
+2025-09-09 16:17:13,539 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 28
+2025-09-09 16:17:13,545 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:17:13,545 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=28 | total_allocated=28
+2025-09-09 16:17:14,014 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 29
+2025-09-09 16:17:14,019 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:17:14,019 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=29 | total_allocated=29
+2025-09-09 16:19:40,842 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=C:\Users\q1520\AppData\Local\Temp\tmprozod09z | meta_dir=C:\Users\q1520\AppData\Local\Temp\tmprozod09z
+2025-09-09 16:19:40,842 - page_manager - INFO - _log_with_context:97 - Metadata file not found, using default configuration
+2025-09-09 16:19:40,843 - page_manager - INFO - _log_with_context:97 - Created new data file | Context: file_path=C:\Users\q1520\AppData\Local\Temp\tmprozod09z\database.db
+2025-09-09 16:19:40,843 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=C:\Users\q1520\AppData\Local\Temp\tmprozod09z\database.db | meta_file=C:\Users\q1520\AppData\Local\Temp\tmprozod09z\metadata.json | allocated_pages=0
+2025-09-09 16:19:40,846 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 1
+2025-09-09 16:19:40,848 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:19:40,848 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | total_allocated=1
+2025-09-09 16:19:40,867 - page_manager - DEBUG - _log_with_context:97 - Extended data file to 4096 bytes
+2025-09-09 16:19:40,870 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=1 | data_length=4096 | file_offset=0
+2025-09-09 16:19:40,871 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:19:40,871 - page_manager - INFO - _log_with_context:97 - Page deallocated | Context: page_id=1 | total_allocated=0
+2025-09-09 16:19:40,871 - page_manager - DEBUG - _log_with_context:97 - Reusing freed page 1
+2025-09-09 16:19:40,873 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:19:40,873 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | total_allocated=1
+2025-09-09 16:19:40,891 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=C:\Users\q1520\AppData\Local\Temp\tmpfokg5y64 | meta_dir=C:\Users\q1520\AppData\Local\Temp\tmpfokg5y64
+2025-09-09 16:19:40,891 - page_manager - INFO - _log_with_context:97 - Metadata file not found, using default configuration
+2025-09-09 16:19:40,892 - page_manager - INFO - _log_with_context:97 - Created new data file | Context: file_path=C:\Users\q1520\AppData\Local\Temp\tmpfokg5y64\database.db
+2025-09-09 16:19:40,892 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=C:\Users\q1520\AppData\Local\Temp\tmpfokg5y64\database.db | meta_file=C:\Users\q1520\AppData\Local\Temp\tmpfokg5y64\metadata.json | allocated_pages=0
+2025-09-09 16:19:40,893 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 1
+2025-09-09 16:19:40,894 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:19:40,894 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | total_allocated=1
+2025-09-09 16:19:40,897 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 2
+2025-09-09 16:19:40,898 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:19:40,898 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=2 | total_allocated=2
+2025-09-09 16:19:40,900 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 3
+2025-09-09 16:19:40,902 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:19:40,902 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=3 | total_allocated=3
+2025-09-09 16:19:40,940 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=C:\Users\q1520\AppData\Local\Temp\tmp8k0bij25 | meta_dir=C:\Users\q1520\AppData\Local\Temp\tmp8k0bij25
+2025-09-09 16:19:40,940 - page_manager - INFO - _log_with_context:97 - Metadata file not found, using default configuration
+2025-09-09 16:19:40,941 - page_manager - INFO - _log_with_context:97 - Created new data file | Context: file_path=C:\Users\q1520\AppData\Local\Temp\tmp8k0bij25\database.db
+2025-09-09 16:19:40,941 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=C:\Users\q1520\AppData\Local\Temp\tmp8k0bij25\database.db | meta_file=C:\Users\q1520\AppData\Local\Temp\tmp8k0bij25\metadata.json | allocated_pages=0
+2025-09-09 16:19:40,942 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 1
+2025-09-09 16:19:40,943 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:19:40,943 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | total_allocated=1
+2025-09-09 16:19:41,024 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 2
+2025-09-09 16:19:41,026 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:19:41,026 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=2 | total_allocated=2
+2025-09-09 16:19:41,126 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 3
+2025-09-09 16:19:41,129 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:19:41,129 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=3 | total_allocated=3
+2025-09-09 16:19:41,241 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 4
+2025-09-09 16:19:41,249 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:19:41,249 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=4 | total_allocated=4
+2025-09-09 16:19:41,371 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 5
+2025-09-09 16:19:41,372 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:19:41,373 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=5 | total_allocated=5
+2025-09-09 16:19:41,478 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 6
+2025-09-09 16:19:41,480 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:19:41,480 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=6 | total_allocated=6
+2025-09-09 16:19:41,605 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 7
+2025-09-09 16:19:41,607 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:19:41,607 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=7 | total_allocated=7
+2025-09-09 16:19:41,737 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 8
+2025-09-09 16:19:41,739 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:19:41,739 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=8 | total_allocated=8
+2025-09-09 16:19:41,868 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 9
+2025-09-09 16:19:41,870 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:19:41,870 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=9 | total_allocated=9
+2025-09-09 16:19:42,040 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 10
+2025-09-09 16:19:42,041 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:19:42,041 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=10 | total_allocated=10
+2025-09-09 16:19:42,246 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 11
+2025-09-09 16:19:42,247 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:19:42,247 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=11 | total_allocated=11
+2025-09-09 16:19:42,429 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 12
+2025-09-09 16:19:42,431 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:19:42,431 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=12 | total_allocated=12
+2025-09-09 16:19:42,606 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 13
+2025-09-09 16:19:42,608 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:19:42,608 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=13 | total_allocated=13
+2025-09-09 16:19:42,808 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 14
+2025-09-09 16:19:42,810 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:19:42,810 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=14 | total_allocated=14
+2025-09-09 16:19:43,025 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 15
+2025-09-09 16:19:43,027 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:19:43,027 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=15 | total_allocated=15
+2025-09-09 16:19:43,250 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 16
+2025-09-09 16:19:43,252 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:19:43,252 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=16 | total_allocated=16
+2025-09-09 16:19:43,457 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 17
+2025-09-09 16:19:43,459 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:19:43,459 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=17 | total_allocated=17
+2025-09-09 16:19:43,708 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 18
+2025-09-09 16:19:43,710 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:19:43,710 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=18 | total_allocated=18
+2025-09-09 16:19:43,923 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 19
+2025-09-09 16:19:43,925 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:19:43,925 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=19 | total_allocated=19
+2025-09-09 16:19:44,143 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 20
+2025-09-09 16:19:44,145 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:19:44,145 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=20 | total_allocated=20
+2025-09-09 16:19:44,389 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 21
+2025-09-09 16:19:44,391 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:19:44,391 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=21 | total_allocated=21
+2025-09-09 16:19:44,645 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 22
+2025-09-09 16:19:44,648 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:19:44,648 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=22 | total_allocated=22
+2025-09-09 16:19:44,890 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 23
+2025-09-09 16:19:44,892 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:19:44,892 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=23 | total_allocated=23
+2025-09-09 16:19:45,143 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 24
+2025-09-09 16:19:45,146 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:19:45,146 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=24 | total_allocated=24
+2025-09-09 16:19:45,431 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 25
+2025-09-09 16:19:45,433 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:19:45,433 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=25 | total_allocated=25
+2025-09-09 16:19:45,719 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 26
+2025-09-09 16:19:45,721 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:19:45,722 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=26 | total_allocated=26
+2025-09-09 16:19:45,992 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 27
+2025-09-09 16:19:45,995 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:19:45,995 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=27 | total_allocated=27
+2025-09-09 16:19:46,287 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 28
+2025-09-09 16:19:46,289 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:19:46,289 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=28 | total_allocated=28
+2025-09-09 16:19:46,559 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 29
+2025-09-09 16:19:46,561 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:19:46,561 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=29 | total_allocated=29
+2025-09-09 16:23:00,289 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=C:\Users\q1520\AppData\Local\Temp\tmpxn9v4aqb | meta_dir=C:\Users\q1520\AppData\Local\Temp\tmpxn9v4aqb
+2025-09-09 16:23:00,289 - page_manager - INFO - _log_with_context:97 - Metadata file not found, using default configuration
+2025-09-09 16:23:00,290 - page_manager - INFO - _log_with_context:97 - Created new data file | Context: file_path=C:\Users\q1520\AppData\Local\Temp\tmpxn9v4aqb\database.db
+2025-09-09 16:23:00,290 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=C:\Users\q1520\AppData\Local\Temp\tmpxn9v4aqb\database.db | meta_file=C:\Users\q1520\AppData\Local\Temp\tmpxn9v4aqb\metadata.json | allocated_pages=0
+2025-09-09 16:23:00,293 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 1
+2025-09-09 16:23:00,294 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:23:00,294 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | total_allocated=1
+2025-09-09 16:23:00,312 - page_manager - DEBUG - _log_with_context:97 - Extended data file to 4096 bytes
+2025-09-09 16:23:00,315 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=1 | data_length=4096 | file_offset=0
+2025-09-09 16:23:00,317 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:23:00,317 - page_manager - INFO - _log_with_context:97 - Page deallocated | Context: page_id=1 | total_allocated=0
+2025-09-09 16:23:00,317 - page_manager - DEBUG - _log_with_context:97 - Reusing freed page 1
+2025-09-09 16:23:00,318 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:23:00,318 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | total_allocated=1
+2025-09-09 16:23:00,339 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=C:\Users\q1520\AppData\Local\Temp\tmpcfqnt5zk | meta_dir=C:\Users\q1520\AppData\Local\Temp\tmpcfqnt5zk
+2025-09-09 16:23:00,339 - page_manager - INFO - _log_with_context:97 - Metadata file not found, using default configuration
+2025-09-09 16:23:00,341 - page_manager - INFO - _log_with_context:97 - Created new data file | Context: file_path=C:\Users\q1520\AppData\Local\Temp\tmpcfqnt5zk\database.db
+2025-09-09 16:23:00,341 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=C:\Users\q1520\AppData\Local\Temp\tmpcfqnt5zk\database.db | meta_file=C:\Users\q1520\AppData\Local\Temp\tmpcfqnt5zk\metadata.json | allocated_pages=0
+2025-09-09 16:23:00,342 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 1
+2025-09-09 16:23:00,342 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:23:00,343 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | total_allocated=1
+2025-09-09 16:23:00,345 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 2
+2025-09-09 16:23:00,346 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:23:00,346 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=2 | total_allocated=2
+2025-09-09 16:23:00,348 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 3
+2025-09-09 16:23:00,350 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:23:00,350 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=3 | total_allocated=3
+2025-09-09 16:23:00,393 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=C:\Users\q1520\AppData\Local\Temp\tmp054w9zm8 | meta_dir=C:\Users\q1520\AppData\Local\Temp\tmp054w9zm8
+2025-09-09 16:23:00,393 - page_manager - INFO - _log_with_context:97 - Metadata file not found, using default configuration
+2025-09-09 16:23:00,394 - page_manager - INFO - _log_with_context:97 - Created new data file | Context: file_path=C:\Users\q1520\AppData\Local\Temp\tmp054w9zm8\database.db
+2025-09-09 16:23:00,394 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=C:\Users\q1520\AppData\Local\Temp\tmp054w9zm8\database.db | meta_file=C:\Users\q1520\AppData\Local\Temp\tmp054w9zm8\metadata.json | allocated_pages=0
+2025-09-09 16:23:00,395 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 1
+2025-09-09 16:23:00,397 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:23:00,397 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | total_allocated=1
+2025-09-09 16:23:00,480 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 2
+2025-09-09 16:23:00,482 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:23:00,482 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=2 | total_allocated=2
+2025-09-09 16:23:00,576 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 3
+2025-09-09 16:23:00,577 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:23:00,577 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=3 | total_allocated=3
+2025-09-09 16:23:00,682 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 4
+2025-09-09 16:23:00,684 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:23:00,684 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=4 | total_allocated=4
+2025-09-09 16:23:00,794 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 5
+2025-09-09 16:23:00,797 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:23:00,797 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=5 | total_allocated=5
+2025-09-09 16:23:00,910 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 6
+2025-09-09 16:23:00,912 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:23:00,912 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=6 | total_allocated=6
+2025-09-09 16:23:01,041 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 7
+2025-09-09 16:23:01,043 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:23:01,043 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=7 | total_allocated=7
+2025-09-09 16:23:01,179 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 8
+2025-09-09 16:23:01,181 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:23:01,181 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=8 | total_allocated=8
+2025-09-09 16:23:01,331 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 9
+2025-09-09 16:23:01,334 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:23:01,334 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=9 | total_allocated=9
+2025-09-09 16:23:01,475 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 10
+2025-09-09 16:23:01,477 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:23:01,478 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=10 | total_allocated=10
+2025-09-09 16:23:01,649 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 11
+2025-09-09 16:23:01,651 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:23:01,651 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=11 | total_allocated=11
+2025-09-09 16:23:01,821 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 12
+2025-09-09 16:23:01,823 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:23:01,823 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=12 | total_allocated=12
+2025-09-09 16:23:01,979 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 13
+2025-09-09 16:23:01,981 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:23:01,981 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=13 | total_allocated=13
+2025-09-09 16:23:02,169 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 14
+2025-09-09 16:23:02,171 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:23:02,171 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=14 | total_allocated=14
+2025-09-09 16:23:02,348 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 15
+2025-09-09 16:23:02,351 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:23:02,351 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=15 | total_allocated=15
+2025-09-09 16:23:02,557 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 16
+2025-09-09 16:23:02,560 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:23:02,560 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=16 | total_allocated=16
+2025-09-09 16:23:02,752 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 17
+2025-09-09 16:23:02,754 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:23:02,754 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=17 | total_allocated=17
+2025-09-09 16:23:02,952 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 18
+2025-09-09 16:23:02,954 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:23:02,954 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=18 | total_allocated=18
+2025-09-09 16:23:03,166 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 19
+2025-09-09 16:23:03,167 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:23:03,168 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=19 | total_allocated=19
+2025-09-09 16:23:03,393 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 20
+2025-09-09 16:23:03,395 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:23:03,396 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=20 | total_allocated=20
+2025-09-09 16:23:03,626 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 21
+2025-09-09 16:23:03,628 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:23:03,628 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=21 | total_allocated=21
+2025-09-09 16:23:03,855 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 22
+2025-09-09 16:23:03,857 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:23:03,857 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=22 | total_allocated=22
+2025-09-09 16:23:04,108 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 23
+2025-09-09 16:23:04,110 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:23:04,110 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=23 | total_allocated=23
+2025-09-09 16:23:04,349 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 24
+2025-09-09 16:23:04,351 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:23:04,351 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=24 | total_allocated=24
+2025-09-09 16:23:04,611 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 25
+2025-09-09 16:23:04,613 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:23:04,613 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=25 | total_allocated=25
+2025-09-09 16:23:04,857 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 26
+2025-09-09 16:23:04,860 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:23:04,860 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=26 | total_allocated=26
+2025-09-09 16:23:05,134 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 27
+2025-09-09 16:23:05,135 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:23:05,135 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=27 | total_allocated=27
+2025-09-09 16:23:05,394 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 28
+2025-09-09 16:23:05,396 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:23:05,396 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=28 | total_allocated=28
+2025-09-09 16:23:05,658 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 29
+2025-09-09 16:23:05,660 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:23:05,660 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=29 | total_allocated=29
+2025-09-09 16:28:17,049 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=C:\Users\q1520\AppData\Local\Temp\tmptou3p2mm | meta_dir=C:\Users\q1520\AppData\Local\Temp\tmptou3p2mm
+2025-09-09 16:28:17,049 - page_manager - INFO - _log_with_context:97 - Metadata file not found, using default configuration
+2025-09-09 16:28:17,050 - page_manager - INFO - _log_with_context:97 - Created new data file | Context: file_path=C:\Users\q1520\AppData\Local\Temp\tmptou3p2mm\database.db
+2025-09-09 16:28:17,050 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=C:\Users\q1520\AppData\Local\Temp\tmptou3p2mm\database.db | meta_file=C:\Users\q1520\AppData\Local\Temp\tmptou3p2mm\metadata.json | allocated_pages=0
+2025-09-09 16:28:17,053 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 1
+2025-09-09 16:28:17,055 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:17,055 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | total_allocated=1
+2025-09-09 16:28:17,071 - page_manager - DEBUG - _log_with_context:97 - Extended data file to 4096 bytes
+2025-09-09 16:28:17,075 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=1 | data_length=4096 | file_offset=0
+2025-09-09 16:28:17,077 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:17,077 - page_manager - INFO - _log_with_context:97 - Page deallocated | Context: page_id=1 | total_allocated=0
+2025-09-09 16:28:17,077 - page_manager - DEBUG - _log_with_context:97 - Reusing freed page 1
+2025-09-09 16:28:17,079 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:17,079 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | total_allocated=1
+2025-09-09 16:28:17,098 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=C:\Users\q1520\AppData\Local\Temp\tmptexa_w7h | meta_dir=C:\Users\q1520\AppData\Local\Temp\tmptexa_w7h
+2025-09-09 16:28:17,098 - page_manager - INFO - _log_with_context:97 - Metadata file not found, using default configuration
+2025-09-09 16:28:17,099 - page_manager - INFO - _log_with_context:97 - Created new data file | Context: file_path=C:\Users\q1520\AppData\Local\Temp\tmptexa_w7h\database.db
+2025-09-09 16:28:17,099 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=C:\Users\q1520\AppData\Local\Temp\tmptexa_w7h\database.db | meta_file=C:\Users\q1520\AppData\Local\Temp\tmptexa_w7h\metadata.json | allocated_pages=0
+2025-09-09 16:28:17,101 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 1
+2025-09-09 16:28:17,102 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:17,102 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | total_allocated=1
+2025-09-09 16:28:17,104 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 2
+2025-09-09 16:28:17,105 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:17,106 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=2 | total_allocated=2
+2025-09-09 16:28:17,108 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 3
+2025-09-09 16:28:17,108 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:17,108 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=3 | total_allocated=3
+2025-09-09 16:28:17,152 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=C:\Users\q1520\AppData\Local\Temp\tmpyhrppcjj | meta_dir=C:\Users\q1520\AppData\Local\Temp\tmpyhrppcjj
+2025-09-09 16:28:17,152 - page_manager - INFO - _log_with_context:97 - Metadata file not found, using default configuration
+2025-09-09 16:28:17,152 - page_manager - INFO - _log_with_context:97 - Created new data file | Context: file_path=C:\Users\q1520\AppData\Local\Temp\tmpyhrppcjj\database.db
+2025-09-09 16:28:17,152 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=C:\Users\q1520\AppData\Local\Temp\tmpyhrppcjj\database.db | meta_file=C:\Users\q1520\AppData\Local\Temp\tmpyhrppcjj\metadata.json | allocated_pages=0
+2025-09-09 16:28:17,153 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 1
+2025-09-09 16:28:17,155 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:17,155 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | total_allocated=1
+2025-09-09 16:28:17,234 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 2
+2025-09-09 16:28:17,235 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:17,235 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=2 | total_allocated=2
+2025-09-09 16:28:17,339 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 3
+2025-09-09 16:28:17,340 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:17,340 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=3 | total_allocated=3
+2025-09-09 16:28:17,441 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 4
+2025-09-09 16:28:17,443 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:17,443 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=4 | total_allocated=4
+2025-09-09 16:28:17,570 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 5
+2025-09-09 16:28:17,571 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:17,571 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=5 | total_allocated=5
+2025-09-09 16:28:17,679 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 6
+2025-09-09 16:28:17,681 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:17,681 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=6 | total_allocated=6
+2025-09-09 16:28:17,811 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 7
+2025-09-09 16:28:17,813 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:17,813 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=7 | total_allocated=7
+2025-09-09 16:28:17,926 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 8
+2025-09-09 16:28:17,927 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:17,927 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=8 | total_allocated=8
+2025-09-09 16:28:18,071 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 9
+2025-09-09 16:28:18,072 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:18,072 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=9 | total_allocated=9
+2025-09-09 16:28:18,240 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 10
+2025-09-09 16:28:18,241 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:18,241 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=10 | total_allocated=10
+2025-09-09 16:28:18,397 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 11
+2025-09-09 16:28:18,399 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:18,399 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=11 | total_allocated=11
+2025-09-09 16:28:18,540 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 12
+2025-09-09 16:28:18,542 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:18,542 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=12 | total_allocated=12
+2025-09-09 16:28:18,751 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 13
+2025-09-09 16:28:18,753 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:18,753 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=13 | total_allocated=13
+2025-09-09 16:28:19,011 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 14
+2025-09-09 16:28:19,013 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:19,013 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=14 | total_allocated=14
+2025-09-09 16:28:19,192 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 15
+2025-09-09 16:28:19,194 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:19,194 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=15 | total_allocated=15
+2025-09-09 16:28:19,389 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 16
+2025-09-09 16:28:19,391 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:19,391 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=16 | total_allocated=16
+2025-09-09 16:28:19,626 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 17
+2025-09-09 16:28:19,629 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:19,629 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=17 | total_allocated=17
+2025-09-09 16:28:19,848 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 18
+2025-09-09 16:28:19,850 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:19,850 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=18 | total_allocated=18
+2025-09-09 16:28:20,080 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 19
+2025-09-09 16:28:20,082 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:20,082 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=19 | total_allocated=19
+2025-09-09 16:28:20,326 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 20
+2025-09-09 16:28:20,328 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:20,328 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=20 | total_allocated=20
+2025-09-09 16:28:20,581 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 21
+2025-09-09 16:28:20,583 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:20,583 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=21 | total_allocated=21
+2025-09-09 16:28:20,826 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 22
+2025-09-09 16:28:20,828 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:20,828 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=22 | total_allocated=22
+2025-09-09 16:28:21,081 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 23
+2025-09-09 16:28:21,083 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:21,083 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=23 | total_allocated=23
+2025-09-09 16:28:21,320 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 24
+2025-09-09 16:28:21,323 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:21,323 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=24 | total_allocated=24
+2025-09-09 16:28:21,588 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 25
+2025-09-09 16:28:21,590 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:21,590 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=25 | total_allocated=25
+2025-09-09 16:28:21,840 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 26
+2025-09-09 16:28:21,843 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:21,843 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=26 | total_allocated=26
+2025-09-09 16:28:22,202 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 27
+2025-09-09 16:28:22,204 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:22,204 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=27 | total_allocated=27
+2025-09-09 16:28:22,519 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 28
+2025-09-09 16:28:22,521 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:22,521 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=28 | total_allocated=28
+2025-09-09 16:28:22,834 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 29
+2025-09-09 16:28:22,836 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:22,836 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=29 | total_allocated=29
+2025-09-09 16:28:23,288 - page_manager - DEBUG - _log_with_context:97 - Extended data file to 4096 bytes
+2025-09-09 16:28:23,298 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=1 | data_length=4096 | file_offset=0
+2025-09-09 16:28:23,300 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:23,301 - page_manager - INFO - _log_with_context:97 - Page deallocated | Context: page_id=1 | total_allocated=28
+2025-09-09 16:28:23,302 - page_manager - DEBUG - _log_with_context:97 - Extended data file to 8192 bytes
+2025-09-09 16:28:23,312 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=2 | data_length=4096 | file_offset=4096
+2025-09-09 16:28:23,316 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:23,317 - page_manager - INFO - _log_with_context:97 - Page deallocated | Context: page_id=2 | total_allocated=27
+2025-09-09 16:28:23,319 - page_manager - DEBUG - _log_with_context:97 - Extended data file to 12288 bytes
+2025-09-09 16:28:23,338 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=3 | data_length=4096 | file_offset=8192
+2025-09-09 16:28:23,344 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:23,344 - page_manager - INFO - _log_with_context:97 - Page deallocated | Context: page_id=3 | total_allocated=26
+2025-09-09 16:28:23,347 - page_manager - DEBUG - _log_with_context:97 - Extended data file to 16384 bytes
+2025-09-09 16:28:23,356 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=4 | data_length=4096 | file_offset=12288
+2025-09-09 16:28:23,361 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:23,361 - page_manager - INFO - _log_with_context:97 - Page deallocated | Context: page_id=4 | total_allocated=25
+2025-09-09 16:28:23,363 - page_manager - DEBUG - _log_with_context:97 - Extended data file to 20480 bytes
+2025-09-09 16:28:23,370 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=5 | data_length=4096 | file_offset=16384
+2025-09-09 16:28:23,372 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:23,372 - page_manager - INFO - _log_with_context:97 - Page deallocated | Context: page_id=5 | total_allocated=24
+2025-09-09 16:28:23,373 - page_manager - DEBUG - _log_with_context:97 - Extended data file to 24576 bytes
+2025-09-09 16:28:23,385 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=6 | data_length=4096 | file_offset=20480
+2025-09-09 16:28:23,388 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:23,388 - page_manager - INFO - _log_with_context:97 - Page deallocated | Context: page_id=6 | total_allocated=23
+2025-09-09 16:28:23,389 - page_manager - DEBUG - _log_with_context:97 - Extended data file to 28672 bytes
+2025-09-09 16:28:23,394 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=7 | data_length=4096 | file_offset=24576
+2025-09-09 16:28:23,396 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:23,396 - page_manager - INFO - _log_with_context:97 - Page deallocated | Context: page_id=7 | total_allocated=22
+2025-09-09 16:28:23,397 - page_manager - DEBUG - _log_with_context:97 - Extended data file to 32768 bytes
+2025-09-09 16:28:23,409 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=8 | data_length=4096 | file_offset=28672
+2025-09-09 16:28:23,412 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:23,412 - page_manager - INFO - _log_with_context:97 - Page deallocated | Context: page_id=8 | total_allocated=21
+2025-09-09 16:28:23,413 - page_manager - DEBUG - _log_with_context:97 - Extended data file to 36864 bytes
+2025-09-09 16:28:23,426 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=9 | data_length=4096 | file_offset=32768
+2025-09-09 16:28:23,428 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:23,429 - page_manager - INFO - _log_with_context:97 - Page deallocated | Context: page_id=9 | total_allocated=20
+2025-09-09 16:28:23,430 - page_manager - DEBUG - _log_with_context:97 - Extended data file to 40960 bytes
+2025-09-09 16:28:23,437 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=10 | data_length=4096 | file_offset=36864
+2025-09-09 16:28:23,440 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:23,440 - page_manager - INFO - _log_with_context:97 - Page deallocated | Context: page_id=10 | total_allocated=19
+2025-09-09 16:28:23,442 - page_manager - DEBUG - _log_with_context:97 - Extended data file to 45056 bytes
+2025-09-09 16:28:23,454 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=11 | data_length=4096 | file_offset=40960
+2025-09-09 16:28:23,457 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:23,457 - page_manager - INFO - _log_with_context:97 - Page deallocated | Context: page_id=11 | total_allocated=18
+2025-09-09 16:28:23,459 - page_manager - DEBUG - _log_with_context:97 - Extended data file to 49152 bytes
+2025-09-09 16:28:23,466 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=12 | data_length=4096 | file_offset=45056
+2025-09-09 16:28:23,468 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:23,468 - page_manager - INFO - _log_with_context:97 - Page deallocated | Context: page_id=12 | total_allocated=17
+2025-09-09 16:28:23,469 - page_manager - DEBUG - _log_with_context:97 - Extended data file to 53248 bytes
+2025-09-09 16:28:23,483 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=13 | data_length=4096 | file_offset=49152
+2025-09-09 16:28:23,485 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:23,485 - page_manager - INFO - _log_with_context:97 - Page deallocated | Context: page_id=13 | total_allocated=16
+2025-09-09 16:28:23,487 - page_manager - DEBUG - _log_with_context:97 - Extended data file to 57344 bytes
+2025-09-09 16:28:23,490 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=14 | data_length=4096 | file_offset=53248
+2025-09-09 16:28:23,493 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:23,493 - page_manager - INFO - _log_with_context:97 - Page deallocated | Context: page_id=14 | total_allocated=15
+2025-09-09 16:28:23,494 - page_manager - DEBUG - _log_with_context:97 - Extended data file to 61440 bytes
+2025-09-09 16:28:23,502 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=15 | data_length=4096 | file_offset=57344
+2025-09-09 16:28:23,505 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:23,505 - page_manager - INFO - _log_with_context:97 - Page deallocated | Context: page_id=15 | total_allocated=14
+2025-09-09 16:28:23,506 - page_manager - DEBUG - _log_with_context:97 - Extended data file to 65536 bytes
+2025-09-09 16:28:23,517 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=16 | data_length=4096 | file_offset=61440
+2025-09-09 16:28:23,520 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:23,520 - page_manager - INFO - _log_with_context:97 - Page deallocated | Context: page_id=16 | total_allocated=13
+2025-09-09 16:28:23,522 - page_manager - DEBUG - _log_with_context:97 - Extended data file to 69632 bytes
+2025-09-09 16:28:23,528 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=17 | data_length=4096 | file_offset=65536
+2025-09-09 16:28:23,531 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:23,531 - page_manager - INFO - _log_with_context:97 - Page deallocated | Context: page_id=17 | total_allocated=12
+2025-09-09 16:28:23,533 - page_manager - DEBUG - _log_with_context:97 - Extended data file to 73728 bytes
+2025-09-09 16:28:23,547 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=18 | data_length=4096 | file_offset=69632
+2025-09-09 16:28:23,552 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:23,552 - page_manager - INFO - _log_with_context:97 - Page deallocated | Context: page_id=18 | total_allocated=11
+2025-09-09 16:28:23,555 - page_manager - DEBUG - _log_with_context:97 - Extended data file to 77824 bytes
+2025-09-09 16:28:23,560 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=19 | data_length=4096 | file_offset=73728
+2025-09-09 16:28:23,565 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:23,565 - page_manager - INFO - _log_with_context:97 - Page deallocated | Context: page_id=19 | total_allocated=10
+2025-09-09 16:28:23,566 - page_manager - DEBUG - _log_with_context:97 - Extended data file to 81920 bytes
+2025-09-09 16:28:23,574 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=20 | data_length=4096 | file_offset=77824
+2025-09-09 16:28:23,577 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:23,577 - page_manager - INFO - _log_with_context:97 - Page deallocated | Context: page_id=20 | total_allocated=9
+2025-09-09 16:28:23,578 - page_manager - DEBUG - _log_with_context:97 - Extended data file to 86016 bytes
+2025-09-09 16:28:23,593 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=21 | data_length=4096 | file_offset=81920
+2025-09-09 16:28:23,596 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:23,596 - page_manager - INFO - _log_with_context:97 - Page deallocated | Context: page_id=21 | total_allocated=8
+2025-09-09 16:28:23,598 - page_manager - DEBUG - _log_with_context:97 - Extended data file to 90112 bytes
+2025-09-09 16:28:23,603 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=22 | data_length=4096 | file_offset=86016
+2025-09-09 16:28:23,606 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:23,606 - page_manager - INFO - _log_with_context:97 - Page deallocated | Context: page_id=22 | total_allocated=7
+2025-09-09 16:28:23,607 - page_manager - DEBUG - _log_with_context:97 - Extended data file to 94208 bytes
+2025-09-09 16:28:23,618 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=23 | data_length=4096 | file_offset=90112
+2025-09-09 16:28:23,621 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:23,621 - page_manager - INFO - _log_with_context:97 - Page deallocated | Context: page_id=23 | total_allocated=6
+2025-09-09 16:28:23,622 - page_manager - DEBUG - _log_with_context:97 - Extended data file to 98304 bytes
+2025-09-09 16:28:23,632 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=24 | data_length=4096 | file_offset=94208
+2025-09-09 16:28:23,634 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:23,634 - page_manager - INFO - _log_with_context:97 - Page deallocated | Context: page_id=24 | total_allocated=5
+2025-09-09 16:28:23,635 - page_manager - DEBUG - _log_with_context:97 - Extended data file to 102400 bytes
+2025-09-09 16:28:23,641 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=25 | data_length=4096 | file_offset=98304
+2025-09-09 16:28:23,644 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:23,644 - page_manager - INFO - _log_with_context:97 - Page deallocated | Context: page_id=25 | total_allocated=4
+2025-09-09 16:28:23,645 - page_manager - DEBUG - _log_with_context:97 - Extended data file to 106496 bytes
+2025-09-09 16:28:23,656 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=26 | data_length=4096 | file_offset=102400
+2025-09-09 16:28:23,659 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:23,659 - page_manager - INFO - _log_with_context:97 - Page deallocated | Context: page_id=26 | total_allocated=3
+2025-09-09 16:28:23,660 - page_manager - DEBUG - _log_with_context:97 - Extended data file to 110592 bytes
+2025-09-09 16:28:23,668 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=27 | data_length=4096 | file_offset=106496
+2025-09-09 16:28:23,670 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:23,670 - page_manager - INFO - _log_with_context:97 - Page deallocated | Context: page_id=27 | total_allocated=2
+2025-09-09 16:28:23,671 - page_manager - DEBUG - _log_with_context:97 - Extended data file to 114688 bytes
+2025-09-09 16:28:23,683 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=28 | data_length=4096 | file_offset=110592
+2025-09-09 16:28:23,686 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:23,686 - page_manager - INFO - _log_with_context:97 - Page deallocated | Context: page_id=28 | total_allocated=1
+2025-09-09 16:28:23,687 - page_manager - DEBUG - _log_with_context:97 - Extended data file to 118784 bytes
+2025-09-09 16:28:23,698 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=29 | data_length=4096 | file_offset=114688
+2025-09-09 16:28:23,714 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:23,714 - page_manager - INFO - _log_with_context:97 - Page deallocated | Context: page_id=29 | total_allocated=0
+2025-09-09 16:28:23,714 - page_manager - DEBUG - _log_with_context:97 - Reusing freed page 1
+2025-09-09 16:28:23,718 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:23,718 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | total_allocated=1
+2025-09-09 16:28:23,740 - page_manager - DEBUG - _log_with_context:97 - Reusing freed page 2
+2025-09-09 16:28:23,743 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:23,743 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=2 | total_allocated=2
+2025-09-09 16:28:23,773 - page_manager - DEBUG - _log_with_context:97 - Reusing freed page 3
+2025-09-09 16:28:23,776 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:23,776 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=3 | total_allocated=3
+2025-09-09 16:28:23,806 - page_manager - DEBUG - _log_with_context:97 - Reusing freed page 4
+2025-09-09 16:28:23,808 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:23,808 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=4 | total_allocated=4
+2025-09-09 16:28:23,847 - page_manager - DEBUG - _log_with_context:97 - Reusing freed page 5
+2025-09-09 16:28:23,850 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:23,850 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=5 | total_allocated=5
+2025-09-09 16:28:23,897 - page_manager - DEBUG - _log_with_context:97 - Reusing freed page 6
+2025-09-09 16:28:23,899 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:23,899 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=6 | total_allocated=6
+2025-09-09 16:28:23,948 - page_manager - DEBUG - _log_with_context:97 - Reusing freed page 7
+2025-09-09 16:28:23,950 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:23,950 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=7 | total_allocated=7
+2025-09-09 16:28:24,006 - page_manager - DEBUG - _log_with_context:97 - Reusing freed page 8
+2025-09-09 16:28:24,008 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:24,008 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=8 | total_allocated=8
+2025-09-09 16:28:24,070 - page_manager - DEBUG - _log_with_context:97 - Reusing freed page 9
+2025-09-09 16:28:24,072 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:24,073 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=9 | total_allocated=9
+2025-09-09 16:28:24,141 - page_manager - DEBUG - _log_with_context:97 - Reusing freed page 10
+2025-09-09 16:28:24,145 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:24,145 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=10 | total_allocated=10
+2025-09-09 16:28:24,228 - page_manager - DEBUG - _log_with_context:97 - Reusing freed page 11
+2025-09-09 16:28:24,231 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:24,231 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=11 | total_allocated=11
+2025-09-09 16:28:24,314 - page_manager - DEBUG - _log_with_context:97 - Reusing freed page 12
+2025-09-09 16:28:24,317 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:24,317 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=12 | total_allocated=12
+2025-09-09 16:28:24,416 - page_manager - DEBUG - _log_with_context:97 - Reusing freed page 13
+2025-09-09 16:28:24,419 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:24,419 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=13 | total_allocated=13
+2025-09-09 16:28:24,508 - page_manager - DEBUG - _log_with_context:97 - Reusing freed page 14
+2025-09-09 16:28:24,511 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:24,511 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=14 | total_allocated=14
+2025-09-09 16:28:24,621 - page_manager - DEBUG - _log_with_context:97 - Reusing freed page 15
+2025-09-09 16:28:24,623 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:24,623 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=15 | total_allocated=15
+2025-09-09 16:28:24,723 - page_manager - DEBUG - _log_with_context:97 - Reusing freed page 16
+2025-09-09 16:28:24,725 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:24,725 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=16 | total_allocated=16
+2025-09-09 16:28:24,845 - page_manager - DEBUG - _log_with_context:97 - Reusing freed page 17
+2025-09-09 16:28:24,848 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:24,848 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=17 | total_allocated=17
+2025-09-09 16:28:24,969 - page_manager - DEBUG - _log_with_context:97 - Reusing freed page 18
+2025-09-09 16:28:24,972 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:24,972 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=18 | total_allocated=18
+2025-09-09 16:28:25,143 - page_manager - DEBUG - _log_with_context:97 - Reusing freed page 19
+2025-09-09 16:28:25,146 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:25,146 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=19 | total_allocated=19
+2025-09-09 16:28:25,286 - page_manager - DEBUG - _log_with_context:97 - Reusing freed page 20
+2025-09-09 16:28:25,288 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:25,288 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=20 | total_allocated=20
+2025-09-09 16:28:25,433 - page_manager - DEBUG - _log_with_context:97 - Reusing freed page 21
+2025-09-09 16:28:25,436 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:25,436 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=21 | total_allocated=21
+2025-09-09 16:28:25,587 - page_manager - DEBUG - _log_with_context:97 - Reusing freed page 22
+2025-09-09 16:28:25,590 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:25,591 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=22 | total_allocated=22
+2025-09-09 16:28:25,745 - page_manager - DEBUG - _log_with_context:97 - Reusing freed page 23
+2025-09-09 16:28:25,747 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 16:28:25,747 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=23 | total_allocated=23

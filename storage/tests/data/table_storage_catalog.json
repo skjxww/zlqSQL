@@ -1,0 +1,19 @@
+{
+  "version": "1.0",
+  "created_time": 1757420284.2907624,
+  "table_count": 1,
+  "tables": [
+    {
+      "table_name": "test_table",
+      "pages": [
+        3
+      ],
+      "estimated_record_size": 512,
+      "created_time": 1757420284.2866511,
+      "last_modified": 1757420284.2866511,
+      "total_page_allocations": 1,
+      "total_page_reads": 0,
+      "total_page_writes": 0
+    }
+  ]
+}
