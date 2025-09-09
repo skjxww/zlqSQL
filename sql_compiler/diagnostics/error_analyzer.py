@@ -84,7 +84,13 @@ class ErrorDiagnostics:
 
     def _diagnose_syntax_error(self, error: CompilerError, sql: str) -> Dict[str, Any]:
         """诊断语法错误"""
-        result = {}
+        result = {
+            'suggestions': [],
+            'corrected_sql': None,
+            'explanation': '',
+            'examples': []
+        }
+
         error_msg = str(error)
 
         # 期望token但遇到其他token
@@ -172,6 +178,8 @@ class ErrorDiagnostics:
 
         suggestions = []
         corrected_sql = sql
+        expected = "未知token"
+        actual = "未知token"
 
         if expected_match and actual_match:
             expected = expected_match.group(1)
@@ -183,6 +191,7 @@ class ErrorDiagnostics:
                 if close_keywords:
                     suggestions.append(f"'{actual}' 可能是 '{close_keywords[0]}' 的拼写错误")
                     corrected_sql = sql.replace(actual, close_keywords[0])
+
             # 常见的token替换建议
             token_fixes = {
                 ';': {
@@ -216,7 +225,7 @@ class ErrorDiagnostics:
 
         if self.catalog:
             # 获取所有存在的表
-            existing_tables = list(self.catalog.get_all_tables().keys())
+            existing_tables = self.catalog.get_all_tables()  # 这里返回的是列表
 
             # 查找相似的表名
             similar_tables = get_close_matches(missing_table, existing_tables, n=3, cutoff=0.6)

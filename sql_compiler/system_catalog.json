@@ -1,0 +1,30 @@
+{
+  "tables": {
+    "users": {
+      "name": "users",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INT",
+          "constraints": null
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR(50)",
+          "constraints": null
+        },
+        {
+          "name": "email",
+          "type": "VARCHAR(100)",
+          "constraints": null
+        }
+      ],
+      "created_at": "2025-09-09T16:45:17.370085",
+      "row_count": 0
+    }
+  },
+  "metadata": {
+    "version": "1.0",
+    "created_at": null
+  }
+}
