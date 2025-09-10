@@ -3,23 +3,39 @@ from sql_compiler.parser.ast_nodes import *
 from sql_compiler.codegen.operators import *
 from sql_compiler.exceptions.compiler_errors import SemanticError
 
-# 安全导入优化器
+# 导入高级优化器
 try:
-    from sql_compiler.optimizer.optimizer import QueryOptimizer
-    OPTIMIZER_AVAILABLE = True
+    from sql_compiler.optimizer.advanced_optimizer import AdvancedQueryOptimizer, QueryOptimizationPipeline
+
+    ADVANCED_OPTIMIZER_AVAILABLE = True
 except ImportError:
-    OPTIMIZER_AVAILABLE = False
-    print("⚠️ 优化器模块未找到，将跳过查询优化")
+    try:
+        from sql_compiler.optimizer.simple_optimizer import SimpleQueryOptimizer
+
+        ADVANCED_OPTIMIZER_AVAILABLE = False
+    except ImportError:
+        ADVANCED_OPTIMIZER_AVAILABLE = False
+
 
 class PlanGenerator:
-    """执行计划生成器"""
+    """执行计划生成器 - 支持高级优化"""
 
-    def __init__(self, enable_optimization=True, silent_mode=False):
+    def __init__(self, enable_optimization=True, silent_mode=False, catalog_manager=None):
         """初始化计划生成器"""
-        self.enable_optimization = enable_optimization and OPTIMIZER_AVAILABLE
+        self.enable_optimization = enable_optimization and ADVANCED_OPTIMIZER_AVAILABLE
         self.silent_mode = silent_mode
+        self.catalog_manager = catalog_manager
+
         if self.enable_optimization:
-            self.optimizer = QueryOptimizer(silent_mode=silent_mode)
+            if ADVANCED_OPTIMIZER_AVAILABLE:
+                # 使用高级优化流水线
+                self.optimization_pipeline = QueryOptimizationPipeline(catalog_manager)
+                self.optimizer = self.optimization_pipeline.optimizer
+                self.optimizer.silent_mode = silent_mode
+            else:
+                # 回退到简单优化器
+                from sql_compiler.optimizer.simple_optimizer import SimpleQueryOptimizer
+                self.optimizer = SimpleQueryOptimizer(silent_mode)
         else:
             self.optimizer = None
 
@@ -41,16 +57,60 @@ class PlanGenerator:
 
         # 只对SELECT语句应用优化
         if (self.optimizer and
-            self.enable_optimization and
-            isinstance(stmt, SelectStmt)):
+                self.enable_optimization and
+                isinstance(stmt, SelectStmt)):
             try:
-                optimized_plan = self.optimizer.optimize(plan)
+                if hasattr(self, 'optimization_pipeline'):
+                    # 使用高级优化流水线
+                    query_context = {
+                        'statement_type': 'SELECT',
+                        'table_count': len(self._extract_tables_from_stmt(stmt)),
+                        'has_joins': self._has_joins(stmt),
+                        'has_aggregation': self._has_aggregation(stmt),
+                        'has_subqueries': self._has_subqueries(stmt)
+                    }
+                    optimized_plan = self.optimization_pipeline.optimize(plan, query_context)
+                else:
+                    # 使用简单优化器
+                    optimized_plan = self.optimizer.optimize(plan)
+
                 return optimized_plan
+
             except Exception as e:
                 if not self.silent_mode:
                     print(f"⚠️ 查询优化失败: {e}，使用原始计划")
 
         return plan
+
+    def _extract_tables_from_stmt(self, stmt: SelectStmt) -> List[str]:
+        """从SELECT语句中提取表名"""
+        tables = []
+        if hasattr(stmt, 'from_clause') and stmt.from_clause:
+            if hasattr(stmt.from_clause, 'table_name'):
+                tables.append(stmt.from_clause.table_name)
+            # 处理JOIN的情况
+            # 这里需要根据你的AST结构来实现
+        return tables
+
+    def _has_joins(self, stmt: SelectStmt) -> bool:
+        """检查是否包含JOIN"""
+        return hasattr(stmt, 'from_clause') and hasattr(stmt.from_clause, 'join_type')
+
+    def _has_aggregation(self, stmt: SelectStmt) -> bool:
+        """检查是否包含聚合"""
+        return hasattr(stmt, 'group_by') and stmt.group_by is not None
+
+    def _has_subqueries(self, stmt: SelectStmt) -> bool:
+        """检查是否包含子查询"""
+        # 简化实现，实际需要遍历AST
+        return False
+
+    def get_optimization_statistics(self) -> Dict[str, Any]:
+        """获取优化统计信息"""
+        if hasattr(self, 'optimization_pipeline'):
+            return self.optimization_pipeline.get_optimization_statistics()
+        else:
+            return {}
 
     def _generate_create_table_plan(self, stmt: CreateTableStmt) -> Operator:
         """生成CREATE TABLE执行计划"""

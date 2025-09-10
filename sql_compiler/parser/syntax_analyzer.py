@@ -327,9 +327,14 @@ class SyntaxAnalyzer:
 
         # 检查是否有别名
         alias = None
-        # 如果下一个token是标识符，且不是SQL关键字，则认为是别名
-        if (self._check(TokenType.IDENTIFIER) and
-                not self._is_sql_keyword(self._current_token())):
+
+        # 处理 AS 关键字别名
+        if self._match(TokenType.AS):
+            # AS 后面必须是标识符
+            alias = self._expect(TokenType.IDENTIFIER).lexeme
+        # 处理直接标识符别名（如果没有AS关键字）
+        elif (self._check(TokenType.IDENTIFIER) and
+              not self._is_sql_keyword(self._current_token())):
             alias = self._advance().lexeme
 
         return TableRef(table_name, alias)

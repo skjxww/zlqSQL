@@ -15,6 +15,7 @@ class TokenType(Enum):
     DELETE = "DELETE"
     UPDATE = "UPDATE"
     SET = "SET"
+    AS = "AS"
 
     # JOIN相关
     JOIN = "JOIN"

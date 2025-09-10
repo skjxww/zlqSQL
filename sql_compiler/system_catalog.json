@@ -6,74 +6,97 @@
         {
           "name": "id",
           "type": "INT",
-          "constraints": null
+          "constraints": [
+            "PRIMARY KEY"
+          ]
         },
         {
           "name": "name",
-          "type": "VARCHAR(50)",
-          "constraints": null
+          "type": "VARCHAR(100)",
+          "constraints": []
         },
         {
           "name": "city",
-          "type": "VARCHAR(30)",
-          "constraints": null
+          "type": "VARCHAR(50)",
+          "constraints": []
+        },
+        {
+          "name": "country",
+          "type": "VARCHAR(50)",
+          "constraints": []
         },
         {
           "name": "age",
           "type": "INT",
-          "constraints": null
+          "constraints": []
         }
       ],
-      "created_at": "2025-09-10T00:28:06.290444",
+      "created_at": "2025-09-10T16:32:11.301679",
       "row_count": 0
     },
     "orders": {
       "name": "orders",
       "columns": [
         {
-          "name": "order_id",
+          "name": "id",
           "type": "INT",
-          "constraints": null
+          "constraints": [
+            "PRIMARY KEY"
+          ]
         },
         {
           "name": "customer_id",
           "type": "INT",
-          "constraints": null
+          "constraints": [
+            "FOREIGN KEY"
+          ]
+        },
+        {
+          "name": "product",
+          "type": "VARCHAR(100)",
+          "constraints": []
         },
         {
           "name": "amount",
-          "type": "INT",
-          "constraints": null
+          "type": "DECIMAL(10,2)",
+          "constraints": []
         },
         {
-          "name": "status",
-          "type": "VARCHAR(20)",
-          "constraints": null
+          "name": "order_date",
+          "type": "DATE",
+          "constraints": []
         }
       ],
-      "created_at": "2025-09-10T00:28:06.291451",
+      "created_at": "2025-09-10T16:32:11.301679",
       "row_count": 0
     },
     "products": {
       "name": "products",
       "columns": [
         {
-          "name": "product_id",
+          "name": "id",
           "type": "INT",
-          "constraints": null
+          "constraints": [
+            "PRIMARY KEY"
+          ]
         },
         {
           "name": "name",
+          "type": "VARCHAR(100)",
+          "constraints": []
+        },
+        {
+          "name": "category",
           "type": "VARCHAR(50)",
-          "constraints": null
+          "constraints": []
         },
         {
           "name": "price",
-          "type": "INT",
-          "constraints": null
+          "type": "DECIMAL(10,2)",
+          "constraints": []
         }
       ],
-      "created_at": "2025-09-10T00:28:06.292518",
+      "created_at": "2025-09-10T16:32:11.303158",
       "row_count": 0
     }
   },

@@ -46,7 +46,9 @@ KEYWORDS = {
     'AND': TokenType.AND,
     'OR': TokenType.OR,
     'NOT': TokenType.NOT,
-    'IN': TokenType.IN,  # 添加 IN
+    'IN': TokenType.IN,
+
+    'AS': TokenType.AS,
 }
 
 # 符号映射表 - 更新

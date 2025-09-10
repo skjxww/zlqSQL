@@ -3,7 +3,7 @@ from sql_compiler.parser.ast_nodes import *
 from sql_compiler.codegen.operators import *
 
 
-class QueryOptimizer:
+class SimpleQueryOptimizer:
     """简化的查询优化器"""
 
     def __init__(self, silent_mode=False):
