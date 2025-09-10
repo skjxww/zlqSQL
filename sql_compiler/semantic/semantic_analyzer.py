@@ -11,9 +11,16 @@ class SemanticAnalyzer:
     def __init__(self, catalog: CatalogManager):
         self.catalog = catalog
         self.symbol_table = SymbolTable()
+        # 添加别名追踪
+        self.current_aliases = {}  # 当前查询中的别名映射
+        self.alias_to_real = {}  # 别名 -> 真实表名
 
     def analyze(self, stmt: Statement):
         """分析语句"""
+        # 重置别名信息
+        self.current_aliases = {}
+        self.alias_to_real = {}
+
         if isinstance(stmt, CreateTableStmt):
             self._analyze_create_table(stmt)
         elif isinstance(stmt, InsertStmt):
@@ -26,6 +33,84 @@ class SemanticAnalyzer:
             self._analyze_delete(stmt)
         else:
             raise SemanticError(f"不支持的语句类型: {type(stmt).__name__}")
+
+    def _analyze_from_clause(self, from_clause: FromClause) -> Dict[str, List[str]]:
+        """分析FROM子句，返回可用的表和列 - 增强别名支持"""
+        if isinstance(from_clause, TableRef):
+            if not self.catalog.table_exists(from_clause.table_name):
+                raise SemanticError(f"表 '{from_clause.table_name}' 不存在")
+
+            table_info = self.catalog.get_table(from_clause.table_name)
+            if not table_info:
+                raise SemanticError(f"无法获取表 '{from_clause.table_name}' 的信息")
+
+            table_columns = [col["name"] for col in table_info["columns"]]
+            real_table_name = from_clause.table_name
+
+            # 构建结果字典
+            result = {}
+
+            # 处理别名
+            if from_clause.alias:
+                table_alias = from_clause.alias
+
+                # 建立别名映射
+                self.alias_to_real[table_alias] = real_table_name
+                self.current_aliases[table_alias] = table_columns
+
+                # 在结果中主要使用别名
+                result[table_alias] = table_columns
+                # 也保留真实表名，用于兼容性
+                result[real_table_name] = table_columns
+            else:
+                # 没有别名
+                self.current_aliases[real_table_name] = table_columns
+                result[real_table_name] = table_columns
+
+            return result
+
+        elif isinstance(from_clause, JoinExpr):
+            # 递归分析JOIN的左右两边
+            left_tables = self._analyze_from_clause(from_clause.left)
+            right_tables = self._analyze_from_clause(from_clause.right)
+
+            # 合并可用的表
+            available_tables = {**left_tables, **right_tables}
+
+            # 分析ON条件
+            if from_clause.on_condition:
+                self._analyze_expression(from_clause.on_condition, available_tables)
+
+            return available_tables
+
+        else:
+            raise SemanticError(f"不支持的FROM子句类型: {type(from_clause).__name__}")
+
+    def get_current_aliases(self) -> Dict[str, str]:
+        """获取当前的别名映射"""
+        return self.alias_to_real.copy()
+
+    def resolve_table_reference(self, table_ref: str) -> str:
+        """解析表引用，返回真实表名"""
+        return self.alias_to_real.get(table_ref, table_ref)
+
+    def get_real_table_name(self, table_identifier: str) -> str:
+        """获取表的真实名称（处理别名）"""
+        if table_identifier in self.alias_to_real:
+            return self.alias_to_real[table_identifier]
+        return table_identifier
+
+    def get_table_alias(self, real_table_name: str) -> str:
+        """获取表的别名（如果有的话）"""
+        return self.real_to_alias.get(real_table_name, real_table_name)
+
+    def get_alias_info(self) -> Dict[str, Any]:
+        """获取别名信息"""
+        return {
+            'alias_to_real': self.alias_to_real,
+            'real_to_alias': self.real_to_alias,
+            'all_aliases': list(self.table_aliases.keys())
+        }
 
     def _analyze_create_table(self, stmt: CreateTableStmt):
         """分析CREATE TABLE语句"""
@@ -339,49 +424,6 @@ class SemanticAnalyzer:
             return True
 
         return False
-
-    # 其他现有方法保持不变...
-    def _analyze_from_clause(self, from_clause: FromClause) -> Dict[str, List[str]]:
-        """分析FROM子句，返回可用的表和列"""
-        if isinstance(from_clause, TableRef):
-            if not self.catalog.table_exists(from_clause.table_name):
-                raise SemanticError(f"表 '{from_clause.table_name}' 不存在")
-
-            table_info = self.catalog.get_table(from_clause.table_name)
-            if not table_info:
-                raise SemanticError(f"无法获取表 '{from_clause.table_name}' 的信息")
-
-            table_columns = [col["name"] for col in table_info["columns"]]
-
-            # 构建结果字典
-            result = {}
-
-            # 如果有别名，使用别名作为主键
-            if from_clause.alias:
-                result[from_clause.alias] = table_columns
-                # 同时也保留原表名的映射，以防某些地方需要用到
-                result[from_clause.table_name] = table_columns
-            else:
-                result[from_clause.table_name] = table_columns
-
-            return result
-
-        elif isinstance(from_clause, JoinExpr):
-            # 递归分析JOIN的左右两边
-            left_tables = self._analyze_from_clause(from_clause.left)
-            right_tables = self._analyze_from_clause(from_clause.right)
-
-            # 合并可用的表
-            available_tables = {**left_tables, **right_tables}
-
-            # 分析ON条件
-            if from_clause.on_condition:
-                self._analyze_expression(from_clause.on_condition, available_tables)
-
-            return available_tables
-
-        else:
-            raise SemanticError(f"不支持的FROM子句类型: {type(from_clause).__name__}")
 
     def _analyze_expression(self, expr: Expression, available_tables: Dict[str, List[str]]):
         """分析表达式"""

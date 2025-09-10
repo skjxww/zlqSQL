@@ -18,13 +18,17 @@ except ImportError:
 
 
 class PlanGenerator:
-    """执行计划生成器 - 支持高级优化"""
+    """执行计划生成器 - 支持高级优化和别名处理"""
 
     def __init__(self, enable_optimization=True, silent_mode=False, catalog_manager=None):
         """初始化计划生成器"""
         self.enable_optimization = enable_optimization and ADVANCED_OPTIMIZER_AVAILABLE
         self.silent_mode = silent_mode
         self.catalog_manager = catalog_manager
+
+        # 添加别名追踪
+        self.table_aliases = {}  # 别名 -> 真实表名
+        self.real_to_alias = {}  # 真实表名 -> 别名
 
         if self.enable_optimization:
             if ADVANCED_OPTIMIZER_AVAILABLE:
@@ -41,6 +45,13 @@ class PlanGenerator:
 
     def generate(self, stmt: Statement) -> Operator:
         """生成执行计划"""
+        # 重置别名映射
+        self._reset_alias_mappings()
+
+        # 预处理：收集别名信息
+        if isinstance(stmt, SelectStmt):
+            self._collect_aliases_from_select(stmt)
+
         # 生成基础执行计划
         if isinstance(stmt, CreateTableStmt):
             plan = self._generate_create_table_plan(stmt)
@@ -67,7 +78,8 @@ class PlanGenerator:
                         'table_count': len(self._extract_tables_from_stmt(stmt)),
                         'has_joins': self._has_joins(stmt),
                         'has_aggregation': self._has_aggregation(stmt),
-                        'has_subqueries': self._has_subqueries(stmt)
+                        'has_subqueries': self._has_subqueries(stmt),
+                        'table_aliases': self.table_aliases.copy()
                     }
                     optimized_plan = self.optimization_pipeline.optimize(plan, query_context)
                 else:
@@ -81,6 +93,64 @@ class PlanGenerator:
                     print(f"⚠️ 查询优化失败: {e}，使用原始计划")
 
         return plan
+
+    def _reset_alias_mappings(self):
+        """重置别名映射"""
+        self.table_aliases = {}
+        self.real_to_alias = {}
+
+    def _collect_aliases_from_select(self, stmt: SelectStmt):
+        """从SELECT语句中收集别名信息"""
+        if stmt.from_clause:
+            self._collect_aliases_from_from_clause(stmt.from_clause)
+
+    def _collect_aliases_from_from_clause(self, from_clause: FromClause):
+        """从FROM子句中收集别名"""
+        if isinstance(from_clause, TableRef):
+            real_name = from_clause.table_name
+            alias = from_clause.alias
+
+            if alias:
+                self.table_aliases[alias] = real_name
+                self.real_to_alias[real_name] = alias
+
+        elif isinstance(from_clause, JoinExpr):
+            # 递归收集左右两边的别名
+            self._collect_aliases_from_from_clause(from_clause.left)
+            self._collect_aliases_from_from_clause(from_clause.right)
+
+    def _generate_from_plan(self, from_clause: FromClause) -> Operator:
+        """生成FROM子句的执行计划 - 增强别名支持"""
+        if isinstance(from_clause, TableRef):
+            real_table_name = from_clause.table_name
+            table_alias = from_clause.alias
+
+            # 使用别名感知的扫描操作符
+            if table_alias:
+                return AliasAwareSeqScanOp(real_table_name, table_alias)
+            else:
+                return SeqScanOp(real_table_name)
+
+        elif isinstance(from_clause, JoinExpr):
+            left_plan = self._generate_from_plan(from_clause.left)
+            right_plan = self._generate_from_plan(from_clause.right)
+
+            # 使用别名感知的连接操作符
+            return AliasAwareJoinOp(
+                from_clause.join_type,
+                from_clause.on_condition,
+                [left_plan, right_plan]
+            )
+        else:
+            raise SemanticError(f"不支持的FROM子句类型: {type(from_clause).__name__}")
+
+    def get_alias_info(self) -> Dict[str, Any]:
+        """获取当前的别名信息"""
+        return {
+            'alias_to_real': self.table_aliases.copy(),
+            'real_to_alias': self.real_to_alias.copy()
+        }
+
 
     def _extract_tables_from_stmt(self, stmt: SelectStmt) -> List[str]:
         """从SELECT语句中提取表名"""
@@ -142,18 +212,6 @@ class PlanGenerator:
             plan = OrderByOp(stmt.order_by, [plan])
 
         return plan
-
-    def _generate_from_plan(self, from_clause: FromClause) -> Operator:
-        """生成FROM子句的执行计划"""
-        if isinstance(from_clause, TableRef):
-            return SeqScanOp(from_clause.table_name)
-        elif isinstance(from_clause, JoinExpr):
-            left_plan = self._generate_from_plan(from_clause.left)
-            right_plan = self._generate_from_plan(from_clause.right)
-            return JoinOp(from_clause.join_type, from_clause.on_condition,
-                          [left_plan, right_plan])
-        else:
-            raise SemanticError(f"不支持的FROM子句类型: {type(from_clause).__name__}")
 
     def _generate_update_plan(self, stmt: UpdateStmt) -> Operator:
         """生成UPDATE执行计划"""

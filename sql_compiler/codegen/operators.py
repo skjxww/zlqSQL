@@ -983,3 +983,99 @@ class GatherOp(Operator):
         for child in self.children:
             for row in child.execute():
                 yield row
+
+
+# 在operators.py文件末尾添加
+
+class AliasAwareSeqScanOp(SeqScanOp):
+    """支持别名的顺序扫描操作符"""
+
+    def __init__(self, table_name: str, table_alias: Optional[str] = None):
+        super().__init__(table_name)
+        self.table_alias = table_alias
+        self.real_table_name = table_name
+
+    def get_effective_name(self) -> str:
+        """获取有效的表名（优先使用别名）"""
+        return self.table_alias if self.table_alias else self.real_table_name
+
+    def to_dict(self) -> Dict[str, Any]:
+        result = {
+            "type": "SeqScanOp",
+            "table_name": self.real_table_name
+        }
+
+        if self.table_alias:
+            result["table_alias"] = self.table_alias
+            result["display_name"] = self.table_alias
+        else:
+            result["display_name"] = self.real_table_name
+
+        return result
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        yield {
+            "table": self.real_table_name,
+            "alias": self.table_alias,
+            "operation": "scan",
+            "display_name": self.get_effective_name()
+        }
+
+    def __repr__(self):
+        if self.table_alias:
+            return f"SeqScanOp({self.real_table_name} AS {self.table_alias})"
+        return f"SeqScanOp({self.real_table_name})"
+
+
+class AliasAwareJoinOp(JoinOp):
+    """支持别名的连接操作符"""
+
+    def to_dict(self) -> Dict[str, Any]:
+        result = super().to_dict()
+
+        # 增强连接条件显示，保留别名信息
+        if self.on_condition:
+            result["on_condition_formatted"] = self._format_condition_display()
+
+        return result
+
+    def _format_condition_display(self) -> str:
+        """格式化条件显示，保留别名"""
+        if not self.on_condition:
+            return ""
+
+        try:
+            if hasattr(self.on_condition, 'left') and hasattr(self.on_condition, 'right'):
+                left_display = self._format_identifier_display(self.on_condition.left)
+                right_display = self._format_identifier_display(self.on_condition.right)
+                operator = getattr(self.on_condition, 'operator', '=')
+                return f"{left_display} {operator} {right_display}"
+        except Exception:
+            pass
+
+        return str(self.on_condition)
+
+    def _format_identifier_display(self, expr) -> str:
+        """格式化标识符显示"""
+        if hasattr(expr, 'table_name') and hasattr(expr, 'name'):
+            table_part = expr.table_name if expr.table_name else ""
+            return f"{table_part}.{expr.name}" if table_part else expr.name
+        return str(expr)
+
+
+# 创建一个工厂函数来创建合适的扫描操作符
+def create_scan_op(table_name: str, table_alias: Optional[str] = None) -> Operator:
+    """创建扫描操作符的工厂函数"""
+    if table_alias:
+        return AliasAwareSeqScanOp(table_name, table_alias)
+    else:
+        return SeqScanOp(table_name)
+
+
+def create_join_op(join_type: str, on_condition: Optional[Expression],
+                   children: List[Operator], preserve_aliases: bool = True) -> Operator:
+    """创建连接操作符的工厂函数"""
+    if preserve_aliases:
+        return AliasAwareJoinOp(join_type, on_condition, children)
+    else:
+        return JoinOp(join_type, on_condition, children)
