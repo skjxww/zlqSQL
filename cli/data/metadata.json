@@ -1,0 +1,120 @@
+{
+  "next_page_id": 19,
+  "free_pages": [],
+  "allocated_pages": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18
+  ],
+  "page_usage": {
+    "1": {
+      "allocated_time": 1757430129.9106255,
+      "access_count": 1,
+      "last_access": 1757491297.6946816
+    },
+    "2": {
+      "allocated_time": 1757435268.355716,
+      "access_count": 1,
+      "last_access": 1757435270.8535264
+    },
+    "3": {
+      "allocated_time": 1757435294.6298265,
+      "access_count": 0,
+      "last_access": null
+    },
+    "4": {
+      "allocated_time": 1757436222.2677898,
+      "access_count": 0,
+      "last_access": null
+    },
+    "5": {
+      "allocated_time": 1757437110.3064232,
+      "access_count": 0,
+      "last_access": null
+    },
+    "6": {
+      "allocated_time": 1757437268.599051,
+      "access_count": 0,
+      "last_access": null
+    },
+    "7": {
+      "allocated_time": 1757438815.2475405,
+      "access_count": 0,
+      "last_access": null
+    },
+    "8": {
+      "allocated_time": 1757470889.6651988,
+      "access_count": 0,
+      "last_access": null
+    },
+    "9": {
+      "allocated_time": 1757471654.1764255,
+      "access_count": 4,
+      "last_access": 1757484936.7798202
+    },
+    "10": {
+      "allocated_time": 1757484977.9700794,
+      "access_count": 0,
+      "last_access": null
+    },
+    "11": {
+      "allocated_time": 1757489634.6668851,
+      "access_count": 1,
+      "last_access": 1757492982.588629
+    },
+    "12": {
+      "allocated_time": 1757491643.998636,
+      "access_count": 1,
+      "last_access": 1757492982.5876327
+    },
+    "13": {
+      "allocated_time": 1757493057.5253887,
+      "access_count": 0,
+      "last_access": null
+    },
+    "14": {
+      "allocated_time": 1757493065.9376876,
+      "access_count": 0,
+      "last_access": null
+    },
+    "15": {
+      "allocated_time": 1757493076.650312,
+      "access_count": 0,
+      "last_access": null
+    },
+    "16": {
+      "allocated_time": 1757516158.833738,
+      "access_count": 1,
+      "last_access": 1757516176.5544515
+    },
+    "17": {
+      "allocated_time": 1757516176.7406578,
+      "access_count": 0,
+      "last_access": null
+    },
+    "18": {
+      "allocated_time": 1757516194.8271346,
+      "access_count": 0,
+      "last_access": null
+    }
+  },
+  "last_modification": 1757516194.8271346,
+  "version": "1.0",
+  "total_allocated": 18,
+  "total_free": 0
+}
