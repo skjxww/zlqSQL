@@ -18,7 +18,7 @@ class ExecutionEngine:
 
     # 在 execute_plan 方法中添加这个分支
     def execute_plan(self, plan: Operator) -> Any:
-        """执行查询计划"""
+        """执行查询计划 - 修复GroupBy执行"""
         try:
             if isinstance(plan, CreateTableOp):
                 return self.execute_create_table(plan.table_name, plan.columns)
@@ -32,10 +32,15 @@ class ExecutionEngine:
                 # 处理过滤操作
                 child_results = self.execute_plan(plan.children[0])
                 return [row for row in child_results if self.evaluate_condition(row, plan.condition)]
-            elif isinstance(plan, GroupByOp):  # 先处理 GroupBy
-                return self.execute_group_by(plan.group_columns, plan.having_condition,
-                                             plan.children[0], plan.aggregate_functions)
-            elif isinstance(plan, ProjectOp):  # 然后处理 Project
+            elif isinstance(plan, GroupByOp):
+                # 🔑 使用独立的execute_group_by方法，传入正确的参数
+                return self.execute_group_by(
+                    group_columns=plan.group_columns,
+                    having_condition=plan.having_condition,
+                    child_plan=plan.children[0],  # 传入子计划而不是执行结果
+                    aggregate_functions=plan.aggregate_functions
+                )
+            elif isinstance(plan, ProjectOp):
                 return self.execute_project(plan.columns, plan.children[0])
             elif isinstance(plan, UpdateOp):
                 return self.execute_update(plan.table_name, plan.assignments, plan.children[0])

@@ -856,8 +856,13 @@ class AdvancedQueryOptimizer:
                 return FilterOp(original.condition, new_children)
             elif isinstance(original, ProjectOp):
                 return ProjectOp(original.columns, new_children)
-            elif isinstance(original, GroupByOp):  # ✅ 添加GroupByOp支持
-                return GroupByOp(original.group_columns, original.having_condition, new_children)
+            elif isinstance(original, GroupByOp):
+                return GroupByOp(
+                    group_columns=original.group_columns,
+                    having_condition=original.having_condition,
+                    children=new_children,
+                    aggregate_functions=original.aggregate_functions
+                )
             elif isinstance(original, JoinOp):
                 return JoinOp(original.join_type, original.on_condition, new_children)
             elif isinstance(original, NestedLoopJoinOp):
