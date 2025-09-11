@@ -152,17 +152,7 @@ class StorageManager:
     @handle_storage_exceptions
     @performance_monitor("write_page")
     def write_page(self, page_id: int, data: bytes):
-        """
-        写入页数据（写入缓存，标记为脏页）
-
-        Args:
-            page_id: 页号
-            data: 要写入的数据
-
-        Raises:
-            SystemShutdownException: 系统已关闭
-            PageException: 页操作错误
-        """
+        """写入页数据（写入缓存，标记为脏页）"""
         self._check_shutdown()
 
         if not isinstance(data, bytes):
@@ -171,11 +161,17 @@ class StorageManager:
         with self._lock:
             self.operation_count += 1
 
-            # 将数据写入缓存并标记为脏页
+            # 修复：确保数据填充到PAGE_SIZE再放入缓存
+            from .utils.constants import PAGE_SIZE
+            if len(data) < PAGE_SIZE:
+                data = data + b'\x00' * (PAGE_SIZE - len(data))
+            elif len(data) > PAGE_SIZE:
+                data = data[:PAGE_SIZE]
+
+            # 将填充后的数据写入缓存并标记为脏页
             self.buffer_pool.put(page_id, data, is_dirty=True)
 
             self.logger.debug(f"Page {page_id} written to cache and marked dirty")
-
     @handle_storage_exceptions
     @performance_monitor("allocate_page")
     def allocate_page(self) -> int:
