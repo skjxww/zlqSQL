@@ -1,8 +1,3 @@
-"""
-智能错误诊断器
-提供智能纠错提示和错误分析
-"""
-
 import re
 from typing import List, Dict, Any, Optional
 from difflib import SequenceMatcher, get_close_matches

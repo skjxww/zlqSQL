@@ -1,0 +1,14 @@
+2025-09-11 15:12:27,948 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized | Context: capacity=100 | max_size=1000 | min_size=10
+2025-09-11 15:12:27,950 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized | Context: capacity=100 | max_size=1000 | min_size=10
+2025-09-11 15:12:55,933 - buffer_pool - INFO - _log_with_context:97 - Flushed 0 dirty pages
+2025-09-11 15:12:58,560 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized | Context: capacity=100 | max_size=1000 | min_size=10
+2025-09-11 15:12:58,560 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized | Context: capacity=100 | max_size=1000 | min_size=10
+2025-09-11 15:13:23,885 - buffer_pool - INFO - _log_with_context:97 - Flushed 0 dirty pages
+2025-09-11 15:19:34,925 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized | Context: capacity=100 | max_size=1000 | min_size=10
+2025-09-11 15:19:34,925 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized | Context: capacity=100 | max_size=1000 | min_size=10
+2025-09-11 15:19:54,780 - buffer_pool - INFO - _log_with_context:97 - Flushed 0 dirty pages
+2025-09-11 15:26:14,292 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized | Context: capacity=100 | max_size=1000 | min_size=10
+2025-09-11 15:26:14,293 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized | Context: capacity=100 | max_size=1000 | min_size=10
+2025-09-11 15:26:44,309 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages
+2025-09-11 15:27:14,316 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages
+2025-09-11 15:27:34,262 - buffer_pool - INFO - _log_with_context:97 - Flushed 0 dirty pages

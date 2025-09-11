@@ -1374,3 +1374,16 @@
 2025-09-11 14:38:08,694 - storage - INFO - _log_with_context:97 - StorageManager initialized successfully | Context: buffer_size=100 | data_file=data\database.db | meta_file=data\metadata.json | auto_flush_interval=30
 2025-09-11 14:38:08,694 - storage - INFO - _log_with_context:97 - Loaded 18 table storage entries
 2025-09-11 14:38:08,694 - storage - INFO - _log_with_context:97 - TableStorage initialized with 18 tables
+2025-09-11 15:32:37,395 - storage - INFO - _log_with_context:97 - StorageManager initialized successfully | Context: buffer_size=100 | data_file=data\database.db | meta_file=data\metadata.json | auto_flush_interval=30
+2025-09-11 15:32:37,395 - storage - INFO - _log_with_context:97 - Loaded 18 table storage entries
+2025-09-11 15:32:37,395 - storage - INFO - _log_with_context:97 - TableStorage initialized with 18 tables
+2025-09-11 15:32:37,946 - storage - INFO - _log_with_context:97 - StorageManager initialized successfully | Context: buffer_size=100 | data_file=data\database.db | meta_file=data\metadata.json | auto_flush_interval=30
+2025-09-11 15:32:37,946 - storage - INFO - _log_with_context:97 - Loaded 18 table storage entries
+2025-09-11 15:32:37,947 - storage - INFO - _log_with_context:97 - TableStorage initialized with 18 tables
+2025-09-11 15:47:17,470 - storage - INFO - _log_with_context:97 - StorageManager initialized successfully | Context: buffer_size=100 | data_file=data\database.db | meta_file=data\metadata.json | auto_flush_interval=30
+2025-09-11 15:47:17,470 - storage - INFO - _log_with_context:97 - Loaded 18 table storage entries
+2025-09-11 15:47:17,470 - storage - INFO - _log_with_context:97 - TableStorage initialized with 18 tables
+2025-09-11 15:47:23,216 - storage - INFO - _log_with_context:97 - Starting StorageManager shutdown
+2025-09-11 15:47:23,216 - storage - INFO - _log_with_context:97 - Flushed all dirty pages | Context: pages_flushed=0 | flush_count=1
+2025-09-11 15:47:23,217 - storage - INFO - _log_with_context:97 - Performance: flush_all_pages:flush_all_pages completed in 0.0000s | Context: avg_time=0.0000s
+2025-09-11 15:47:23,220 - storage - INFO - _log_with_context:97 - StorageManager shutdown completed successfully | Context: pages_flushed=0 | total_operations=0 | total_flushes=1 | final_cache_hit_rate=0.0 | uptime_seconds=5.75
