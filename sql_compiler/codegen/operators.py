@@ -207,34 +207,118 @@ class JoinOp(Operator):
 
 
 class GroupByOp(Operator):
-    """分组操作符"""
+    """分组操作符 - 支持HAVING条件"""
 
-    def __init__(self, group_columns: List[str], having_condition: Optional[Expression], children: List[Operator]):
-        super().__init__(children)
+    def __init__(self, group_columns: List[str], having_condition: Optional[Expression] = None,
+                 children: List[Operator] = None):
+        super().__init__(children or [])
         self.group_columns = group_columns
         self.having_condition = having_condition
 
     def to_dict(self) -> Dict[str, Any]:
-        return {
+        result = {
             "type": "GroupByOp",
             "group_columns": self.group_columns,
-            "having_condition": self.having_condition.to_dict() if self.having_condition else None,
             "children": [child.to_dict() for child in self.children]
         }
 
+        # 🔑 重要：正确序列化HAVING条件
+        if self.having_condition:
+            result["having_condition"] = self.having_condition.to_dict()
+        else:
+            result["having_condition"] = None
+
+        return result
+
     def execute(self) -> Iterator[Dict[str, Any]]:
-        # 模拟分组操作
-        groups = {}
+        """执行分组操作"""
+        # 1. 从子操作符获取数据
+        rows = []
         for child in self.children:
             for row in child.execute():
-                # 简化的分组逻辑
-                key = tuple(row.get(col, None) for col in self.group_columns)
-                if key not in groups:
-                    groups[key] = []
-                groups[key].append(row)
+                rows.append(row)
 
+        # 2. 按分组列进行分组
+        groups = {}
+        for row in rows:
+            # 构建分组键
+            group_key = tuple(row.get(col, None) for col in self.group_columns)
+            if group_key not in groups:
+                groups[group_key] = []
+            groups[group_key].append(row)
+
+        # 3. 对每个分组应用聚合函数并检查HAVING条件
         for group_key, group_rows in groups.items():
-            yield {"group_key": group_key, "count": len(group_rows)}
+            # 计算聚合结果
+            aggregated_row = self._compute_aggregates(group_key, group_rows)
+
+            # 4. 应用HAVING条件过滤
+            if self.having_condition:
+                if self._evaluate_having_condition(aggregated_row):
+                    yield aggregated_row
+            else:
+                yield aggregated_row
+
+    def _compute_aggregates(self, group_key: tuple, group_rows: List[Dict]) -> Dict[str, Any]:
+        """计算聚合值"""
+        result = {}
+
+        # 添加分组列的值
+        for i, col in enumerate(self.group_columns):
+            result[col] = group_key[i]
+
+        # 简化：添加一些基本聚合函数
+        result['COUNT(*)'] = len(group_rows)
+
+        # 这里可以根据需要添加更多聚合函数的计算
+        return result
+
+    def _evaluate_having_condition(self, aggregated_row: Dict[str, Any]) -> bool:
+        """评估HAVING条件"""
+        try:
+            # 简化实现：对于COUNT(*) > 1的情况
+            if (hasattr(self.having_condition, 'left') and
+                    hasattr(self.having_condition, 'operator') and
+                    hasattr(self.having_condition, 'right')):
+
+                left_expr = self.having_condition.left
+                operator = self.having_condition.operator
+                right_expr = self.having_condition.right
+
+                # 处理COUNT(*)函数
+                if (hasattr(left_expr, 'function_name') and
+                        left_expr.function_name.upper() == 'COUNT'):
+                    left_value = aggregated_row.get('COUNT(*)', 0)
+                else:
+                    left_value = 0
+
+                # 处理右侧的字面值
+                if hasattr(right_expr, 'value'):
+                    right_value = right_expr.value
+                else:
+                    right_value = 0
+
+                # 应用比较操作
+                if operator == '>':
+                    return left_value > right_value
+                elif operator == '>=':
+                    return left_value >= right_value
+                elif operator == '<':
+                    return left_value < right_value
+                elif operator == '<=':
+                    return left_value <= right_value
+                elif operator == '=':
+                    return left_value == right_value
+                elif operator == '!=':
+                    return left_value != right_value
+
+            return True  # 默认通过
+        except Exception:
+            return True  # 发生错误时默认通过
+
+    def __repr__(self):
+        having_str = f" HAVING {self.having_condition}" if self.having_condition else ""
+        return f"GroupByOp(GROUP BY {self.group_columns}{having_str})"
 
 
 class OrderByOp(Operator):

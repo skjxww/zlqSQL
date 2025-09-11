@@ -191,13 +191,14 @@ class PlanGenerator:
         return InsertOp(stmt.table_name, stmt.columns, stmt.values)
 
     def _generate_select_plan(self, stmt: SelectStmt) -> Operator:
-        """生成SELECT执行计划 - 修复版本"""
+        """生成SELECT执行计划 - 保留HAVING在GroupByOp中"""
 
         # 调试模式
         if not self.silent_mode:
             print(f"\n🔧 生成SELECT执行计划")
             print(f"   选择列: {stmt.columns}")
             print(f"   GROUP BY: {stmt.group_by}")
+            print(f"   HAVING: {'有' if stmt.having_clause else '无'}")
 
         # 从FROM子句开始构建计划
         plan = self._generate_from_plan(stmt.from_clause)
@@ -208,11 +209,14 @@ class PlanGenerator:
             if not self.silent_mode:
                 print(f"   ✅ 添加WHERE过滤")
 
-        # 添加GROUP BY
+        # 添加GROUP BY（包含HAVING条件）
         if stmt.group_by and len(stmt.group_by) > 0:
+            # 🔑 关键修复：将HAVING条件传入GroupByOp
             plan = GroupByOp(stmt.group_by, stmt.having_clause, [plan])
             if not self.silent_mode:
                 print(f"   ✅ 添加GROUP BY，分组列: {stmt.group_by}")
+                if stmt.having_clause:
+                    print(f"   ✅ 包含HAVING条件")
 
         # 添加投影
         if stmt.columns != ["*"]:

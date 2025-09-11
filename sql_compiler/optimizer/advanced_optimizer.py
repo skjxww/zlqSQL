@@ -141,29 +141,59 @@ class AdvancedQueryOptimizer:
         return optimized
 
     def _apply_safe_projection_elimination(self, plan: Operator) -> Operator:
-        """安全的投影消除 - 保护GROUP BY"""
+        """安全的投影消除 - 保护包含HAVING的GROUP BY"""
         try:
-            # 对于包含GROUP BY的计划，只进行非常保守的优化
             if isinstance(plan, ProjectOp):
                 if len(plan.children) == 1:
                     child = plan.children[0]
 
-                    # 绝对不要触碰GroupByOp
+                    # 🔑 特别保护包含HAVING条件的GroupByOp
                     if isinstance(child, GroupByOp):
-                        # 只递归处理GroupByOp的子节点
-                        fixed_children = []
-                        for grandchild in child.children:
-                            # 对非聚合部分进行优化
-                            fixed_children.append(self._apply_safe_projection_elimination(grandchild))
+                        # 如果GroupByOp包含HAVING条件，绝对不要修改其结构
+                        if child.having_condition:
+                            if not self.silent_mode:
+                                print("   🛡️ 保护包含HAVING的GROUP BY操作")
+                            # 只递归处理更深层的子节点
+                            fixed_children = []
+                            for grandchild in child.children:
+                                fixed_children.append(self._apply_safe_projection_elimination(grandchild))
 
-                        # 重建GroupByOp结构
-                        if fixed_children != child.children:
-                            new_group_by = GroupByOp(child.group_columns, child.having_condition, fixed_children)
-                            return ProjectOp(plan.columns, [new_group_by])
+                            if fixed_children != child.children:
+                                new_group_by = GroupByOp(child.group_columns, child.having_condition, fixed_children)
+                                return ProjectOp(plan.columns, [new_group_by])
 
-                        return plan  # 保持完整结构
+                            return plan  # 保持完整结构
+                        else:
+                            # 没有HAVING条件的GroupByOp处理
+                            # 检查投影列是否与分组列匹配
+                            if set(plan.columns) == set(child.group_columns):
+                                # 投影列与分组列完全匹配，可以消除投影
+                                if not self.silent_mode:
+                                    print("   ✅ 消除冗余投影（GROUP BY列匹配）")
+                                # 递归处理子节点后返回子节点
+                                fixed_children = []
+                                for grandchild in child.children:
+                                    fixed_children.append(self._apply_safe_projection_elimination(grandchild))
 
-            # 对于其他操作符，递归处理但不做结构改变
+                                if fixed_children != child.children:
+                                    return GroupByOp(child.group_columns, child.having_condition, fixed_children)
+                                return child
+                            else:
+                                # 投影列包含聚合函数或其他列，保持投影
+                                if not self.silent_mode:
+                                    print("   ℹ️ 保持投影（包含聚合函数或额外列）")
+                                # 递归处理子节点
+                                fixed_children = []
+                                for grandchild in child.children:
+                                    fixed_children.append(self._apply_safe_projection_elimination(grandchild))
+
+                                if fixed_children != child.children:
+                                    new_group_by = GroupByOp(child.group_columns, child.having_condition,
+                                                             fixed_children)
+                                    return ProjectOp(plan.columns, [new_group_by])
+                                return plan
+
+            # 递归处理其他情况
             new_children = []
             changed = False
             for child in plan.children:
@@ -710,6 +740,47 @@ class QueryOptimizationPipeline:
         # 优化历史
         self.optimization_history = []
 
+    def optimize(self, plan: Operator, query_context: Dict[str, Any] = None) -> Operator:
+        """优化执行计划 - 添加缺失的方法"""
+        import time
+
+        start_time = time.time()
+
+        # 记录优化前状态
+        original_cost = self._estimate_plan_cost(plan)
+
+        # 执行优化
+        try:
+            optimized_plan = self.optimizer.optimize(plan)
+            optimization_success = True
+            error_message = None
+        except Exception as e:
+            optimized_plan = plan
+            optimization_success = False
+            error_message = str(e)
+
+        # 记录优化历史
+        optimization_time = time.time() - start_time
+        optimized_cost = self._estimate_plan_cost(optimized_plan)
+
+        history_entry = {
+            'timestamp': time.time(),
+            'original_cost': original_cost,
+            'optimized_cost': optimized_cost,
+            'optimization_time': optimization_time,
+            'success': optimization_success,
+            'error': error_message,
+            'query_context': query_context or {}
+        }
+
+        self.optimization_history.append(history_entry)
+
+        # 限制历史记录大小
+        if len(self.optimization_history) > 100:
+            self.optimization_history = self.optimization_history[-100:]
+
+        return optimized_plan
+
     def _collect_initial_statistics(self):
         """收集初始统计信息"""
         try:
@@ -760,4 +831,3 @@ class QueryOptimizationPipeline:
         """重置统计信息"""
         self.optimization_history = []
         self.stats_manager = StatisticsManager()
-
