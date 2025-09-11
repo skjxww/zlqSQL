@@ -2142,3 +2142,66 @@
 2025-09-11 00:52:04,659 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages
 2025-09-11 00:52:34,668 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages
 2025-09-11 00:53:04,681 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages
+2025-09-11 12:08:21,393 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized | Context: capacity=100 | max_size=1000 | min_size=10
+2025-09-11 12:08:21,394 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized | Context: capacity=100 | max_size=1000 | min_size=10
+2025-09-11 12:08:51,402 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages
+2025-09-11 12:09:21,419 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages
+2025-09-11 12:09:51,433 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages
+2025-09-11 12:10:21,439 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages
+2025-09-11 12:25:16,268 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized | Context: capacity=100 | max_size=1000 | min_size=10
+2025-09-11 12:25:16,269 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized | Context: capacity=100 | max_size=1000 | min_size=10
+2025-09-11 12:25:46,272 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages
+2025-09-11 12:26:16,286 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages
+2025-09-11 12:27:04,789 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized | Context: capacity=100 | max_size=1000 | min_size=10
+2025-09-11 12:27:04,792 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized | Context: capacity=100 | max_size=1000 | min_size=10
+2025-09-11 12:27:34,803 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages
+2025-09-11 12:27:43,786 - buffer_pool - DEBUG - _log_with_context:97 - Cache miss for page 1 | Context: page_id=1 | cache_size=0
+2025-09-11 12:27:43,787 - buffer_pool - DEBUG - _log_with_context:97 - Added new cache entry for page 1 | Context: page_id=1 | is_dirty=False | cache_size=1 | data_size=4096
+2025-09-11 12:28:04,818 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages
+2025-09-11 12:28:34,820 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages
+2025-09-11 12:29:04,827 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages
+2025-09-11 12:29:15,067 - buffer_pool - DEBUG - _log_with_context:97 - Cache hit for page 1 | Context: page_id=1 | hit_rate=50.0
+2025-09-11 12:29:34,835 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages
+2025-09-11 12:30:04,846 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages
+2025-09-11 12:30:34,859 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages
+2025-09-11 12:30:52,955 - buffer_pool - DEBUG - _log_with_context:97 - Cache hit for page 1 | Context: page_id=1 | hit_rate=66.67
+2025-09-11 12:31:04,863 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages
+2025-09-11 12:31:34,870 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages
+2025-09-11 12:32:04,881 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages
+2025-09-11 12:32:34,881 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages
+2025-09-11 12:33:04,892 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages
+2025-09-11 12:33:34,897 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages
+2025-09-11 12:34:04,908 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages
+2025-09-11 12:34:34,914 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages
+2025-09-11 12:35:04,922 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages
+2025-09-11 12:35:34,936 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages
+2025-09-11 12:36:04,951 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages
+2025-09-11 12:36:34,952 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages
+2025-09-11 12:36:47,935 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized | Context: capacity=100 | max_size=1000 | min_size=10
+2025-09-11 12:36:47,936 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized | Context: capacity=100 | max_size=1000 | min_size=10
+2025-09-11 12:36:55,276 - buffer_pool - DEBUG - _log_with_context:97 - Cache miss for page 1 | Context: page_id=1 | cache_size=0
+2025-09-11 12:36:55,277 - buffer_pool - DEBUG - _log_with_context:97 - Added new cache entry for page 1 | Context: page_id=1 | is_dirty=False | cache_size=1 | data_size=4096
+2025-09-11 12:37:16,142 - buffer_pool - DEBUG - _log_with_context:97 - Cache hit for page 1 | Context: page_id=1 | hit_rate=50.0
+2025-09-11 12:37:17,943 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages
+2025-09-11 12:48:09,148 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized | Context: capacity=100 | max_size=1000 | min_size=10
+2025-09-11 12:48:09,149 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized | Context: capacity=100 | max_size=1000 | min_size=10
+2025-09-11 12:48:39,158 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages
+2025-09-11 12:49:09,165 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages
+2025-09-11 12:49:39,175 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages
+2025-09-11 12:50:09,191 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages
+2025-09-11 12:50:39,202 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages
+2025-09-11 12:51:09,202 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages
+2025-09-11 12:51:39,216 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages
+2025-09-11 12:53:10,809 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized | Context: capacity=100 | max_size=1000 | min_size=10
+2025-09-11 12:53:10,809 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized | Context: capacity=100 | max_size=1000 | min_size=10
+2025-09-11 12:53:40,814 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages
+2025-09-11 12:54:10,826 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages
+2025-09-11 12:54:40,845 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages
+2025-09-11 12:55:10,856 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages
+2025-09-11 12:55:40,869 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages
+2025-09-11 13:02:33,472 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized | Context: capacity=100 | max_size=1000 | min_size=10
+2025-09-11 13:02:33,473 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized | Context: capacity=100 | max_size=1000 | min_size=10
+2025-09-11 13:02:51,567 - buffer_pool - DEBUG - _log_with_context:97 - Cache miss for page 1 | Context: page_id=1 | cache_size=0
+2025-09-11 13:02:51,567 - buffer_pool - DEBUG - _log_with_context:97 - Added new cache entry for page 1 | Context: page_id=1 | is_dirty=False | cache_size=1 | data_size=4096
+2025-09-11 13:03:03,482 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages
+2025-09-11 13:03:33,490 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages

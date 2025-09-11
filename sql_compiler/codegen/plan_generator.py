@@ -191,25 +191,43 @@ class PlanGenerator:
         return InsertOp(stmt.table_name, stmt.columns, stmt.values)
 
     def _generate_select_plan(self, stmt: SelectStmt) -> Operator:
-        """生成SELECT执行计划"""
+        """生成SELECT执行计划 - 修复版本"""
+
+        # 调试模式
+        if not self.silent_mode:
+            print(f"\n🔧 生成SELECT执行计划")
+            print(f"   选择列: {stmt.columns}")
+            print(f"   GROUP BY: {stmt.group_by}")
+
         # 从FROM子句开始构建计划
         plan = self._generate_from_plan(stmt.from_clause)
 
         # 添加WHERE过滤
         if stmt.where_clause:
             plan = FilterOp(stmt.where_clause, [plan])
+            if not self.silent_mode:
+                print(f"   ✅ 添加WHERE过滤")
 
         # 添加GROUP BY
-        if stmt.group_by:
+        if stmt.group_by and len(stmt.group_by) > 0:
             plan = GroupByOp(stmt.group_by, stmt.having_clause, [plan])
+            if not self.silent_mode:
+                print(f"   ✅ 添加GROUP BY，分组列: {stmt.group_by}")
 
         # 添加投影
         if stmt.columns != ["*"]:
             plan = ProjectOp(stmt.columns, [plan])
+            if not self.silent_mode:
+                print(f"   ✅ 添加投影，列: {stmt.columns}")
 
         # 添加ORDER BY
         if stmt.order_by:
             plan = OrderByOp(stmt.order_by, [plan])
+            if not self.silent_mode:
+                print(f"   ✅ 添加ORDER BY")
+
+        if not self.silent_mode:
+            print(f"   🎯 最终计划: {type(plan).__name__}")
 
         return plan
 

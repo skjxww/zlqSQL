@@ -1321,3 +1321,44 @@
 2025-09-11 00:30:20,711 - storage - INFO - _log_with_context:97 - Performance: page_read:read_page_from_disk completed in 0.0010s | Context: avg_time=0.0004s
 2025-09-11 00:30:20,711 - storage - INFO - _log_with_context:97 - Performance: buffer_put:put completed in 0.0000s | Context: avg_time=0.0004s
 2025-09-11 00:30:20,711 - storage - INFO - _log_with_context:97 - Performance: read_page:read_page completed in 0.0010s | Context: avg_time=0.0004s
+2025-09-11 12:08:21,394 - storage - INFO - _log_with_context:97 - StorageManager initialized successfully | Context: buffer_size=100 | data_file=data\database.db | meta_file=data\metadata.json | auto_flush_interval=30
+2025-09-11 12:08:21,395 - storage - INFO - _log_with_context:97 - Loaded 18 table storage entries
+2025-09-11 12:08:21,395 - storage - INFO - _log_with_context:97 - TableStorage initialized with 18 tables
+2025-09-11 12:08:42,063 - storage - ERROR - _log_with_context:97 - Error getting all rows from table 'customers': [STORAGE_ERROR] Schema not found for table 'customers'
+2025-09-11 12:25:16,270 - storage - INFO - _log_with_context:97 - StorageManager initialized successfully | Context: buffer_size=100 | data_file=data\database.db | meta_file=data\metadata.json | auto_flush_interval=30
+2025-09-11 12:25:16,271 - storage - INFO - _log_with_context:97 - Loaded 18 table storage entries
+2025-09-11 12:25:16,271 - storage - INFO - _log_with_context:97 - TableStorage initialized with 18 tables
+2025-09-11 12:25:23,168 - storage - ERROR - _log_with_context:97 - Error getting all rows from table 'customers': [STORAGE_ERROR] Schema not found for table 'customers'
+2025-09-11 12:27:04,793 - storage - INFO - _log_with_context:97 - StorageManager initialized successfully | Context: buffer_size=100 | data_file=data\database.db | meta_file=data\metadata.json | auto_flush_interval=30
+2025-09-11 12:27:04,793 - storage - INFO - _log_with_context:97 - Loaded 18 table storage entries
+2025-09-11 12:27:04,793 - storage - INFO - _log_with_context:97 - TableStorage initialized with 18 tables
+2025-09-11 12:27:43,787 - storage - INFO - _log_with_context:97 - Performance: buffer_get:get completed in 0.0009s | Context: avg_time=0.0009s
+2025-09-11 12:27:43,787 - storage - INFO - _log_with_context:97 - Performance: page_read:read_page_from_disk completed in 0.0000s | Context: avg_time=0.0005s
+2025-09-11 12:27:43,787 - storage - INFO - _log_with_context:97 - Performance: buffer_put:put completed in 0.0000s | Context: avg_time=0.0003s
+2025-09-11 12:27:43,787 - storage - INFO - _log_with_context:97 - Performance: read_page:read_page completed in 0.0009s | Context: avg_time=0.0005s
+2025-09-11 12:29:15,067 - storage - INFO - _log_with_context:97 - Performance: buffer_get:get completed in 0.0000s | Context: avg_time=0.0004s
+2025-09-11 12:29:15,067 - storage - INFO - _log_with_context:97 - Performance: read_page:read_page completed in 0.0000s | Context: avg_time=0.0003s
+2025-09-11 12:30:52,955 - storage - INFO - _log_with_context:97 - Performance: buffer_get:get completed in 0.0000s | Context: avg_time=0.0003s
+2025-09-11 12:30:52,955 - storage - INFO - _log_with_context:97 - Performance: read_page:read_page completed in 0.0000s | Context: avg_time=0.0002s
+2025-09-11 12:36:47,938 - storage - INFO - _log_with_context:97 - StorageManager initialized successfully | Context: buffer_size=100 | data_file=data\database.db | meta_file=data\metadata.json | auto_flush_interval=30
+2025-09-11 12:36:47,939 - storage - INFO - _log_with_context:97 - Loaded 18 table storage entries
+2025-09-11 12:36:47,939 - storage - INFO - _log_with_context:97 - TableStorage initialized with 18 tables
+2025-09-11 12:36:55,276 - storage - INFO - _log_with_context:97 - Performance: buffer_get:get completed in 0.0000s | Context: avg_time=0.0000s
+2025-09-11 12:36:55,277 - storage - INFO - _log_with_context:97 - Performance: page_read:read_page_from_disk completed in 0.0010s | Context: avg_time=0.0005s
+2025-09-11 12:36:55,277 - storage - INFO - _log_with_context:97 - Performance: buffer_put:put completed in 0.0000s | Context: avg_time=0.0003s
+2025-09-11 12:36:55,277 - storage - INFO - _log_with_context:97 - Performance: read_page:read_page completed in 0.0010s | Context: avg_time=0.0005s
+2025-09-11 12:37:16,142 - storage - INFO - _log_with_context:97 - Performance: buffer_get:get completed in 0.0000s | Context: avg_time=0.0004s
+2025-09-11 12:37:16,143 - storage - INFO - _log_with_context:97 - Performance: read_page:read_page completed in 0.0013s | Context: avg_time=0.0005s
+2025-09-11 12:48:09,150 - storage - INFO - _log_with_context:97 - StorageManager initialized successfully | Context: buffer_size=100 | data_file=data\database.db | meta_file=data\metadata.json | auto_flush_interval=30
+2025-09-11 12:48:09,151 - storage - INFO - _log_with_context:97 - Loaded 18 table storage entries
+2025-09-11 12:48:09,151 - storage - INFO - _log_with_context:97 - TableStorage initialized with 18 tables
+2025-09-11 12:53:10,811 - storage - INFO - _log_with_context:97 - StorageManager initialized successfully | Context: buffer_size=100 | data_file=data\database.db | meta_file=data\metadata.json | auto_flush_interval=30
+2025-09-11 12:53:10,812 - storage - INFO - _log_with_context:97 - Loaded 18 table storage entries
+2025-09-11 12:53:10,812 - storage - INFO - _log_with_context:97 - TableStorage initialized with 18 tables
+2025-09-11 13:02:33,474 - storage - INFO - _log_with_context:97 - StorageManager initialized successfully | Context: buffer_size=100 | data_file=data\database.db | meta_file=data\metadata.json | auto_flush_interval=30
+2025-09-11 13:02:33,475 - storage - INFO - _log_with_context:97 - Loaded 18 table storage entries
+2025-09-11 13:02:33,475 - storage - INFO - _log_with_context:97 - TableStorage initialized with 18 tables
+2025-09-11 13:02:51,567 - storage - INFO - _log_with_context:97 - Performance: buffer_get:get completed in 0.0000s | Context: avg_time=0.0000s
+2025-09-11 13:02:51,567 - storage - INFO - _log_with_context:97 - Performance: page_read:read_page_from_disk completed in 0.0000s | Context: avg_time=0.0000s
+2025-09-11 13:02:51,567 - storage - INFO - _log_with_context:97 - Performance: buffer_put:put completed in 0.0000s | Context: avg_time=0.0000s
+2025-09-11 13:02:51,567 - storage - INFO - _log_with_context:97 - Performance: read_page:read_page completed in 0.0000s | Context: avg_time=0.0000s

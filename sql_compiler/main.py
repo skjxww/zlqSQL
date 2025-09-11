@@ -49,7 +49,7 @@ class SQLCompiler:
 
             # 执行计划生成（包含优化）
             print("\n=== 执行计划生成 ===")
-            codegen = PlanGenerator(enable_optimization=True)
+            codegen = PlanGenerator()
             plan = codegen.generate(ast)
             print("执行计划:")
             print(format_json(plan.to_dict()))

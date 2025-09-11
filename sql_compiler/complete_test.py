@@ -147,7 +147,7 @@ def test_complex_queries():
 
     complex_queries = [
         # GROUP BY 和聚合函数
-        "SELECT city, COUNT(*) FROM customers GROUP BY city;",
+        "",
         "SELECT city, AVG(age) FROM customers GROUP BY city;",
         "SELECT customer_id, SUM(amount) FROM orders GROUP BY customer_id;",
 

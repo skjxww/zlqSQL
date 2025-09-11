@@ -30,20 +30,34 @@ class AdvancedQueryOptimizer:
         self.enable_statistics = True
 
     def optimize(self, plan: Operator) -> Operator:
-        """主优化入口"""
+        """主优化入口 - 增强聚合查询保护"""
         if not self.silent_mode:
             print("\n🚀 高级查询优化器启动")
 
         try:
+            # 检查是否是聚合查询
+            is_aggregation = self._is_aggregation_query(plan)
+            has_group_by = self._contains_group_by_operator(plan)
+
+            if (is_aggregation or has_group_by) and not self.silent_mode:
+                print("🔍 检测到聚合查询，启用保护模式")
+
             # 第一阶段：基于规则的逻辑优化
             if not self.silent_mode:
                 print("📋 阶段1: 逻辑优化（基于规则）")
 
             logical_optimized = self.rule_optimizer.optimize(plan)
 
-            # 第二阶段：基于成本的优化（仅对复杂查询）
+            # 验证GROUP BY是否被意外移除
+            if has_group_by and not self._contains_group_by_operator(logical_optimized):
+                if not self.silent_mode:
+                    print("⚠️ 规则优化移除了GROUP BY，恢复原计划")
+                logical_optimized = plan
+
+            # 第二阶段：基于成本的优化（对聚合查询要谨慎）
             if (self.enable_cost_based_optimization and
-                    self._is_complex_query(logical_optimized)):
+                    self._is_complex_query(logical_optimized) and
+                    not (is_aggregation or has_group_by)):  # 跳过聚合查询的复杂优化
 
                 if not self.silent_mode:
                     print("💰 阶段2: 物理优化（基于成本）")
@@ -51,12 +65,20 @@ class AdvancedQueryOptimizer:
                 cost_optimized = self._cost_based_optimization(logical_optimized)
             else:
                 cost_optimized = logical_optimized
+                if (is_aggregation or has_group_by) and not self.silent_mode:
+                    print("⏭️ 跳过物理优化（聚合查询保护）")
 
             # 第三阶段：最终优化调整
             if not self.silent_mode:
                 print("🔧 阶段3: 最终优化调整")
 
-            final_optimized = self._final_optimization(cost_optimized)
+            final_optimized = self._final_optimization(cost_optimized, preserve_groupby=has_group_by)
+
+            # 最终验证 - 确保GROUP BY没有被移除
+            if has_group_by and not self._contains_group_by_operator(final_optimized):
+                if not self.silent_mode:
+                    print("🔧 最终验证失败：强制恢复GROUP BY结构")
+                final_optimized = cost_optimized
 
             # 输出优化统计
             if not self.silent_mode:
@@ -68,6 +90,149 @@ class AdvancedQueryOptimizer:
             if not self.silent_mode:
                 print(f"⚠️ 高级优化失败: {e}, 回退到规则优化")
             return self.rule_optimizer.optimize(plan)
+
+    def _is_aggregation_query(self, plan: Operator) -> bool:
+        """检查是否是聚合查询"""
+        return self._contains_group_by_operator(plan) or self._contains_aggregate_functions(plan)
+
+    def _contains_group_by_operator(self, plan: Operator) -> bool:
+        """检查是否包含GroupByOp操作符"""
+        if isinstance(plan, GroupByOp):
+            return True
+
+        for child in plan.children:
+            if self._contains_group_by_operator(child):
+                return True
+
+        return False
+
+    def _contains_aggregate_functions(self, plan: Operator) -> bool:
+        """检查是否包含聚合函数"""
+        if isinstance(plan, ProjectOp):
+            for column in plan.columns:
+                if isinstance(column, str) and self._is_aggregate_column(column):
+                    return True
+
+        for child in plan.children:
+            if self._contains_aggregate_functions(child):
+                return True
+
+        return False
+
+    def _final_optimization(self, plan: Operator, preserve_groupby: bool = False) -> Operator:
+        """最终优化调整 - 增加GROUP BY保护"""
+        if preserve_groupby and not self.silent_mode:
+            print("   🛡️ GROUP BY保护模式启用")
+
+        optimized = plan
+
+        # 应用最终的优化规则（但要保护GROUP BY）
+        optimized = self._apply_predicate_merge(optimized)
+
+        # 谨慎应用投影消除
+        if preserve_groupby:
+            # 对聚合查询使用保护性的投影消除
+            optimized = self._apply_safe_projection_elimination(optimized)
+        else:
+            optimized = self._apply_projection_elimination(optimized)
+
+        optimized = self._apply_redundancy_elimination(optimized)
+
+        return optimized
+
+    def _apply_safe_projection_elimination(self, plan: Operator) -> Operator:
+        """安全的投影消除 - 保护GROUP BY"""
+        try:
+            # 对于包含GROUP BY的计划，只进行非常保守的优化
+            if isinstance(plan, ProjectOp):
+                if len(plan.children) == 1:
+                    child = plan.children[0]
+
+                    # 绝对不要触碰GroupByOp
+                    if isinstance(child, GroupByOp):
+                        # 只递归处理GroupByOp的子节点
+                        fixed_children = []
+                        for grandchild in child.children:
+                            # 对非聚合部分进行优化
+                            fixed_children.append(self._apply_safe_projection_elimination(grandchild))
+
+                        # 重建GroupByOp结构
+                        if fixed_children != child.children:
+                            new_group_by = GroupByOp(child.group_columns, child.having_condition, fixed_children)
+                            return ProjectOp(plan.columns, [new_group_by])
+
+                        return plan  # 保持完整结构
+
+            # 对于其他操作符，递归处理但不做结构改变
+            new_children = []
+            changed = False
+            for child in plan.children:
+                new_child = self._apply_safe_projection_elimination(child)
+                new_children.append(new_child)
+                if new_child != child:
+                    changed = True
+
+            if changed:
+                return self._clone_operator(plan, new_children)
+
+        except Exception:
+            pass
+
+        return plan
+
+    def _apply_projection_elimination(self, plan: Operator) -> Operator:
+        """消除不必要的投影操作 - 增强GROUP BY保护"""
+        try:
+            if isinstance(plan, ProjectOp):
+                if len(plan.children) == 1:
+                    child = plan.children[0]
+
+                    # 强化GROUP BY保护
+                    if isinstance(child, (GroupByOp, HashAggregateOp, SortAggregateOp)):
+                        # 聚合操作后的投影通常是必要的，不要消除
+                        # 只递归优化更深层的节点
+                        fixed_children = []
+                        for grandchild in child.children:
+                            fixed_children.append(self._apply_projection_elimination(grandchild))
+
+                        if fixed_children != child.children:
+                            # 重建聚合操作
+                            if isinstance(child, GroupByOp):
+                                new_agg_op = GroupByOp(child.group_columns, child.having_condition, fixed_children)
+                            elif isinstance(child, HashAggregateOp):
+                                new_agg_op = HashAggregateOp(child.group_columns, child.agg_functions,
+                                                             child.having_condition, fixed_children)
+                            else:  # SortAggregateOp
+                                new_agg_op = SortAggregateOp(child.group_columns, child.agg_functions,
+                                                             child.having_condition, fixed_children)
+
+                            return ProjectOp(plan.columns, [new_agg_op])
+
+                        return plan  # 保持原结构
+
+                    # 处理其他情况的投影合并
+                    if isinstance(child, ProjectOp):
+                        if self._can_merge_projections(plan.columns, child.columns):
+                            return ProjectOp(plan.columns, child.children)
+
+                    # SELECT * 的优化
+                    if (plan.columns == ['*'] and
+                            isinstance(child, (SeqScanOp, IndexScanOp))):
+                        return child
+
+            # 递归处理子节点
+            new_children = []
+            for child in plan.children:
+                new_children.append(self._apply_projection_elimination(child))
+
+            if new_children != plan.children:
+                return self._clone_operator(plan, new_children)
+
+        except Exception as e:
+            if not self.silent_mode:
+                print(f"   ⚠️ 投影消除出错: {e}")
+
+        return plan
 
     def _is_complex_query(self, plan: Operator) -> bool:
         """判断是否为复杂查询（加权评分系统）"""
@@ -356,17 +521,6 @@ class AdvancedQueryOptimizer:
 
         return ['*']
 
-    def _final_optimization(self, plan: Operator) -> Operator:
-        """最终优化调整"""
-        optimized = plan
-
-        # 应用一些最终的优化规则
-        optimized = self._apply_predicate_merge(optimized)
-        optimized = self._apply_projection_elimination(optimized)
-        optimized = self._apply_redundancy_elimination(optimized)
-
-        return optimized
-
     def _apply_predicate_merge(self, plan: Operator) -> Operator:
         """合并相邻的谓词"""
         if isinstance(plan, FilterOp):
@@ -381,33 +535,6 @@ class AdvancedQueryOptimizer:
         new_children = []
         for child in plan.children:
             new_children.append(self._apply_predicate_merge(child))
-
-        if new_children != plan.children:
-            return self._clone_operator(plan, new_children)
-
-        return plan
-
-    def _apply_projection_elimination(self, plan: Operator) -> Operator:
-        """消除不必要的投影操作"""
-        if isinstance(plan, ProjectOp):
-            if len(plan.children) == 1:
-                child = plan.children[0]
-
-                # 如果子节点也是投影，合并它们
-                if isinstance(child, ProjectOp):
-                    # 检查是否可以合并投影
-                    if self._can_merge_projections(plan.columns, child.columns):
-                        return ProjectOp(plan.columns, child.children)
-
-                # 如果投影是SELECT *且子节点输出相同，则消除
-                if (plan.columns == ['*'] and
-                        isinstance(child, (SeqScanOp, IndexScanOp))):
-                    return child
-
-        # 递归处理子节点
-        new_children = []
-        for child in plan.children:
-            new_children.append(self._apply_projection_elimination(child))
 
         if new_children != plan.children:
             return self._clone_operator(plan, new_children)
@@ -446,25 +573,37 @@ class AdvancedQueryOptimizer:
         return set(outer_columns).issubset(set(inner_columns))
 
     def _clone_operator(self, original: Operator, new_children: List[Operator]) -> Operator:
-        """克隆操作符并使用新的子节点"""
-        if isinstance(original, FilterOp):
-            return FilterOp(original.condition, new_children)
-        elif isinstance(original, ProjectOp):
-            return ProjectOp(original.columns, new_children)
-        elif isinstance(original, JoinOp):
-            return JoinOp(original.join_type, original.on_condition, new_children)
-        elif isinstance(original, NestedLoopJoinOp):
-            return NestedLoopJoinOp(original.join_type, original.on_condition, new_children)
-        elif isinstance(original, HashJoinOp):
-            return HashJoinOp(original.join_type, original.on_condition, new_children)
-        elif isinstance(original, SortMergeJoinOp):
-            return SortMergeJoinOp(original.join_type, original.on_condition, new_children)
-        elif isinstance(original, GroupByOp):
-            return GroupByOp(original.group_columns, original.having_condition, new_children)
-        elif isinstance(original, OrderByOp):
-            return OrderByOp(original.order_columns, new_children)
-        else:
-            return original
+        """克隆操作符并使用新的子节点 - 增强GROUP BY支持"""
+        try:
+            if isinstance(original, FilterOp):
+                return FilterOp(original.condition, new_children)
+            elif isinstance(original, ProjectOp):
+                return ProjectOp(original.columns, new_children)
+            elif isinstance(original, GroupByOp):  # ✅ 添加GroupByOp支持
+                return GroupByOp(original.group_columns, original.having_condition, new_children)
+            elif isinstance(original, JoinOp):
+                return JoinOp(original.join_type, original.on_condition, new_children)
+            elif isinstance(original, NestedLoopJoinOp):
+                return NestedLoopJoinOp(original.join_type, original.on_condition, new_children)
+            elif isinstance(original, HashJoinOp):
+                return HashJoinOp(original.join_type, original.on_condition, new_children)
+            elif isinstance(original, SortMergeJoinOp):
+                return SortMergeJoinOp(original.join_type, original.on_condition, new_children)
+            elif isinstance(original, OrderByOp):
+                return OrderByOp(original.order_columns, new_children)
+            else:
+                # 对于未知类型，尝试保持原有属性
+                new_op = type(original)(new_children)
+                # 复制关键属性
+                for attr in ['group_columns', 'having_condition', 'order_columns', 'table_name', 'columns',
+                             'condition']:
+                    if hasattr(original, attr):
+                        setattr(new_op, attr, getattr(original, attr))
+                return new_op
+        except Exception:
+            pass
+
+        return original
 
     def _print_optimization_summary(self, original_plan: Operator, optimized_plan: Operator):
         """打印优化总结"""
@@ -570,47 +709,6 @@ class QueryOptimizationPipeline:
 
         # 优化历史
         self.optimization_history = []
-
-    def optimize(self, plan: Operator, query_context: Dict[str, Any] = None) -> Operator:
-        """优化执行计划"""
-        import time
-
-        start_time = time.time()
-
-        # 记录优化前状态
-        original_cost = self._estimate_plan_cost(plan)
-
-        # 执行优化
-        try:
-            optimized_plan = self.optimizer.optimize(plan)
-            optimization_success = True
-            error_message = None
-        except Exception as e:
-            optimized_plan = plan
-            optimization_success = False
-            error_message = str(e)
-
-        # 记录优化历史
-        optimization_time = time.time() - start_time
-        optimized_cost = self._estimate_plan_cost(optimized_plan)
-
-        history_entry = {
-            'timestamp': time.time(),
-            'original_cost': original_cost,
-            'optimized_cost': optimized_cost,
-            'optimization_time': optimization_time,
-            'success': optimization_success,
-            'error': error_message,
-            'query_context': query_context or {}
-        }
-
-        self.optimization_history.append(history_entry)
-
-        # 限制历史记录大小
-        if len(self.optimization_history) > 100:
-            self.optimization_history = self.optimization_history[-100:]
-
-        return optimized_plan
 
     def _collect_initial_statistics(self):
         """收集初始统计信息"""

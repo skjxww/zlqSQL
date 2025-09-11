@@ -1,0 +1,160 @@
+{
+  "tables": {
+    "customers": {
+      "name": "customers",
+      "columns": [
+        {
+          "name": "customer_id",
+          "type": "INT",
+          "constraints": null
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR(50)",
+          "constraints": null
+        },
+        {
+          "name": "city",
+          "type": "VARCHAR(30)",
+          "constraints": null
+        },
+        {
+          "name": "age",
+          "type": "INT",
+          "constraints": null
+        }
+      ],
+      "created_at": "2025-09-10T23:54:27.953015",
+      "row_count": 0
+    },
+    "orders": {
+      "name": "orders",
+      "columns": [
+        {
+          "name": "order_id",
+          "type": "INT",
+          "constraints": null
+        },
+        {
+          "name": "customer_id",
+          "type": "INT",
+          "constraints": null
+        },
+        {
+          "name": "amount",
+          "type": "INT",
+          "constraints": null
+        },
+        {
+          "name": "order_date",
+          "type": "VARCHAR(20)",
+          "constraints": null
+        }
+      ],
+      "created_at": "2025-09-10T23:54:27.955022",
+      "row_count": 0
+    },
+    "products": {
+      "name": "products",
+      "columns": [
+        {
+          "name": "product_id",
+          "type": "INT",
+          "constraints": null
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR(50)",
+          "constraints": null
+        },
+        {
+          "name": "category",
+          "type": "VARCHAR(30)",
+          "constraints": null
+        },
+        {
+          "name": "price",
+          "type": "INT",
+          "constraints": null
+        }
+      ],
+      "created_at": "2025-09-10T23:54:27.967289",
+      "row_count": 0
+    },
+    "students": {
+      "name": "students",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INT",
+          "constraints": null
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR(50)",
+          "constraints": null
+        },
+        {
+          "name": "major",
+          "type": "VARCHAR(30)",
+          "constraints": null
+        },
+        {
+          "name": "gpa",
+          "type": "INT",
+          "constraints": null
+        }
+      ],
+      "created_at": "2025-09-10T23:54:28.073603",
+      "row_count": 0
+    },
+    "courses": {
+      "name": "courses",
+      "columns": [
+        {
+          "name": "course_id",
+          "type": "INT",
+          "constraints": null
+        },
+        {
+          "name": "course_name",
+          "type": "VARCHAR(50)",
+          "constraints": null
+        },
+        {
+          "name": "credits",
+          "type": "INT",
+          "constraints": null
+        }
+      ],
+      "created_at": "2025-09-10T23:54:28.085910",
+      "row_count": 0
+    },
+    "enrollments": {
+      "name": "enrollments",
+      "columns": [
+        {
+          "name": "student_id",
+          "type": "INT",
+          "constraints": null
+        },
+        {
+          "name": "course_id",
+          "type": "INT",
+          "constraints": null
+        },
+        {
+          "name": "grade",
+          "type": "VARCHAR(2)",
+          "constraints": null
+        }
+      ],
+      "created_at": "2025-09-10T23:54:28.089208",
+      "row_count": 0
+    }
+  },
+  "metadata": {
+    "version": "1.0",
+    "created_at": null
+  }
+}
