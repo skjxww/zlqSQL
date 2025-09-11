@@ -3,6 +3,7 @@ from tkinter import ttk, scrolledtext, messagebox
 import threading
 import json
 from datetime import datetime
+import traceback
 from sql_compiler.lexer.lexical_analyzer import LexicalAnalyzer
 from sql_compiler.parser.syntax_analyzer import SyntaxAnalyzer
 from sql_compiler.codegen.plan_generator import PlanGenerator
@@ -12,6 +13,7 @@ from storage.core.storage_manager import StorageManager
 from sql_compiler.catalog.catalog_manager import CatalogManager
 from engine.storage_engine import StorageEngine
 from engine.execution_engine import ExecutionEngine
+from sql_compiler.diagnostics.error_analyzer import SmartSQLCorrector
 
 
 class SimpleDBGUI:
@@ -21,17 +23,13 @@ class SimpleDBGUI:
 
         # 创建GUI
         self.root = tk.Tk()
-        self.root.title("SimpleDB - SQL Database Management System")
+        self.root.title("SimpleDB - SQL Database Management System with Smart Correction")
         self.root.geometry("1400x900")
-        self.root.configure(bg="#f8f9fa")
-
-        # 设置应用程序图标（如果有的话）
-        # self.root.iconbitmap("icon.ico")
+        self.root.configure(bg="#f0f0f0")
 
         # 设置样式
         self.style = ttk.Style()
         self.style.theme_use("clam")
-        self._configure_styles()
 
         # 创建界面组件
         self._create_widgets()
@@ -39,93 +37,9 @@ class SimpleDBGUI:
         # 执行历史
         self.query_history = []
 
-    def _configure_styles(self):
-        """配置自定义样式"""
-        # 配置颜色方案 - 现代蓝色主题
-        self.colors = {
-            'primary': '#4a6fa5',  # 主色调 - 深蓝色
-            'primary_light': '#6d8fc7',  # 浅蓝色
-            'secondary': '#5bb98c',  # 辅助色 - 绿色
-            'accent': '#ff7e5f',  # 强调色 - 珊瑚色
-            'danger': '#e74c3c',  # 危险色 - 红色
-            'warning': '#f39c12',  # 警告色 - 橙色
-            'dark': '#2c3e50',  # 深色文字
-            'light': '#ecf0f1',  # 浅色背景
-            'background': '#f8f9fa',  # 主背景色
-            'text': '#34495e',  # 文本颜色
-            'border': '#dce4ec',  # 边框颜色
-            'highlight': '#e9ecef',  # 高亮背景
-            'success': '#27ae60'  # 成功颜色
-        }
-
-        # 配置样式
-        self.style.configure('TFrame', background=self.colors['background'])
-        self.style.configure('TLabel', background=self.colors['background'], foreground=self.colors['text'])
-        self.style.configure('TButton', padding=8, font=('Segoe UI', 10))
-        self.style.configure('Title.TLabel', font=('Segoe UI', 18, 'bold'), foreground=self.colors['primary'])
-        self.style.configure('Section.TLabelframe',
-                             font=('Segoe UI', 12, 'bold'),
-                             foreground=self.colors['dark'],
-                             background=self.colors['background'],
-                             borderwidth=2,
-                             relief=tk.GROOVE)
-        self.style.configure('Section.TLabelframe.Label',
-                             font=('Segoe UI', 11, 'bold'),
-                             foreground=self.colors['primary'])
-
-        # 按钮样式
-        self.style.configure('Primary.TButton',
-                             background=self.colors['primary'],
-                             foreground='white',
-                             borderwidth=1,
-                             focusthickness=3,
-                             focuscolor=self.colors['primary_light'])
-        self.style.map('Primary.TButton',
-                       background=[('active', self.colors['primary_light']),
-                                   ('pressed', '#3a5a84')])
-
-        self.style.configure('Secondary.TButton',
-                             background=self.colors['secondary'],
-                             foreground='white')
-        self.style.map('Secondary.TButton',
-                       background=[('active', '#6dca9e'),
-                                   ('pressed', '#4a966e')])
-
-        self.style.configure('Accent.TButton',
-                             background=self.colors['accent'],
-                             foreground='white')
-        self.style.map('Accent.TButton',
-                       background=[('active', '#ff9b82'),
-                                   ('pressed', '#cc654c')])
-
-        self.style.configure('Danger.TButton',
-                             background=self.colors['danger'],
-                             foreground='white')
-        self.style.map('Danger.TButton',
-                       background=[('active', '#ff6b6b'),
-                                   ('pressed', '#c0392b')])
-
-        # 输入框样式
-        self.style.configure('Custom.TEntry',
-                             fieldbackground='white',
-                             borderwidth=1,
-                             relief=tk.SOLID,
-                             padding=5)
-
-        # 树形视图样式
-        self.style.configure('Custom.Treeview',
-                             background="white",
-                             fieldbackground="white",
-                             foreground=self.colors['text'],
-                             rowheight=28,
-                             font=('Segoe UI', 10))
-        self.style.configure('Custom.Treeview.Heading',
-                             background=self.colors['primary'],
-                             foreground="white",
-                             padding=8,
-                             font=('Segoe UI', 10, 'bold'))
-        self.style.map('Custom.Treeview.Heading',
-                       background=[('active', self.colors['primary_light'])])
+        # 智能纠错相关变量
+        self.correction_choice = tk.StringVar(value="none")
+        self.current_error_analysis = None
 
     def _init_database(self):
         """初始化数据库组件"""
@@ -154,48 +68,36 @@ class SimpleDBGUI:
             # 初始化SQL编译器组件
             self.lexer = LexicalAnalyzer
 
+            # 初始化智能纠错器
+            self.sql_corrector = SmartSQLCorrector(self.catalog_manager)
+
         except Exception as e:
             messagebox.showerror("初始化错误", f"数据库初始化失败: {str(e)}")
 
     def _create_widgets(self):
         """创建GUI组件"""
         # 创建主框架
-        main_frame = ttk.Frame(self.root, padding="20")
+        main_frame = ttk.Frame(self.root, padding="10")
         main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
 
         # 配置网格权重
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=1)
         main_frame.columnconfigure(1, weight=1)
-        main_frame.rowconfigure(1, weight=1)
-
-        # 标题区域
-        title_frame = ttk.Frame(main_frame)
-        title_frame.grid(row=0, column=0, columnspan=2, pady=(0, 20), sticky=(tk.W, tk.E))
-        title_frame.columnconfigure(0, weight=1)
+        main_frame.rowconfigure(2, weight=1)
 
         # 标题
         title_label = ttk.Label(
-            title_frame,
-            text="SimpleDB - SQL Database Management System",
-            style="Title.TLabel"
+            main_frame,
+            text="SimpleDB - SQL Database Management System with Smart Correction",
+            font=("Arial", 16, "bold")
         )
-        title_label.grid(row=0, column=0, pady=(0, 5))
-
-        # 副标题
-        subtitle_label = ttk.Label(
-            title_frame,
-            text="轻量级SQL数据库管理系统",
-            font=('Segoe UI', 12),
-            foreground=self.colors['text']
-        )
-        subtitle_label.grid(row=1, column=0)
+        title_label.grid(row=0, column=0, columnspan=2, pady=(0, 20))
 
         # 左侧面板
-        left_panel = ttk.LabelFrame(main_frame, text="数据库操作", padding="15", style="Section.TLabelframe")
-        left_panel.grid(row=1, column=0, rowspan=2, sticky=(tk.W, tk.E, tk.N, tk.S), padx=(0, 15))
+        left_panel = ttk.LabelFrame(main_frame, text="数据库操作", padding="10")
+        left_panel.grid(row=1, column=0, rowspan=2, sticky=(tk.W, tk.E, tk.N, tk.S), padx=(0, 10))
         left_panel.columnconfigure(0, weight=1)
-        left_panel.rowconfigure(1, weight=1)
 
         # 右侧面板
         right_panel = ttk.Frame(main_frame)
@@ -212,41 +114,33 @@ class SimpleDBGUI:
         # 数据库信息区域
         self._create_database_info_area(left_panel)
 
+        # 智能诊断区域
+        self._create_smart_diagnosis_area(left_panel)
+
         # 结果显示区域
         self._create_result_area(right_panel)
 
         # 查询历史区域
         self._create_history_area(right_panel)
 
-        # 状态栏
-        self._create_status_bar(main_frame)
-
     def _create_sql_input_area(self, parent):
         """创建SQL输入区域"""
         # SQL输入标签
-        sql_label = ttk.Label(parent, text="SQL查询:", font=("Segoe UI", 11, "bold"))
-        sql_label.grid(row=0, column=0, sticky=tk.W, pady=(0, 10))
+        sql_label = ttk.Label(parent, text="SQL查询:", font=("Arial", 12, "bold"))
+        sql_label.grid(row=0, column=0, sticky=tk.W, pady=(0, 5))
 
         # SQL输入文本框
-        sql_frame = ttk.Frame(parent)
-        sql_frame.grid(row=1, column=0, sticky=(tk.W, tk.E), pady=(0, 15))
-        sql_frame.columnconfigure(0, weight=1)
-
         self.sql_text = scrolledtext.ScrolledText(
-            sql_frame,
-            height=10,
+            parent,
+            height=8,
             width=50,
             font=("Consolas", 11),
-            wrap=tk.WORD,
-            relief=tk.SOLID,
-            borderwidth=1,
-            padx=12,
-            pady=12,
-            bg='white',
-            fg=self.colors['text'],
-            insertbackground=self.colors['primary']  # 光标颜色
+            wrap=tk.WORD
         )
-        self.sql_text.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        self.sql_text.grid(row=1, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=(0, 10))
+
+        # 绑定快捷键
+        self.sql_text.bind('<Control-Return>', lambda e: self._execute_sql())
 
         # 添加语法高亮（简单版本）
         self._setup_syntax_highlighting()
@@ -257,25 +151,25 @@ class SimpleDBGUI:
     def _setup_syntax_highlighting(self):
         """设置简单的SQL语法高亮"""
         # 定义SQL关键字颜色
-        self.sql_text.tag_configure("keyword", foreground=self.colors['primary'], font=("Consolas", 11, "bold"))
-        self.sql_text.tag_configure("string", foreground=self.colors['accent'])
-        self.sql_text.tag_configure("number", foreground=self.colors['warning'])
-        self.sql_text.tag_configure("comment", foreground="#95a5a6", font=("Consolas", 11, "italic"))
-        self.sql_text.tag_configure("function", foreground=self.colors['secondary'], font=("Consolas", 11, "bold"))
+        self.sql_text.tag_configure("keyword", foreground="blue", font=("Consolas", 11, "bold"))
+        self.sql_text.tag_configure("string", foreground="green")
+        self.sql_text.tag_configure("number", foreground="red")
+        self.sql_text.tag_configure("comment", foreground="gray")
 
     def _create_example_buttons(self, parent):
         """创建示例SQL按钮"""
-        example_frame = ttk.LabelFrame(parent, text="示例查询", padding="10", style="Section.TLabelframe")
-        example_frame.grid(row=2, column=0, sticky=(tk.W, tk.E), pady=(0, 15))
-        example_frame.columnconfigure((0, 1, 2), weight=1)
+        example_frame = ttk.LabelFrame(parent, text="示例SQL", padding="5")
+        example_frame.grid(row=2, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=(0, 10))
+        example_frame.columnconfigure(0, weight=1)
+        example_frame.columnconfigure(1, weight=1)
 
         examples = [
             ("创建表", "CREATE TABLE users (id INT PRIMARY KEY, name VARCHAR(50), email VARCHAR(100));"),
             ("插入数据", "INSERT INTO users VALUES (1, 'Alice', 'alice@example.com');"),
             ("查询数据", "SELECT * FROM users;"),
-            ("条件查询", "SELECT name, email FROM users WHERE id > 100;"),
             ("聚合查询", "SELECT city, COUNT(*) FROM customers GROUP BY city HAVING COUNT(*) > 1;"),
-            ("连接查询", "SELECT u.name, o.amount FROM users u JOIN orders o ON u.id = o.user_id;"),
+            ("更新数据", "UPDATE users SET email = 'newemail@example.com' WHERE id = 1;"),
+            ("连接查询", "SELECT u.name, o.total FROM users u JOIN orders o ON u.id = o.user_id;"),
         ]
 
         for i, (name, sql) in enumerate(examples):
@@ -283,10 +177,9 @@ class SimpleDBGUI:
                 example_frame,
                 text=name,
                 command=lambda s=sql: self._insert_example_sql(s),
-                style="Secondary.TButton",
-                width=15
+                width=12
             )
-            btn.grid(row=i // 3, column=i % 3, padx=5, pady=5, sticky=(tk.W, tk.E))
+            btn.grid(row=i // 2, column=i % 2, padx=2, pady=2, sticky=(tk.W, tk.E))
 
     def _insert_example_sql(self, sql):
         """插入示例SQL"""
@@ -296,15 +189,14 @@ class SimpleDBGUI:
     def _create_control_buttons(self, parent):
         """创建控制按钮"""
         button_frame = ttk.Frame(parent)
-        button_frame.grid(row=3, column=0, sticky=(tk.W, tk.E), pady=(0, 15))
-        button_frame.columnconfigure((0, 1, 2), weight=1)
+        button_frame.grid(row=3, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=(0, 10))
 
         # 执行按钮
         self.execute_btn = ttk.Button(
             button_frame,
             text="🚀 执行SQL",
             command=self._execute_sql,
-            style="Primary.TButton"
+            style="Execute.TButton"
         )
         self.execute_btn.grid(row=0, column=0, padx=(0, 5), sticky=(tk.W, tk.E))
 
@@ -312,64 +204,72 @@ class SimpleDBGUI:
         clear_btn = ttk.Button(
             button_frame,
             text="🗑️ 清除",
-            command=self._clear_sql,
-            style="Danger.TButton"
+            command=self._clear_sql
         )
-        clear_btn.grid(row=0, column=1, padx=5, sticky=(tk.W, tk.E))
+        clear_btn.grid(row=0, column=1, padx=(5, 0), sticky=(tk.W, tk.E))
 
-        # 格式化按钮
-        format_btn = ttk.Button(
+        # 智能检查按钮
+        check_btn = ttk.Button(
             button_frame,
-            text="✨ 格式化",
-            command=self._format_sql,
-            style="Accent.TButton"
+            text="🔍 智能检查",
+            command=self._smart_check_sql
         )
-        format_btn.grid(row=0, column=2, padx=(5, 0), sticky=(tk.W, tk.E))
+        check_btn.grid(row=1, column=0, columnspan=2, pady=(5, 0), sticky=(tk.W, tk.E))
+
+        # 配置按钮样式
+        self.style.configure("Execute.TButton", font=("Arial", 10, "bold"))
+
+        button_frame.columnconfigure(0, weight=1)
+        button_frame.columnconfigure(1, weight=1)
 
     def _create_database_info_area(self, parent):
         """创建数据库信息区域"""
-        info_frame = ttk.LabelFrame(parent, text="数据库状态", padding="12", style="Section.TLabelframe")
-        info_frame.grid(row=4, column=0, sticky=(tk.W, tk.E))
-        info_frame.columnconfigure(0, weight=1)
+        info_frame = ttk.LabelFrame(parent, text="数据库信息", padding="5")
+        info_frame.grid(row=4, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=(0, 10))
 
         # 状态信息
-        status_frame = ttk.Frame(info_frame)
-        status_frame.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
+        self.status_label = ttk.Label(info_frame, text="状态: 就绪", foreground="green")
+        self.status_label.grid(row=0, column=0, sticky=tk.W)
 
-        ttk.Label(status_frame, text="状态:", font=("Segoe UI", 10, "bold")).grid(row=0, column=0, sticky=tk.W)
-        self.status_label = ttk.Label(status_frame, text="就绪", foreground=self.colors['success'],
-                                      font=("Segoe UI", 10))
-        self.status_label.grid(row=0, column=1, sticky=tk.W, padx=(8, 0))
-
-        # 表数量信息
-        table_frame = ttk.Frame(info_frame)
-        table_frame.grid(row=1, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
-
-        ttk.Label(table_frame, text="表数量:", font=("Segoe UI", 10)).grid(row=0, column=0, sticky=tk.W)
-        self.table_count_label = ttk.Label(table_frame, text="0", font=("Segoe UI", 10))
-        self.table_count_label.grid(row=0, column=1, sticky=tk.W, padx=(8, 0))
-
-        # 数据库大小信息
-        size_frame = ttk.Frame(info_frame)
-        size_frame.grid(row=2, column=0, sticky=(tk.W, tk.E), pady=(0, 15))
-
-        ttk.Label(size_frame, text="数据库大小:", font=("Segoe UI", 10)).grid(row=0, column=0, sticky=tk.W)
-        self.db_size_label = ttk.Label(size_frame, text="0 MB", font=("Segoe UI", 10))
-        self.db_size_label.grid(row=0, column=1, sticky=tk.W, padx=(8, 0))
+        # 表信息
+        self.tables_label = ttk.Label(info_frame, text="表: 加载中...")
+        self.tables_label.grid(row=1, column=0, sticky=tk.W)
 
         # 刷新按钮
         refresh_btn = ttk.Button(
             info_frame,
-            text="🔄 刷新状态",
-            command=self._refresh_database_info,
-            style="Secondary.TButton"
+            text="🔄 刷新信息",
+            command=self._refresh_database_info
         )
-        refresh_btn.grid(row=3, column=0, sticky=(tk.W, tk.E))
+        refresh_btn.grid(row=2, column=0, sticky=(tk.W, tk.E), pady=(5, 0))
+
+    def _create_smart_diagnosis_area(self, parent):
+        """创建智能诊断区域"""
+        diagnosis_frame = ttk.LabelFrame(parent, text="智能诊断", padding="5")
+        diagnosis_frame.grid(row=5, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=(0, 10))
+        diagnosis_frame.columnconfigure(0, weight=1)
+
+        # 诊断状态
+        self.diagnosis_label = ttk.Label(diagnosis_frame, text="诊断状态: 待检查", foreground="gray")
+        self.diagnosis_label.grid(row=0, column=0, sticky=tk.W)
+
+        # 建议计数
+        self.suggestion_label = ttk.Label(diagnosis_frame, text="建议: 0 项")
+        self.suggestion_label.grid(row=1, column=0, sticky=tk.W)
+
+        # 查看详情按钮
+        self.details_btn = ttk.Button(
+            diagnosis_frame,
+            text="📋 查看诊断详情",
+            command=self._show_diagnosis_details,
+            state=tk.DISABLED
+        )
+        self.details_btn.grid(row=2, column=0, sticky=(tk.W, tk.E), pady=(5, 0))
 
     def _create_result_area(self, parent):
         """创建结果显示区域"""
-        result_frame = ttk.LabelFrame(parent, text="执行结果", padding="10", style="Section.TLabelframe")
-        result_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(0, 15))
+        result_frame = ttk.LabelFrame(parent, text="执行结果", padding="5")
+        result_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(0, 10))
         result_frame.columnconfigure(0, weight=1)
         result_frame.rowconfigure(0, weight=1)
 
@@ -378,52 +278,54 @@ class SimpleDBGUI:
         self.result_notebook.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
 
         # 数据结果标签页
-        self.data_frame = ttk.Frame(self.result_notebook, padding="8")
-        self.result_notebook.add(self.data_frame, text="📊 数据结果")
-        self.data_frame.columnconfigure(0, weight=1)
-        self.data_frame.rowconfigure(0, weight=1)
+        self.data_frame = ttk.Frame(self.result_notebook)
+        self.result_notebook.add(self.data_frame, text="数据结果")
 
         # 创建表格显示数据
         self._create_result_table(self.data_frame)
 
         # 执行计划标签页
-        self.plan_frame = ttk.Frame(self.result_notebook, padding="8")
-        self.result_notebook.add(self.plan_frame, text="📋 执行计划")
-        self.plan_frame.columnconfigure(0, weight=1)
-        self.plan_frame.rowconfigure(0, weight=1)
+        self.plan_frame = ttk.Frame(self.result_notebook)
+        self.result_notebook.add(self.plan_frame, text="执行计划")
 
         # 执行计划文本框
         self.plan_text = scrolledtext.ScrolledText(
             self.plan_frame,
             font=("Consolas", 10),
-            wrap=tk.WORD,
-            relief=tk.SOLID,
-            borderwidth=1,
-            padx=10,
-            pady=10,
-            bg='#fcfcfc'
+            wrap=tk.WORD
         )
         self.plan_text.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        self.plan_frame.columnconfigure(0, weight=1)
+        self.plan_frame.rowconfigure(0, weight=1)
+
+        # 智能分析标签页
+        self.analysis_frame = ttk.Frame(self.result_notebook)
+        self.result_notebook.add(self.analysis_frame, text="智能分析")
+
+        # 智能分析文本框
+        self.analysis_text = scrolledtext.ScrolledText(
+            self.analysis_frame,
+            font=("Consolas", 9),
+            wrap=tk.WORD
+        )
+        self.analysis_text.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        self.analysis_frame.columnconfigure(0, weight=1)
+        self.analysis_frame.rowconfigure(0, weight=1)
 
         # 日志标签页
-        self.log_frame = ttk.Frame(self.result_notebook, padding="8")
-        self.result_notebook.add(self.log_frame, text="📝 执行日志")
-        self.log_frame.columnconfigure(0, weight=1)
-        self.log_frame.rowconfigure(0, weight=1)
+        self.log_frame = ttk.Frame(self.result_notebook)
+        self.result_notebook.add(self.log_frame, text="执行日志")
 
         # 日志文本框
         self.log_text = scrolledtext.ScrolledText(
             self.log_frame,
             font=("Consolas", 9),
             wrap=tk.WORD,
-            state=tk.DISABLED,
-            relief=tk.SOLID,
-            borderwidth=1,
-            padx=10,
-            pady=10,
-            bg='#fcfcfc'
+            state=tk.DISABLED
         )
         self.log_text.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        self.log_frame.columnconfigure(0, weight=1)
+        self.log_frame.rowconfigure(0, weight=1)
 
     def _create_result_table(self, parent):
         """创建结果表格"""
@@ -434,7 +336,7 @@ class SimpleDBGUI:
         table_frame.rowconfigure(0, weight=1)
 
         # 创建Treeview表格
-        self.result_tree = ttk.Treeview(table_frame, style="Custom.Treeview")
+        self.result_tree = ttk.Treeview(table_frame)
         self.result_tree.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
 
         # 添加滚动条
@@ -448,81 +350,24 @@ class SimpleDBGUI:
 
     def _create_history_area(self, parent):
         """创建查询历史区域"""
-        history_frame = ttk.LabelFrame(parent, text="📚 查询历史", padding="10", style="Section.TLabelframe")
+        history_frame = ttk.LabelFrame(parent, text="查询历史", padding="5")
         history_frame.grid(row=1, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
         history_frame.columnconfigure(0, weight=1)
         history_frame.rowconfigure(0, weight=1)
 
-        # 历史列表框架
-        history_list_frame = ttk.Frame(history_frame)
-        history_list_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
-        history_list_frame.columnconfigure(0, weight=1)
-        history_list_frame.rowconfigure(0, weight=1)
-
         # 历史列表
         self.history_listbox = tk.Listbox(
-            history_list_frame,
-            font=("Segoe UI", 9),
-            selectmode=tk.SINGLE,
-            relief=tk.SOLID,
-            borderwidth=1,
-            highlightthickness=0,
-            bg='white',
-            fg=self.colors['text'],
-            selectbackground=self.colors['primary_light'],
-            selectforeground="white"
+            history_frame,
+            font=("Consolas", 9),
+            selectmode=tk.SINGLE
         )
         self.history_listbox.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
         self.history_listbox.bind('<Double-1>', self._load_history_query)
 
         # 历史滚动条
-        history_scrollbar = ttk.Scrollbar(history_list_frame, orient=tk.VERTICAL, command=self.history_listbox.yview)
+        history_scrollbar = ttk.Scrollbar(history_frame, orient=tk.VERTICAL, command=self.history_listbox.yview)
         history_scrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
         self.history_listbox.configure(yscrollcommand=history_scrollbar.set)
-
-        # 历史操作按钮
-        history_btn_frame = ttk.Frame(history_frame)
-        history_btn_frame.grid(row=1, column=0, sticky=(tk.W, tk.E), pady=(10, 0))
-        history_btn_frame.columnconfigure((0, 1), weight=1)
-
-        clear_history_btn = ttk.Button(
-            history_btn_frame,
-            text="清除历史",
-            command=self._clear_history,
-            style="Danger.TButton"
-        )
-        clear_history_btn.grid(row=0, column=0, padx=(0, 5), sticky=(tk.W, tk.E))
-
-        export_history_btn = ttk.Button(
-            history_btn_frame,
-            text="导出历史",
-            command=self._export_history,
-            style="Secondary.TButton"
-        )
-        export_history_btn.grid(row=0, column=1, padx=(5, 0), sticky=(tk.W, tk.E))
-
-    def _create_status_bar(self, parent):
-        """创建状态栏"""
-        status_bar = ttk.Frame(parent, relief=tk.SUNKEN, borderwidth=1)
-        status_bar.grid(row=3, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=(15, 0))
-        status_bar.columnconfigure(0, weight=1)
-
-        self.status_message = ttk.Label(
-            status_bar,
-            text="就绪 | 欢迎使用SimpleDB数据库管理系统",
-            font=('Segoe UI', 9),
-            foreground=self.colors['text']
-        )
-        self.status_message.grid(row=0, column=0, sticky=tk.W, padx=10, pady=3)
-
-        # 版本信息
-        version_label = ttk.Label(
-            status_bar,
-            text="v1.0.0",
-            font=('Segoe UI', 9),
-            foreground=self.colors['text']
-        )
-        version_label.grid(row=0, column=1, sticky=tk.E, padx=10, pady=3)
 
     def _execute_sql(self):
         """执行SQL语句"""
@@ -537,8 +382,7 @@ class SimpleDBGUI:
 
         # 禁用执行按钮
         self.execute_btn.configure(state=tk.DISABLED, text="执行中...")
-        self.status_label.configure(text="执行中...", foreground=self.colors['warning'])
-        self.status_message.configure(text="正在执行SQL查询...")
+        self.status_label.configure(text="状态: 执行中...", foreground="orange")
 
         # 在单独线程中执行SQL，避免界面卡顿
         thread = threading.Thread(target=self._execute_sql_thread, args=(sql,))
@@ -546,25 +390,29 @@ class SimpleDBGUI:
         thread.start()
 
     def _execute_sql_thread(self, sql):
-        """在单独线程中执行SQL"""
+        """在单独线程中执行SQL - 集成智能纠错"""
         try:
             start_time = datetime.now()
-
-            # 记录到日志
             self._log(f"执行SQL: {sql}")
 
-            # 执行SQL
-            result = self._execute_database_query(sql)
+            try:
+                # 尝试执行SQL
+                result = self._execute_database_query(sql)
+                end_time = datetime.now()
+                execution_time = (end_time - start_time).total_seconds()
 
-            end_time = datetime.now()
-            execution_time = (end_time - start_time).total_seconds()
+                # 成功时也分析SQL以提供改进建议
+                improvement_analysis = self.sql_corrector.analyze_and_suggest(sql)
 
-            # 在主线程中更新UI
-            self.root.after(0, self._update_result_ui, result, sql, execution_time)
+                self.root.after(0, self._update_result_ui, result, sql, execution_time, improvement_analysis)
+
+            except Exception as e:
+                # 发生错误时进行智能分析
+                error_analysis = self.sql_corrector.analyze_and_suggest(sql, e)
+                self.root.after(0, self._update_error_ui_with_analysis, e, error_analysis)
 
         except Exception as e:
-            error_msg = f"执行错误: {str(e)}"
-            self.root.after(0, self._update_error_ui, error_msg)
+            self.root.after(0, self._update_error_ui, f"执行错误: {str(e)}")
 
     def _execute_database_query(self, sql):
         """执行数据库查询"""
@@ -592,15 +440,14 @@ class SimpleDBGUI:
         result = self.execution_engine.execute_plan(plan)
         return result
 
-    def _update_result_ui(self, result, sql, execution_time):
+    def _update_result_ui(self, result, sql, execution_time, improvement_analysis=None):
         """更新结果UI"""
         try:
             # 更新状态
-            self.status_label.configure(text=f"执行完成 ({execution_time:.3f}s)", foreground=self.colors['success'])
-            self.status_message.configure(text=f"SQL执行成功，耗时: {execution_time:.3f}秒")
+            self.status_label.configure(text=f"状态: 执行完成 ({execution_time:.3f}s)", foreground="green")
 
             # 添加到历史
-            self._add_to_history(sql, execution_time)
+            self._add_to_history(sql, execution_time, True)
 
             # 更新结果显示
             self._display_result(result)
@@ -608,26 +455,399 @@ class SimpleDBGUI:
             # 记录成功日志
             self._log(f"执行成功，耗时: {execution_time:.3f}s")
 
+            # 更新智能分析
+            if improvement_analysis:
+                self._update_smart_analysis(improvement_analysis, success=True)
+
         except Exception as e:
             self._log(f"UI更新错误: {str(e)}")
         finally:
             # 重新启用执行按钮
             self.execute_btn.configure(state=tk.NORMAL, text="🚀 执行SQL")
 
-    def _update_error_ui(self, error_msg):
-        """更新错误UI"""
+    def _update_error_ui_with_analysis(self, error, analysis):
+        """更新错误UI并显示智能分析"""
         # 更新状态
-        self.status_label.configure(text="执行失败", foreground=self.colors['danger'])
-        self.status_message.configure(text="SQL执行失败，请查看日志")
-
-        # 显示错误消息
-        messagebox.showerror("执行错误", error_msg)
+        self.status_label.configure(text="状态: 执行失败", foreground="red")
 
         # 记录错误日志
-        self._log(error_msg)
+        self._log(f"执行失败: {str(error)}")
+
+        # 添加到历史
+        sql = self.sql_text.get(1.0, tk.END).strip()
+        self._add_to_history(sql, 0, False, str(error))
+
+        # 更新智能分析
+        self._update_smart_analysis(analysis, success=False)
+
+        # 显示错误分析对话框
+        if analysis.get('suggestions') or analysis.get('corrected_sql_options'):
+            self.root.after(100, lambda: self._show_error_analysis_dialog(analysis))
+        else:
+            messagebox.showerror("执行错误", str(error))
 
         # 重新启用执行按钮
         self.execute_btn.configure(state=tk.NORMAL, text="🚀 执行SQL")
+
+    def _update_error_ui(self, error_msg):
+        """更新错误UI（简单版本）"""
+        self.status_label.configure(text="状态: 执行失败", foreground="red")
+        messagebox.showerror("执行错误", error_msg)
+        self._log(error_msg)
+        self.execute_btn.configure(state=tk.NORMAL, text="🚀 执行SQL")
+
+    def _smart_check_sql(self):
+        """智能检查SQL（不执行）"""
+        sql = self.sql_text.get(1.0, tk.END).strip()
+        if not sql:
+            messagebox.showinfo("提示", "请先输入SQL语句")
+            return
+
+        # 进行智能分析
+        try:
+            analysis = self.sql_corrector.analyze_and_suggest(sql)
+            self._update_smart_analysis(analysis, success=None)
+
+            if analysis.get('improvement_tips'):
+                self._show_improvement_tips_dialog(analysis)
+            else:
+                messagebox.showinfo("智能检查", "未发现明显问题，SQL看起来不错！")
+
+        except Exception as e:
+            messagebox.showerror("智能检查失败", f"分析过程出错: {str(e)}")
+
+    def _update_smart_analysis(self, analysis, success=None):
+        """更新智能分析显示"""
+        self.current_error_analysis = analysis
+
+        # 更新诊断标签
+        if success is True:
+            self.diagnosis_label.configure(text="诊断状态: ✅ 执行成功", foreground="green")
+        elif success is False:
+            self.diagnosis_label.configure(text="诊断状态: ❌ 执行失败", foreground="red")
+        else:
+            self.diagnosis_label.configure(text="诊断状态: 🔍 已分析", foreground="blue")
+
+        # 统计建议数量
+        suggestion_count = 0
+        if analysis.get('suggestions'):
+            suggestion_count += len(analysis['suggestions'])
+        if analysis.get('improvement_tips'):
+            suggestion_count += len(analysis['improvement_tips'])
+        if analysis.get('corrected_sql_options'):
+            suggestion_count += len(analysis['corrected_sql_options'])
+
+        self.suggestion_label.configure(text=f"建议: {suggestion_count} 项")
+
+        # 启用详情按钮
+        if suggestion_count > 0:
+            self.details_btn.configure(state=tk.NORMAL)
+        else:
+            self.details_btn.configure(state=tk.DISABLED)
+
+        # 更新智能分析文本框
+        self._update_analysis_text(analysis)
+
+    def _update_analysis_text(self, analysis):
+        """更新智能分析文本框内容"""
+        self.analysis_text.delete(1.0, tk.END)
+
+        content = "🧠 智能SQL分析报告\n" + "=" * 50 + "\n\n"
+
+        # 基本信息
+        content += f"分析时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+        content += f"SQL语句: {analysis.get('original_sql', '').strip()}\n"
+        content += f"执行状态: {'成功' if not analysis.get('has_error') else '失败'}\n\n"
+
+        # 错误分析
+        if analysis.get('has_error') and analysis.get('error_message'):
+            content += "❌ 错误信息:\n"
+            content += f"   {analysis['error_message']}\n\n"
+
+        # 错误建议
+        if analysis.get('suggestions'):
+            content += "💡 错误分析和建议:\n"
+            for i, suggestion in enumerate(analysis['suggestions'], 1):
+                confidence_bar = "█" * int(suggestion['confidence'] * 10)
+                content += f"{i}. {suggestion['description']}\n"
+                content += f"   建议: {suggestion['suggestion']}\n"
+                content += f"   置信度: {confidence_bar} ({suggestion['confidence']:.1%})\n\n"
+
+        # 修正建议
+        if analysis.get('corrected_sql_options'):
+            content += "🔧 建议的修正版本:\n"
+            for i, option in enumerate(analysis['corrected_sql_options'], 1):
+                content += f"{i}. {option['description']} (置信度: {option['confidence']:.1%})\n"
+                content += f"   修正SQL: {option['sql']}\n\n"
+
+        # 改进建议
+        if analysis.get('improvement_tips'):
+            content += "💡 SQL 优化建议:\n"
+            for i, tip in enumerate(analysis['improvement_tips'], 1):
+                content += f"{i}. {tip['suggestion']}\n"
+
+        if not any(
+                [analysis.get('suggestions'), analysis.get('corrected_sql_options'), analysis.get('improvement_tips')]):
+            content += "✅ 未发现明显问题，SQL看起来不错！"
+
+        self.analysis_text.insert(1.0, content)
+
+    def _show_diagnosis_details(self):
+        """显示诊断详情"""
+        if self.current_error_analysis:
+            if self.current_error_analysis.get('has_error'):
+                self._show_error_analysis_dialog(self.current_error_analysis)
+            else:
+                self._show_improvement_tips_dialog(self.current_error_analysis)
+        else:
+            messagebox.showinfo("提示", "暂无诊断信息")
+
+    def _show_error_analysis_dialog(self, analysis):
+        """显示错误分析对话框"""
+        dialog = tk.Toplevel(self.root)
+        dialog.title("🔍 SQL 智能错误分析")
+        dialog.geometry("700x500")
+        dialog.transient(self.root)
+        dialog.grab_set()
+
+        # 创建主框架
+        main_frame = ttk.Frame(dialog, padding="10")
+        main_frame.pack(fill=tk.BOTH, expand=True)
+
+        # 创建文本框显示分析结果
+        text_frame = ttk.Frame(main_frame)
+        text_frame.pack(fill=tk.BOTH, expand=True)
+
+        analysis_text = scrolledtext.ScrolledText(
+            text_frame,
+            wrap=tk.WORD,
+            font=("Consolas", 10),
+            height=20
+        )
+        analysis_text.pack(fill=tk.BOTH, expand=True)
+
+        # 格式化分析结果
+        content = self._format_error_analysis(analysis)
+        analysis_text.insert(1.0, content)
+        analysis_text.configure(state=tk.DISABLED)
+
+        # 按钮框架
+        button_frame = ttk.Frame(main_frame)
+        button_frame.pack(fill=tk.X, pady=(10, 0))
+
+        # 如果有修正建议，显示修正按钮
+        if analysis.get('corrected_sql_options'):
+            ttk.Button(
+                button_frame,
+                text="🔧 应用修正",
+                command=lambda: self._show_correction_options(dialog, analysis)
+            ).pack(side=tk.LEFT)
+
+        ttk.Button(button_frame, text="关闭", command=dialog.destroy).pack(side=tk.RIGHT)
+
+    def _format_error_analysis(self, analysis):
+        """格式化错误分析内容"""
+        content = "🔍 SQL 智能错误分析\n" + "=" * 60 + "\n\n"
+
+        if analysis['has_error']:
+            content += f"❌ 错误信息:\n{analysis['error_message']}\n\n"
+
+            if analysis['suggestions']:
+                content += "💡 错误分析和建议:\n" + "-" * 40 + "\n"
+                for i, suggestion in enumerate(analysis['suggestions'], 1):
+                    confidence_bar = "█" * int(suggestion['confidence'] * 10)
+                    content += f"\n{i}. 问题类型: {suggestion['type']}\n"
+                    content += f"   描述: {suggestion['description']}\n"
+                    content += f"   建议: {suggestion['suggestion']}\n"
+                    content += f"   置信度: {confidence_bar} ({suggestion['confidence']:.1%})\n"
+
+            if analysis['corrected_sql_options']:
+                content += "\n🔧 建议的修正版本:\n" + "-" * 40 + "\n"
+                for i, option in enumerate(analysis['corrected_sql_options'], 1):
+                    content += f"\n{i}. {option['description']}\n"
+                    content += f"   置信度: {option['confidence']:.1%}\n"
+                    content += f"   修正SQL: {option['sql']}\n"
+
+        return content
+
+    def _show_improvement_tips_dialog(self, analysis):
+        """显示改进建议对话框"""
+        dialog = tk.Toplevel(self.root)
+        dialog.title("💡 SQL 优化建议")
+        dialog.geometry("600x400")
+        dialog.transient(self.root)
+        dialog.grab_set()
+
+        main_frame = ttk.Frame(dialog, padding="10")
+        main_frame.pack(fill=tk.BOTH, expand=True)
+
+        # 标题
+        ttk.Label(main_frame, text="SQL 优化建议", font=("Arial", 14, "bold")).pack(pady=(0, 10))
+
+        # 建议列表
+        tips_frame = ttk.LabelFrame(main_frame, text="优化建议", padding="10")
+        tips_frame.pack(fill=tk.BOTH, expand=True)
+
+        tips_text = scrolledtext.ScrolledText(tips_frame, wrap=tk.WORD, font=("Consolas", 10))
+        tips_text.pack(fill=tk.BOTH, expand=True)
+
+        content = ""
+        if analysis.get('improvement_tips'):
+            for i, tip in enumerate(analysis['improvement_tips'], 1):
+                content += f"{i}. {tip['suggestion']}\n\n"
+        else:
+            content = "✅ 未发现明显的改进点，SQL看起来不错！"
+
+        tips_text.insert(1.0, content)
+        tips_text.configure(state=tk.DISABLED)
+
+        # 关闭按钮
+        ttk.Button(main_frame, text="关闭", command=dialog.destroy).pack(pady=(10, 0))
+
+    def _show_correction_options(self, parent_dialog, analysis):
+        """显示修正选项对话框"""
+        parent_dialog.destroy()  # 关闭父对话框
+
+        dialog = tk.Toplevel(self.root)
+        dialog.title("🔧 SQL 修正选项")
+        dialog.geometry("900x600")
+        dialog.transient(self.root)
+        dialog.grab_set()
+
+        main_frame = ttk.Frame(dialog, padding="10")
+        main_frame.pack(fill=tk.BOTH, expand=True)
+
+        # 说明标签
+        instruction_label = ttk.Label(
+            main_frame,
+            text="发现可能的SQL修正版本，请选择要使用的修正：",
+            font=("Arial", 12, "bold")
+        )
+        instruction_label.pack(pady=(0, 15))
+
+        # 选项框架
+        options_frame = ttk.LabelFrame(main_frame, text="修正选项", padding="10")
+        options_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 15))
+
+        # 创建滚动框架
+        canvas = tk.Canvas(options_frame)
+        scrollbar = ttk.Scrollbar(options_frame, orient="vertical", command=canvas.yview)
+        scrollable_frame = ttk.Frame(canvas)
+
+        scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        )
+
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+
+        # 单选按钮变量
+        self.correction_choice = tk.StringVar(value="none")
+
+        # "不使用修正"选项
+        no_correction_frame = ttk.Frame(scrollable_frame)
+        no_correction_frame.pack(fill=tk.X, pady=5)
+
+        ttk.Radiobutton(
+            no_correction_frame,
+            text="❌ 不使用修正，返回原始错误",
+            variable=self.correction_choice,
+            value="none"
+        ).pack(anchor=tk.W)
+
+        # 分隔线
+        ttk.Separator(scrollable_frame, orient='horizontal').pack(fill=tk.X, pady=10)
+
+        # 修正选项
+        for i, option in enumerate(analysis['corrected_sql_options']):
+            option_frame = ttk.LabelFrame(scrollable_frame, text=f"修正选项 {i + 1}", padding="10")
+            option_frame.pack(fill=tk.X, pady=5)
+
+            # 单选按钮
+            option_text = f"✅ {option['description']} (置信度: {option['confidence']:.1%})"
+            ttk.Radiobutton(
+                option_frame,
+                text=option_text,
+                variable=self.correction_choice,
+                value=str(i)
+            ).pack(anchor=tk.W)
+
+            # 显示修正后的SQL
+            sql_label = ttk.Label(option_frame, text="修正后的SQL:", font=("Arial", 10, "bold"))
+            sql_label.pack(anchor=tk.W, pady=(10, 5))
+
+            sql_text = tk.Text(
+                option_frame,
+                height=3,
+                wrap=tk.WORD,
+                font=("Consolas", 9),
+                bg="#f8f8f8",
+                relief=tk.SUNKEN,
+                bd=1
+            )
+            sql_text.pack(fill=tk.X, pady=(0, 5))
+            sql_text.insert(1.0, option['sql'])
+            sql_text.configure(state=tk.DISABLED)
+
+            # 显示置信度条
+            confidence_frame = ttk.Frame(option_frame)
+            confidence_frame.pack(fill=tk.X, pady=(5, 0))
+
+            confidence_label = ttk.Label(confidence_frame, text="置信度:")
+            confidence_label.pack(side=tk.LEFT)
+
+            # 简单的置信度条
+            progress = ttk.Progressbar(
+                confidence_frame,
+                length=200,
+                mode='determinate',
+                value=option['confidence'] * 100
+            )
+            progress.pack(side=tk.LEFT, padx=(5, 0))
+
+            confidence_text = ttk.Label(confidence_frame, text=f"{option['confidence']:.1%}")
+            confidence_text.pack(side=tk.LEFT, padx=(5, 0))
+
+        # 按钮框架
+        button_frame = ttk.Frame(main_frame)
+        button_frame.pack(fill=tk.X)
+
+        def apply_correction():
+            choice = self.correction_choice.get()
+            dialog.destroy()
+
+            if choice != "none":
+                choice_idx = int(choice)
+                corrected_sql = analysis['corrected_sql_options'][choice_idx]['sql']
+
+                # 将修正后的SQL放入输入框
+                self.sql_text.delete(1.0, tk.END)
+                self.sql_text.insert(1.0, corrected_sql)
+
+                # 显示确认对话框
+                result = messagebox.askyesno(
+                    "应用修正",
+                    f"修正已应用到SQL输入框。\n\n修正后的SQL:\n{corrected_sql}\n\n是否立即执行？"
+                )
+
+                if result:
+                    self._execute_sql()
+                else:
+                    messagebox.showinfo("提示", "修正已应用，可以手动执行或进一步编辑")
+
+        # 按钮
+        ttk.Button(
+            button_frame,
+            text="🚀 应用并执行",
+            command=apply_correction,
+            style="Execute.TButton"
+        ).pack(side=tk.RIGHT, padx=(5, 0))
+
+        ttk.Button(button_frame, text="取消", command=dialog.destroy).pack(side=tk.RIGHT)
 
     def _display_result(self, result):
         """显示查询结果"""
@@ -635,40 +855,61 @@ class SimpleDBGUI:
         for item in self.result_tree.get_children():
             self.result_tree.delete(item)
 
-        if isinstance(result, list) and result:
-            # 如果结果是字典列表，显示为表格
-            if isinstance(result[0], dict):
-                # 设置列
-                columns = list(result[0].keys())
-                self.result_tree["columns"] = columns
-                self.result_tree["show"] = "headings"
+        try:
+            if isinstance(result, list) and result:
+                # 如果结果是字典列表，显示为表格
+                if isinstance(result[0], dict):
+                    # 设置列
+                    columns = list(result[0].keys())
+                    self.result_tree["columns"] = columns
+                    self.result_tree["show"] = "headings"
 
-                # 设置列标题
-                for col in columns:
-                    self.result_tree.heading(col, text=col)
-                    self.result_tree.column(col, width=120, minwidth=80)
+                    # 设置列标题和宽度
+                    for col in columns:
+                        self.result_tree.heading(col, text=col)
+                        # 根据列内容调整宽度
+                        max_width = max(
+                            len(str(col)),
+                            max(len(str(row.get(col, ""))) for row in result[:10])  # 只检查前10行
+                        )
+                        self.result_tree.column(col, width=min(max_width * 8 + 20, 200))
 
-                # 插入数据
-                for row in result:
-                    values = [row.get(col, "") for col in columns]
-                    self.result_tree.insert("", tk.END, values=values)
+                    # 插入数据
+                    for i, row in enumerate(result):
+                        values = [row.get(col, "") for col in columns]
+                        # 为交替行添加不同的标签
+                        tag = "evenrow" if i % 2 == 0 else "oddrow"
+                        self.result_tree.insert("", tk.END, values=values, tags=(tag,))
+
+                    # 配置行颜色
+                    self.result_tree.tag_configure("evenrow", background="#f0f0f0")
+                    self.result_tree.tag_configure("oddrow", background="white")
+
+                else:
+                    # 简单列表显示
+                    self.result_tree["columns"] = ("result",)
+                    self.result_tree["show"] = "headings"
+                    self.result_tree.heading("result", text="结果")
+                    self.result_tree.column("result", width=300)
+
+                    for i, item in enumerate(result):
+                        tag = "evenrow" if i % 2 == 0 else "oddrow"
+                        self.result_tree.insert("", tk.END, values=(str(item),), tags=(tag,))
             else:
-                # 简单列表显示
+                # 单个结果或字符串结果
                 self.result_tree["columns"] = ("result",)
                 self.result_tree["show"] = "headings"
                 self.result_tree.heading("result", text="结果")
+                self.result_tree.column("result", width=300)
+                self.result_tree.insert("", tk.END, values=(str(result),))
 
-                for item in result:
-                    self.result_tree.insert("", tk.END, values=(str(item),))
-        else:
-            # 单个结果或字符串结果
-            self.result_tree["columns"] = ("result",)
-            self.result_tree["show"] = "headings"
-            self.result_tree.heading("result", text="结果")
-            self.result_tree.insert("", tk.END, values=(str(result),))
+            # 切换到数据结果标签页
+            self.result_notebook.select(self.data_frame)
 
-        # 切换到数据结果标签页
-        self.result_notebook.select(self.data_frame)
+        except Exception as e:
+            # 如果显示结果时出错，在日志中记录
+            self._log(f"显示结果时出错: {str(e)}")
+            messagebox.showerror("显示错误", f"结果显示失败: {str(e)}")
 
     def _update_execution_plan(self, plan_json):
         """更新执行计划显示"""
@@ -685,18 +926,24 @@ class SimpleDBGUI:
         self.log_text.see(tk.END)
         self.log_text.configure(state=tk.DISABLED)
 
-    def _add_to_history(self, sql, execution_time):
+    def _add_to_history(self, sql, execution_time, success=True, error_msg=None):
         """添加到查询历史"""
         timestamp = datetime.now().strftime("%H:%M:%S")
-        history_entry = f"[{timestamp}] ({execution_time:.2f}s) {sql[:50]}{'...' if len(sql) > 50 else ''}"
+        status_icon = "✅" if success else "❌"
+        sql_preview = sql[:40] + "..." if len(sql) > 40 else sql
 
-        self.query_history.append({
+        history_entry_text = f"[{timestamp}] {status_icon} {sql_preview}"
+
+        history_entry_data = {
             'sql': sql,
             'timestamp': timestamp,
-            'execution_time': execution_time
-        })
+            'execution_time': execution_time,
+            'success': success,
+            'error_msg': error_msg
+        }
 
-        self.history_listbox.insert(0, history_entry)
+        self.query_history.insert(0, history_entry_data)
+        self.history_listbox.insert(0, history_entry_text)
 
         # 限制历史记录数量
         if len(self.query_history) > 50:
@@ -709,63 +956,65 @@ class SimpleDBGUI:
         if selection:
             index = selection[0]
             if index < len(self.query_history):
-                sql = self.query_history[index]['sql']
+                history_item = self.query_history[index]
+                sql = history_item['sql']
                 self.sql_text.delete(1.0, tk.END)
                 self.sql_text.insert(1.0, sql)
+
+                # 显示历史详情
+                details = f"时间: {history_item['timestamp']}\n"
+                details += f"状态: {'成功' if history_item['success'] else '失败'}\n"
+                if history_item['success']:
+                    details += f"执行时间: {history_item['execution_time']:.3f}s\n"
+                else:
+                    details += f"错误: {history_item.get('error_msg', 'Unknown')}\n"
+                details += f"SQL: {sql}"
+
+                messagebox.showinfo("查询历史详情", details)
 
     def _clear_sql(self):
         """清除SQL输入"""
         self.sql_text.delete(1.0, tk.END)
-
-    def _format_sql(self):
-        """格式化SQL语句"""
-        sql = self.sql_text.get(1.0, tk.END).strip()
-        if not sql:
-            return
-
-        # 简单的SQL格式化（可以替换为更复杂的格式化库）
-        formatted_sql = sql.upper()
-        keywords = ['SELECT', 'FROM', 'WHERE', 'INSERT', 'INTO', 'VALUES',
-                    'UPDATE', 'SET', 'DELETE', 'CREATE', 'TABLE', 'DROP',
-                    'ALTER', 'JOIN', 'LEFT', 'RIGHT', 'INNER', 'OUTER',
-                    'GROUP BY', 'ORDER BY', 'HAVING', 'LIMIT', 'OFFSET']
-
-        for keyword in keywords:
-            formatted_sql = formatted_sql.replace(keyword, f"\n{keyword} ")
-
-        formatted_sql = formatted_sql.replace(',', ',\n\t')
-
-        self.sql_text.delete(1.0, tk.END)
-        self.sql_text.insert(1.0, formatted_sql.strip())
-
-    def _clear_history(self):
-        """清除查询历史"""
-        self.query_history.clear()
-        self.history_listbox.delete(0, tk.END)
-        self._log("查询历史已清除")
-
-    def _export_history(self):
-        """导出查询历史"""
-        # 这里可以实现导出历史到文件的功能
-        messagebox.showinfo("导出历史", "导出功能将在未来版本中实现")
+        # 清除智能分析
+        self.current_error_analysis = None
+        self.diagnosis_label.configure(text="诊断状态: 待检查", foreground="gray")
+        self.suggestion_label.configure(text="建议: 0 项")
+        self.details_btn.configure(state=tk.DISABLED)
+        self.analysis_text.delete(1.0, tk.END)
 
     def _refresh_database_info(self):
         """刷新数据库信息"""
         try:
-            # 这里可以添加获取数据库状态信息的代码
-            table_count = len(self.catalog_manager.get_all_tables())
-            self.table_count_label.configure(text=str(table_count))
-            self.status_label.configure(text="就绪", foreground=self.colors['success'])
-            self.status_message.configure(text="数据库状态已刷新")
+            # 获取表列表
+            tables = []
+            try:
+                if hasattr(self.catalog_manager, 'get_all_tables'):
+                    tables = self.catalog_manager.get_all_tables()
+            except:
+                pass
+
+            if tables:
+                self.tables_label.configure(text=f"表: {', '.join(tables[:5])}")
+            else:
+                self.tables_label.configure(text="表: 无")
+
+            self.status_label.configure(text="状态: 就绪", foreground="green")
             self._log("数据库信息已刷新")
+
         except Exception as e:
             self._log(f"刷新信息失败: {str(e)}")
+            self.tables_label.configure(text="表: 加载失败")
 
     def run(self):
         """启动GUI"""
+        # 初始化刷新数据库信息
+        self._refresh_database_info()
+
         # 添加欢迎日志
         self._log("SimpleDB GUI 已启动")
-        self._log("请在左侧输入SQL语句并点击执行")
+        self._log("🧠 智能SQL纠错功能已启用")
+        self._log("💡 可以使用 Ctrl+Enter 快捷键执行SQL")
+        self._log("🔍 点击'智能检查'按钮可以在执行前分析SQL")
 
         # 启动主循环
         self.root.protocol("WM_DELETE_WINDOW", self._on_closing)
@@ -790,6 +1039,7 @@ def main():
         app.run()
     except Exception as e:
         messagebox.showerror("启动错误", f"应用程序启动失败: {str(e)}")
+        print(f"详细错误信息: {traceback.format_exc()}")
 
 
 if __name__ == "__main__":

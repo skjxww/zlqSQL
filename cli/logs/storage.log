@@ -1417,3 +1417,23 @@
 2025-09-11 16:10:10,487 - storage - INFO - _log_with_context:97 - Performance: page_read:read_page_from_disk completed in 0.0004s | Context: avg_time=0.0006s
 2025-09-11 16:10:10,487 - storage - INFO - _log_with_context:97 - Performance: buffer_put:put completed in 0.0000s | Context: avg_time=0.0005s
 2025-09-11 16:10:10,487 - storage - INFO - _log_with_context:97 - Performance: read_page:read_page completed in 0.0014s | Context: avg_time=0.0006s
+2025-09-11 16:38:36,721 - storage - INFO - _log_with_context:97 - StorageManager initialized successfully | Context: buffer_size=100 | data_file=data\database.db | meta_file=data\metadata.json | auto_flush_interval=30
+2025-09-11 16:38:36,722 - storage - INFO - _log_with_context:97 - Loaded 18 table storage entries
+2025-09-11 16:38:36,722 - storage - INFO - _log_with_context:97 - TableStorage initialized with 18 tables
+2025-09-11 16:38:47,622 - storage - WARNING - _log_with_context:97 - Table storage for 'users' already exists
+2025-09-11 16:38:47,623 - storage - ERROR - _log_with_context:97 - Error creating table 'users': [STORAGE_ERROR] Failed to create storage for table 'users'
+2025-09-11 16:39:13,559 - storage - WARNING - _log_with_context:97 - Table storage for 'users' already exists
+2025-09-11 16:39:13,559 - storage - ERROR - _log_with_context:97 - Error creating table 'users': [STORAGE_ERROR] Failed to create storage for table 'users'
+2025-09-11 16:40:46,240 - storage - INFO - _log_with_context:97 - Performance: page_allocation:allocate_page completed in 0.0020s | Context: avg_time=0.0020s
+2025-09-11 16:40:46,240 - storage - INFO - _log_with_context:97 - Allocated new page 19
+2025-09-11 16:40:46,240 - storage - INFO - _log_with_context:97 - Performance: allocate_page:allocate_page completed in 0.0020s | Context: avg_time=0.0020s
+2025-09-11 16:40:46,240 - storage - ERROR - _log_with_context:97 - Operation write_page:write_page failed after 0.0000s | Context: exception=No module named 'storage.core.utils'
+2025-09-11 16:40:46,241 - storage - ERROR - _log_with_context:97 - Failed to create storage for table 'users1': [UNKNOWN_ERROR] Unexpected error: No module named 'storage.core.utils'
+2025-09-11 16:40:46,241 - storage - ERROR - _log_with_context:97 - Error creating table 'users1': [STORAGE_ERROR] Failed to create storage for table 'users1'
+2025-09-11 16:46:24,022 - storage - INFO - _log_with_context:97 - StorageManager initialized successfully | Context: buffer_size=100 | data_file=data\database.db | meta_file=data\metadata.json | auto_flush_interval=30
+2025-09-11 16:46:24,023 - storage - INFO - _log_with_context:97 - Loaded 18 table storage entries
+2025-09-11 16:46:24,023 - storage - INFO - _log_with_context:97 - TableStorage initialized with 18 tables
+2025-09-11 16:46:42,963 - storage - INFO - _log_with_context:97 - Starting StorageManager shutdown
+2025-09-11 16:46:42,964 - storage - INFO - _log_with_context:97 - Flushed all dirty pages | Context: pages_flushed=0 | flush_count=1
+2025-09-11 16:46:42,964 - storage - INFO - _log_with_context:97 - Performance: flush_all_pages:flush_all_pages completed in 0.0000s | Context: avg_time=0.0000s
+2025-09-11 16:46:42,967 - storage - INFO - _log_with_context:97 - StorageManager shutdown completed successfully | Context: pages_flushed=0 | total_operations=0 | total_flushes=1 | final_cache_hit_rate=0.0 | uptime_seconds=18.95

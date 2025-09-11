@@ -810,3 +810,22 @@
 2025-09-11 16:09:41,580 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=18
 2025-09-11 16:09:49,638 - page_manager - DEBUG - _log_with_context:97 - Read page from disk | Context: page_id=1 | data_length=4096 | file_offset=0
 2025-09-11 16:10:10,487 - page_manager - DEBUG - _log_with_context:97 - Read page from disk | Context: page_id=5 | data_length=4096 | file_offset=16384
+2025-09-11 16:38:36,718 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-11 16:38:36,718 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=19 | allocated_count=18 | free_count=0
+2025-09-11 16:38:36,719 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=18
+2025-09-11 16:38:36,719 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-11 16:38:36,720 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=19 | allocated_count=18 | free_count=0
+2025-09-11 16:38:36,720 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=18
+2025-09-11 16:40:46,238 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 19
+2025-09-11 16:40:46,240 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-11 16:40:46,240 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=19 | total_allocated=19
+2025-09-11 16:46:24,018 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-11 16:46:24,019 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=20 | allocated_count=19 | free_count=0
+2025-09-11 16:46:24,019 - page_manager - WARNING - _log_with_context:97 - Data file size inconsistent with metadata | Context: file_size=73728 | expected_size=77824
+2025-09-11 16:46:24,019 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=19
+2025-09-11 16:46:24,021 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-11 16:46:24,021 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=20 | allocated_count=19 | free_count=0
+2025-09-11 16:46:24,021 - page_manager - WARNING - _log_with_context:97 - Data file size inconsistent with metadata | Context: file_size=73728 | expected_size=77824
+2025-09-11 16:46:24,021 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=19
+2025-09-11 16:46:42,967 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-11 16:46:42,967 - page_manager - INFO - _log_with_context:97 - PageManager cleanup completed

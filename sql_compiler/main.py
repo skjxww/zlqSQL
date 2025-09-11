@@ -6,7 +6,6 @@ from sql_compiler.codegen.plan_generator import PlanGenerator
 from sql_compiler.catalog.catalog_manager import CatalogManager
 from sql_compiler.exceptions.compiler_errors import CompilerError
 from sql_compiler.utils.helpers import print_tokens, format_json
-from sql_compiler.diagnostics.error_analyzer import SmartErrorReporter
 
 
 class SQLCompiler:
@@ -14,10 +13,6 @@ class SQLCompiler:
         self.catalog = CatalogManager()
         self.test_mode = test_mode
         self.enable_diagnostics = enable_diagnostics
-
-        # 初始化智能错误报告器
-        if self.enable_diagnostics:
-            self.error_reporter = SmartErrorReporter(self.catalog)
 
         if not test_mode:
             print(f"系统目录已加载，当前表数: {len(self.catalog.get_all_tables())}")
@@ -58,11 +53,7 @@ class SQLCompiler:
             return plan
 
         except CompilerError as e:
-            if self.enable_diagnostics and not self.test_mode:
-                # 使用智能错误诊断
-                self.error_reporter.report_error(e, sql_text)
-            else:
-                print(f"\n❌ 编译失败: {e}")
+            print(f"\n❌ 编译失败: {e}")
             return None
         except Exception as e:
             print(f"\n❌ 系统错误: {e}")
