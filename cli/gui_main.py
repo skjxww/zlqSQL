@@ -231,9 +231,23 @@ class SimpleDBGUI:
         self.status_label = ttk.Label(info_frame, text="状态: 就绪", foreground="green")
         self.status_label.grid(row=0, column=0, sticky=tk.W)
 
-        # 表信息
-        self.tables_label = ttk.Label(info_frame, text="表: 加载中...")
-        self.tables_label.grid(row=1, column=0, sticky=tk.W)
+        # 表信息框架
+        table_frame = ttk.Frame(info_frame)
+        table_frame.grid(row=1, column=0, sticky=(tk.W, tk.E), pady=(5, 0))
+
+        # 表标签
+        ttk.Label(table_frame, text="表:").grid(row=0, column=0, sticky=tk.W)
+
+        # 表列表（可点击）
+        self.tables_listbox = tk.Listbox(
+            table_frame,
+            height=4,
+            width=30,
+            font=("Consolas", 9),
+            selectmode=tk.SINGLE
+        )
+        self.tables_listbox.grid(row=1, column=0, sticky=(tk.W, tk.E), pady=(2, 0))
+        self.tables_listbox.bind('<Double-1>', self._show_table_details)
 
         # 刷新按钮
         refresh_btn = ttk.Button(
@@ -242,6 +256,8 @@ class SimpleDBGUI:
             command=self._refresh_database_info
         )
         refresh_btn.grid(row=2, column=0, sticky=(tk.W, tk.E), pady=(5, 0))
+
+        table_frame.columnconfigure(0, weight=1)
 
     def _create_smart_diagnosis_area(self, parent):
         """创建智能诊断区域"""
@@ -368,6 +384,116 @@ class SimpleDBGUI:
         history_scrollbar = ttk.Scrollbar(history_frame, orient=tk.VERTICAL, command=self.history_listbox.yview)
         history_scrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
         self.history_listbox.configure(yscrollcommand=history_scrollbar.set)
+
+    def _show_table_details(self, event):
+        """显示表详细信息"""
+        selection = self.tables_listbox.curselection()
+        if not selection:
+            return
+
+        table_name = self.tables_listbox.get(selection[0])
+
+        try:
+            # 获取表详细信息
+            tables_dict = self.catalog_manager.get_all_tables()
+            table_info = tables_dict.get(table_name, {})
+
+            # 创建详情对话框
+            dialog = tk.Toplevel(self.root)
+            dialog.title(f"表详细信息: {table_name}")
+            dialog.geometry("800x600")
+            dialog.transient(self.root)
+            dialog.grab_set()
+
+            main_frame = ttk.Frame(dialog, padding="10")
+            main_frame.pack(fill=tk.BOTH, expand=True)
+
+            # 基本信息
+            info_frame = ttk.LabelFrame(main_frame, text="表基本信息", padding="10")
+            info_frame.pack(fill=tk.X, pady=(0, 10))
+
+            # 创建基本信息表格
+            info_tree = ttk.Treeview(info_frame, columns=("property", "value"), show="tree", height=3)
+            info_tree.heading("#0", text="属性")
+            info_tree.heading("property", text="")
+            info_tree.heading("value", text="值")
+
+            # 添加基本信息
+            info_tree.insert("", tk.END, text="表名", values=("", table_name))
+            info_tree.insert("", tk.END, text="列数", values=("", str(len(table_info.get('columns', [])))))
+            info_tree.insert("", tk.END, text="行数", values=("", str(table_info.get('rows', 0))))
+
+            info_tree.pack(fill=tk.X)
+
+            # 列信息
+            columns_frame = ttk.LabelFrame(main_frame, text="列信息", padding="10")
+            columns_frame.pack(fill=tk.BOTH, expand=True)
+
+            # 创建列信息表格
+            columns_tree = ttk.Treeview(columns_frame, columns=("name", "type", "nullable", "default"), show="headings")
+            columns_tree.heading("name", text="列名")
+            columns_tree.heading("type", text="类型")
+            columns_tree.heading("nullable", text="可空")
+            columns_tree.heading("default", text="默认值")
+
+            # 设置列宽
+            columns_tree.column("name", width=150)
+            columns_tree.column("type", width=100)
+            columns_tree.column("nullable", width=60)
+            columns_tree.column("default", width=100)
+
+            # 添加列信息（这里简化处理，实际应该从表信息中获取）
+            columns = table_info.get('columns', [])
+            for i, column in enumerate(columns):
+                columns_tree.insert("", tk.END, values=(column, "VARCHAR", "YES", "NULL"))
+
+            # 添加滚动条
+            scrollbar = ttk.Scrollbar(columns_frame, orient=tk.VERTICAL, command=columns_tree.yview)
+            columns_tree.configure(yscrollcommand=scrollbar.set)
+
+            columns_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+            scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+            # 操作按钮
+            button_frame = ttk.Frame(main_frame)
+            button_frame.pack(fill=tk.X, pady=(10, 0))
+
+            # 查看数据按钮
+            ttk.Button(
+                button_frame,
+                text="📊 查看数据",
+                command=lambda: self._view_table_data(table_name)
+            ).pack(side=tk.LEFT, padx=(0, 5))
+
+            # 生成查询按钮
+            ttk.Button(
+                button_frame,
+                text="🔍 生成SELECT查询",
+                command=lambda: self._generate_select_query(table_name)
+            ).pack(side=tk.LEFT)
+
+            ttk.Button(button_frame, text="关闭", command=dialog.destroy).pack(side=tk.RIGHT)
+
+        except Exception as e:
+            messagebox.showerror("错误", f"获取表信息失败: {str(e)}")
+
+    def _view_table_data(self, table_name):
+        """查看表数据"""
+        try:
+            # 生成SELECT查询
+            query = f"SELECT * FROM {table_name};"
+            self.sql_text.delete(1.0, tk.END)
+            self.sql_text.insert(1.0, query)
+            self._execute_sql()
+        except Exception as e:
+            messagebox.showerror("错误", f"查看表数据失败: {str(e)}")
+
+    def _generate_select_query(self, table_name):
+        """生成SELECT查询"""
+        query = f"SELECT * FROM {table_name} WHERE condition;"
+        self.sql_text.delete(1.0, tk.END)
+        self.sql_text.insert(1.0, query)
+        messagebox.showinfo("提示", f"已生成SELECT查询，请修改WHERE条件")
 
     def _execute_sql(self):
         """执行SQL语句"""
@@ -985,25 +1111,37 @@ class SimpleDBGUI:
     def _refresh_database_info(self):
         """刷新数据库信息"""
         try:
-            # 获取表列表
-            tables = []
+            # 获取表信息字典
+            tables_dict = {}
             try:
                 if hasattr(self.catalog_manager, 'get_all_tables'):
-                    tables = self.catalog_manager.get_all_tables()
-            except:
-                pass
+                    tables_dict = self.catalog_manager.get_all_tables()
+            except Exception as e:
+                self._log(f"获取表信息时出错: {str(e)}")
+                raise e
 
-            if tables:
-                self.tables_label.configure(text=f"表: {', '.join(tables[:5])}")
+            # 清空表列表
+            self.tables_listbox.delete(0, tk.END)
+
+            if tables_dict and isinstance(tables_dict, dict):
+                # 获取表名列表
+                table_names = list(tables_dict.keys())
+
+                # 添加到列表框中
+                for table_name in table_names:
+                    self.tables_listbox.insert(tk.END, table_name)
+
+                self._log(f"成功获取 {len(table_names)} 张表")
+
             else:
-                self.tables_label.configure(text="表: 无")
+                self._log("未找到表信息")
 
             self.status_label.configure(text="状态: 就绪", foreground="green")
             self._log("数据库信息已刷新")
 
         except Exception as e:
             self._log(f"刷新信息失败: {str(e)}")
-            self.tables_label.configure(text="表: 加载失败")
+            messagebox.showerror("错误", f"刷新数据库信息失败: {str(e)}")
 
     def run(self):
         """启动GUI"""
@@ -1015,6 +1153,7 @@ class SimpleDBGUI:
         self._log("🧠 智能SQL纠错功能已启用")
         self._log("💡 可以使用 Ctrl+Enter 快捷键执行SQL")
         self._log("🔍 点击'智能检查'按钮可以在执行前分析SQL")
+        self._log("📋 双击表名可以查看表详细信息")
 
         # 启动主循环
         self.root.protocol("WM_DELETE_WINDOW", self._on_closing)

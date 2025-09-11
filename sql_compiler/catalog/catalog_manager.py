@@ -71,7 +71,7 @@ class CatalogManager:
         return table_name in self.catalog_data["tables"]
 
     def get_table(self, table_name: str) -> Optional[Dict[str, Any]]:
-        """获取表信息 - 修复缺失的方法"""
+        """获取表信息"""
         return self.catalog_data["tables"].get(table_name)
 
     def get_all_tables(self) -> Dict[str, Dict[str, Any]]:
