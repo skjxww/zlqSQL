@@ -54,9 +54,10 @@ class InvalidPageIdException(PageException):
     def __init__(self, page_id: int):
         super().__init__(
             f"Invalid page ID: {page_id}",
-            page_id=page_id,
-            error_code="INVALID_PAGE_ID"
+            page_id=page_id
         )
+        # 在父类构造后再设置特定的错误码
+        self.error_code = "INVALID_PAGE_ID"
 
 
 class PageNotAllocatedException(PageException):
@@ -65,9 +66,9 @@ class PageNotAllocatedException(PageException):
     def __init__(self, page_id: int):
         super().__init__(
             f"Page {page_id} is not allocated",
-            page_id=page_id,
-            error_code="PAGE_NOT_ALLOCATED"
+            page_id=page_id
         )
+        self.error_code = "PAGE_NOT_ALLOCATED"
 
 
 class DiskIOException(StorageException):
@@ -85,8 +86,12 @@ class BufferPoolException(StorageException):
     """缓存池异常"""
 
     def __init__(self, message: str, **kwargs):
-        super().__init__(message, error_code="BUFFER_POOL_ERROR", **kwargs)
+        # 将额外参数放入details
+        details = {}
+        for key, value in kwargs.items():
+            details[key] = value
 
+        super().__init__(message, error_code="BUFFER_POOL_ERROR", details=details)
 
 class BufferFullException(BufferPoolException):
     """缓存池已满异常"""
@@ -94,18 +99,22 @@ class BufferFullException(BufferPoolException):
     def __init__(self, capacity: int):
         super().__init__(
             f"Buffer pool is full (capacity: {capacity})",
-            error_code="BUFFER_FULL"
+            capacity=capacity
         )
-        self.details['capacity'] = capacity
+        self.error_code = "BUFFER_FULL"
 
 
 class TableException(StorageException):
     """表管理相关异常"""
 
     def __init__(self, message: str, table_name: str = None, **kwargs):
-        super().__init__(message, error_code="TABLE_ERROR", **kwargs)
+        details = {}
         if table_name:
-            self.details['table_name'] = table_name
+            details['table_name'] = table_name
+        for key, value in kwargs.items():
+            details[key] = value
+
+        super().__init__(message, error_code="TABLE_ERROR", details=details)
 
 
 class TableNotFoundException(TableException):
@@ -114,9 +123,9 @@ class TableNotFoundException(TableException):
     def __init__(self, table_name: str):
         super().__init__(
             f"Table '{table_name}' not found",
-            table_name=table_name,
-            error_code="TABLE_NOT_FOUND"
+            table_name=table_name
         )
+        self.error_code = "TABLE_NOT_FOUND"
 
 
 class TableAlreadyExistsException(TableException):
@@ -125,9 +134,9 @@ class TableAlreadyExistsException(TableException):
     def __init__(self, table_name: str):
         super().__init__(
             f"Table '{table_name}' already exists",
-            table_name=table_name,
-            error_code="TABLE_ALREADY_EXISTS"
+            table_name=table_name
         )
+        self.error_code = "TABLE_ALREADY_EXISTS"
 
 
 class SchemaException(StorageException):
@@ -142,9 +151,9 @@ class InvalidSchemaException(SchemaException):
 
     def __init__(self, schema_info: str):
         super().__init__(
-            f"Invalid schema: {schema_info}",
-            error_code="INVALID_SCHEMA"
+            f"Invalid schema: {schema_info}"
         )
+        self.error_code = "INVALID_SCHEMA"
         self.details['schema_info'] = schema_info
 
 
@@ -160,9 +169,9 @@ class RecordTooLargeException(RecordException):
 
     def __init__(self, record_size: int, max_size: int):
         super().__init__(
-            f"Record size {record_size} exceeds maximum size {max_size}",
-            error_code="RECORD_TOO_LARGE"
+            f"Record size {record_size} exceeds maximum size {max_size}"
         )
+        self.error_code = "RECORD_TOO_LARGE"
         self.details.update({
             'record_size': record_size,
             'max_size': max_size
@@ -173,9 +182,13 @@ class SerializationException(StorageException):
     """序列化异常"""
 
     def __init__(self, message: str, data_type: str = None, **kwargs):
-        super().__init__(message, error_code="SERIALIZATION_ERROR", **kwargs)
+        details = {}
         if data_type:
-            self.details['data_type'] = data_type
+            details['data_type'] = data_type
+        for key, value in kwargs.items():
+            details[key] = value
+
+        super().__init__(message, error_code="SERIALIZATION_ERROR", details=details)
 
 
 class SystemShutdownException(StorageException):

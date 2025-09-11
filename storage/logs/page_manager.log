@@ -1499,3 +1499,14 @@
 2025-09-09 16:28:25,745 - page_manager - DEBUG - _log_with_context:97 - Reusing freed page 23
 2025-09-09 16:28:25,747 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
 2025-09-09 16:28:25,747 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=23 | total_allocated=23
+2025-09-09 21:29:32,032 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-09 21:29:32,033 - page_manager - INFO - _log_with_context:97 - Metadata file not found, using default configuration
+2025-09-09 21:29:32,034 - page_manager - INFO - _log_with_context:97 - Created new data file | Context: file_path=data\database.db
+2025-09-09 21:29:32,034 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=0
+2025-09-09 21:29:32,035 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 1
+2025-09-09 21:29:32,037 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 21:29:32,037 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | total_allocated=1
+2025-09-09 21:29:32,038 - page_manager - DEBUG - _log_with_context:97 - Extended data file to 4096 bytes
+2025-09-09 21:29:32,041 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=1 | data_length=4096 | file_offset=0
+2025-09-09 21:29:32,043 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-09 21:29:32,043 - page_manager - INFO - _log_with_context:97 - PageManager cleanup completed

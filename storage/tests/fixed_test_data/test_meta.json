@@ -1,0 +1,20 @@
+{
+  "next_page_id": 3,
+  "free_pages": [
+    1
+  ],
+  "allocated_pages": [
+    2
+  ],
+  "page_usage": {
+    "2": {
+      "allocated_time": 1757494137.3336356,
+      "access_count": 0,
+      "last_access": null
+    }
+  },
+  "last_modification": 1757494137.340111,
+  "version": "1.0",
+  "total_allocated": 1,
+  "total_free": 1
+}
