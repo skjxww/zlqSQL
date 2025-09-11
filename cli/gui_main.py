@@ -296,6 +296,8 @@ class SimpleDBGUI:
         # 数据结果标签页
         self.data_frame = ttk.Frame(self.result_notebook)
         self.result_notebook.add(self.data_frame, text="数据结果")
+        self.data_frame.columnconfigure(0, weight=1)
+        self.data_frame.rowconfigure(0, weight=1)
 
         # 创建表格显示数据
         self._create_result_table(self.data_frame)
@@ -303,6 +305,8 @@ class SimpleDBGUI:
         # 执行计划标签页
         self.plan_frame = ttk.Frame(self.result_notebook)
         self.result_notebook.add(self.plan_frame, text="执行计划")
+        self.plan_frame.columnconfigure(0, weight=1)
+        self.plan_frame.rowconfigure(0, weight=1)
 
         # 执行计划文本框
         self.plan_text = scrolledtext.ScrolledText(
@@ -311,26 +315,53 @@ class SimpleDBGUI:
             wrap=tk.WORD
         )
         self.plan_text.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
-        self.plan_frame.columnconfigure(0, weight=1)
-        self.plan_frame.rowconfigure(0, weight=1)
 
         # 智能分析标签页
         self.analysis_frame = ttk.Frame(self.result_notebook)
         self.result_notebook.add(self.analysis_frame, text="智能分析")
+        self.analysis_frame.columnconfigure(0, weight=1)
+        self.analysis_frame.rowconfigure(0, weight=1)
+
+        # 创建分析框架的布局
+        analysis_container = ttk.Frame(self.analysis_frame)
+        analysis_container.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        analysis_container.columnconfigure(0, weight=1)
+        analysis_container.rowconfigure(0, weight=1)
 
         # 智能分析文本框
         self.analysis_text = scrolledtext.ScrolledText(
-            self.analysis_frame,
+            analysis_container,
             font=("Consolas", 9),
             wrap=tk.WORD
         )
         self.analysis_text.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
-        self.analysis_frame.columnconfigure(0, weight=1)
-        self.analysis_frame.rowconfigure(0, weight=1)
+
+        # 按钮框架 - 放在分析文本框下方
+        self.analysis_button_frame = ttk.Frame(analysis_container)
+        self.analysis_button_frame.grid(row=1, column=0, sticky=(tk.W, tk.E), pady=(5, 0))
+
+        # 应用修正按钮
+        self.apply_correction_btn = ttk.Button(
+            self.analysis_button_frame,
+            text="🔧 应用修正",
+            command=self._apply_correction_from_analysis,
+            state=tk.DISABLED
+        )
+        self.apply_correction_btn.pack(side=tk.LEFT, padx=(0, 5))
+
+        # 重新检查按钮
+        self.recheck_btn = ttk.Button(
+            self.analysis_button_frame,
+            text="🔄 重新检查",
+            command=self._smart_check_sql
+        )
+        self.recheck_btn.pack(side=tk.LEFT)
 
         # 日志标签页
         self.log_frame = ttk.Frame(self.result_notebook)
         self.result_notebook.add(self.log_frame, text="执行日志")
+        self.log_frame.columnconfigure(0, weight=1)
+        self.log_frame.rowconfigure(0, weight=1)
 
         # 日志文本框
         self.log_text = scrolledtext.ScrolledText(
@@ -340,29 +371,132 @@ class SimpleDBGUI:
             state=tk.DISABLED
         )
         self.log_text.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
-        self.log_frame.columnconfigure(0, weight=1)
-        self.log_frame.rowconfigure(0, weight=1)
+
+    def _apply_correction_from_analysis(self):
+        """从分析结果应用修正"""
+        if not self.current_error_analysis or not self.current_error_analysis.get('corrected_sql_options'):
+            messagebox.showinfo("提示", "没有可用的修正选项")
+            return
+
+        # 如果有多个修正选项，显示选择对话框
+        if len(self.current_error_analysis['corrected_sql_options']) > 1:
+            self._show_correction_options_dialog()
+        else:
+            # 只有一个修正选项，直接应用
+            corrected_sql = self.current_error_analysis['corrected_sql_options'][0]['sql']
+            self._apply_corrected_sql(corrected_sql)
+
+    def _show_correction_options_dialog(self):
+        """显示修正选项对话框"""
+        dialog = tk.Toplevel(self.root)
+        dialog.title("🔧 选择修正选项")
+        dialog.geometry("700x400")
+        dialog.transient(self.root)
+        dialog.grab_set()
+
+        main_frame = ttk.Frame(dialog, padding="10")
+        main_frame.pack(fill=tk.BOTH, expand=True)
+
+        # 说明标签
+        ttk.Label(
+            main_frame,
+            text="请选择要应用的修正版本:",
+            font=("Arial", 12, "bold")
+        ).pack(pady=(0, 15))
+
+        # 选项框架
+        options_frame = ttk.Frame(main_frame)
+        options_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 15))
+
+        # 单选按钮变量
+        correction_choice = tk.StringVar(value="0")
+
+        # 修正选项
+        for i, option in enumerate(self.current_error_analysis['corrected_sql_options']):
+            option_frame = ttk.LabelFrame(options_frame, text=f"选项 {i + 1}", padding="5")
+            option_frame.pack(fill=tk.X, pady=2)
+
+            ttk.Radiobutton(
+                option_frame,
+                text=f"{option['description']} (置信度: {option['confidence']:.1%})",
+                variable=correction_choice,
+                value=str(i)
+            ).pack(anchor=tk.W)
+
+            # 显示SQL预览
+            sql_preview = tk.Text(
+                option_frame,
+                height=2,
+                wrap=tk.WORD,
+                font=("Consolas", 8),
+                bg="#f8f8f8"
+            )
+            sql_preview.pack(fill=tk.X, pady=(2, 0))
+            sql_preview.insert(1.0, option['sql'])
+            sql_preview.configure(state=tk.DISABLED)
+
+        # 按钮框架
+        button_frame = ttk.Frame(main_frame)
+        button_frame.pack(fill=tk.X)
+
+        def apply_selected_correction():
+            choice_idx = int(correction_choice.get())
+            corrected_sql = self.current_error_analysis['corrected_sql_options'][choice_idx]['sql']
+            dialog.destroy()
+            self._apply_corrected_sql(corrected_sql)
+
+        ttk.Button(
+            button_frame,
+            text="🚀 应用并执行",
+            command=apply_selected_correction,
+            style="Execute.TButton"
+        ).pack(side=tk.RIGHT, padx=(5, 0))
+
+        ttk.Button(button_frame, text="取消", command=dialog.destroy).pack(side=tk.RIGHT)
+
+    def _apply_corrected_sql(self, corrected_sql):
+        """应用修正后的SQL"""
+        # 将修正后的SQL放入输入框
+        self.sql_text.delete(1.0, tk.END)
+        self.sql_text.insert(1.0, corrected_sql)
+
+        # 显示确认对话框
+        result = messagebox.askyesno(
+            "应用修正",
+            f"修正已应用到SQL输入框。\n\n是否立即执行？"
+        )
+
+        if result:
+            self._execute_sql()
+        else:
+            messagebox.showinfo("提示", "修正已应用，可以手动执行或进一步编辑")
 
     def _create_result_table(self, parent):
         """创建结果表格"""
-        # 表格框架
-        table_frame = ttk.Frame(parent)
-        table_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
-        table_frame.columnconfigure(0, weight=1)
-        table_frame.rowconfigure(0, weight=1)
+        # 创建主框架
+        table_container = ttk.Frame(parent)
+        table_container.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        table_container.columnconfigure(0, weight=1)
+        table_container.rowconfigure(0, weight=1)
 
         # 创建Treeview表格
-        self.result_tree = ttk.Treeview(table_frame)
+        self.result_tree = ttk.Treeview(table_container)
         self.result_tree.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
 
         # 添加滚动条
-        v_scrollbar = ttk.Scrollbar(table_frame, orient=tk.VERTICAL, command=self.result_tree.yview)
+        v_scrollbar = ttk.Scrollbar(table_container, orient=tk.VERTICAL, command=self.result_tree.yview)
         v_scrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
         self.result_tree.configure(yscrollcommand=v_scrollbar.set)
 
-        h_scrollbar = ttk.Scrollbar(table_frame, orient=tk.HORIZONTAL, command=self.result_tree.xview)
+        h_scrollbar = ttk.Scrollbar(table_container, orient=tk.HORIZONTAL, command=self.result_tree.xview)
         h_scrollbar.grid(row=1, column=0, sticky=(tk.W, tk.E))
         self.result_tree.configure(xscrollcommand=h_scrollbar.set)
+
+        # 配置网格权重，让表格可以扩展
+        parent.columnconfigure(0, weight=1)
+        parent.rowconfigure(0, weight=1)
+        table_container.columnconfigure(0, weight=1)
+        table_container.rowconfigure(0, weight=1)
 
     def _create_history_area(self, parent):
         """创建查询历史区域"""
@@ -623,7 +757,7 @@ class SimpleDBGUI:
         self.execute_btn.configure(state=tk.NORMAL, text="🚀 执行SQL")
 
     def _smart_check_sql(self):
-        """智能检查SQL（不执行）"""
+        """智能检查SQL（不执行）- 修复版本"""
         sql = self.sql_text.get(1.0, tk.END).strip()
         if not sql:
             messagebox.showinfo("提示", "请先输入SQL语句")
@@ -631,13 +765,23 @@ class SimpleDBGUI:
 
         # 进行智能分析
         try:
-            analysis = self.sql_corrector.analyze_and_suggest(sql)
+            analysis = self.sql_corrector.analyze_and_suggest(sql)  # 不传error参数
             self._update_smart_analysis(analysis, success=None)
 
-            if analysis.get('improvement_tips'):
-                self._show_improvement_tips_dialog(analysis)
+            # 🔑 修复：检查是否有语法问题或修正建议
+            has_syntax_issues = analysis.get('suggestions') or analysis.get('corrected_sql_options')
+            has_improvements = analysis.get('improvement_tips')
+
+            # 直接切换到智能分析标签页
+            self.result_notebook.select(self.analysis_frame)
+
+            # 不再弹出对话框，所有信息都在智能分析标签页中显示
+            if has_syntax_issues or has_improvements:
+                # 显示提示信息
+                messagebox.showinfo("智能检查", "分析完成！SQL有点问题呢。")
             else:
-                messagebox.showinfo("智能检查", "未发现明显问题，SQL看起来不错！")
+                # 真的没有问题
+                messagebox.showinfo("智能检查", "✅ 未发现任何问题，SQL看起来很完美！")
 
         except Exception as e:
             messagebox.showerror("智能检查失败", f"分析过程出错: {str(e)}")
@@ -664,6 +808,12 @@ class SimpleDBGUI:
             suggestion_count += len(analysis['corrected_sql_options'])
 
         self.suggestion_label.configure(text=f"建议: {suggestion_count} 项")
+
+        # 控制应用修正按钮状态
+        if analysis.get('corrected_sql_options'):
+            self.apply_correction_btn.configure(state=tk.NORMAL)
+        else:
+            self.apply_correction_btn.configure(state=tk.DISABLED)
 
         # 启用详情按钮
         if suggestion_count > 0:
