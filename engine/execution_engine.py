@@ -3,7 +3,7 @@ from typing import List, Dict, Any, Optional, Tuple
 from engine.storage_engine import StorageEngine
 from catalog.catalog_manager import CatalogManager
 from sql_compiler.codegen.operators import Operator, CreateTableOp, InsertOp, SeqScanOp, FilterOp, ProjectOp, UpdateOp, \
-    DeleteOp, OptimizedSeqScanOp, GroupByOp, OrderByOp, JoinOp, FilteredSeqScanOp
+    DeleteOp, OptimizedSeqScanOp, GroupByOp, OrderByOp, JoinOp, FilteredSeqScanOp, IndexScanOp, IndexOnlyScanOp, CreateIndexOp, DropIndexOp
 from sql_compiler.exceptions.compiler_errors import SemanticError
 from sql_compiler.semantic.symbol_table import SymbolTable
 from sql_compiler.semantic.type_checker import TypeChecker
@@ -52,6 +52,15 @@ class ExecutionEngine:
                 return self.execute_join(plan.join_type, plan.on_condition, plan.children)
             elif isinstance(plan, FilteredSeqScanOp):
                 return self.execute_filtered_seq_scan(plan.table_name, plan.condition)
+            elif isinstance(plan, IndexScanOp):
+                return self.execute_index_scan(plan.table_name, plan.index_name, plan.scan_condition)
+            elif isinstance(plan, IndexOnlyScanOp):
+                return self.execute_index_only_scan(plan.table_name, plan.index_name, plan.scan_condition)
+            elif isinstance(plan, CreateIndexOp):
+                return self.execute_create_index(plan.index_name, plan.table_name, plan.columns, plan.unique,
+                                                 plan.index_type)
+            elif isinstance(plan, DropIndexOp):
+                return self.execute_drop_index(plan.index_name)
             else:
                 raise SemanticError(f"不支持的执行计划类型: {type(plan).__name__}")
         except Exception as e:
@@ -1248,5 +1257,122 @@ class ExecutionEngine:
         except Exception as e:
             raise SemanticError(f"JOIN操作错误: {str(e)}")
 
+    def execute_index_scan(self, table_name: str, index_name: str, scan_condition: Any) -> List[Dict]:
+        """执行索引扫描"""
+        try:
+            # 从条件中提取键值（简化处理，仅支持等值查询）
+            key = self._extract_key_from_condition(scan_condition)
+            if key is None:
+                raise SemanticError("Unsupported index condition")
+
+            # 调用存储引擎的索引查询方法
+            rows = self.storage_engine.get_rows_by_index(table_name, index_name, key)
+            return rows
+        except Exception as e:
+            raise SemanticError(f"Index scan error: {str(e)}")
+
+    def _extract_key_from_condition(self, condition: Any) -> Any:
+        """从条件中提取等值查询的键值"""
+        if hasattr(condition, 'to_dict'):
+            cond_dict = condition.to_dict()
+        else:
+            cond_dict = condition
+
+        if cond_dict.get('type') == 'BinaryExpr' and cond_dict.get('operator') == '=':
+            left = cond_dict.get('left', {})
+            right = cond_dict.get('right', {})
+            if left.get('type') == 'IdentifierExpr' and right.get('type') == 'LiteralExpr':
+                return right.get('value')
+        return None
+
+    def execute_create_index(self, index_name: str, table_name: str, columns: List[str], unique: bool,
+                             index_type: str) -> str:
+        """执行创建索引操作"""
+        try:
+            # 首先检查表是否存在
+            if not self.catalog.table_exists(table_name):
+                raise SemanticError(f"Table '{table_name}' does not exist")
+
+            # 检查列是否存在 - 通过获取表信息来验证列
+            table_info = self.catalog.get_table(table_name)
+            if table_info is None:
+                raise SemanticError(f"Table '{table_name}' does not exist")
+
+            # 获取表的列名列表
+            table_columns = [col['name'] for col in table_info['columns']]
+            for column in columns:
+                if column not in table_columns:
+                    raise SemanticError(f"Column '{column}' does not exist in table '{table_name}'")
+
+            # 调用存储引擎创建索引
+            success = self.storage_engine.create_index(table_name, index_name, columns[0])  # 仅支持单列索引
+            if not success:
+                raise SemanticError("Failed to create index")
+
+            # 更新系统目录
+            self.catalog.create_index(index_name, table_name, columns, unique, index_type)
+
+            return f"Index '{index_name}' created successfully"
+        except Exception as e:
+            raise SemanticError(f"Create index error: {str(e)}")
+
+    def _extract_index_range(self, condition: Any, index_columns: List[str]) -> Tuple[Any, Any]:
+        """从条件中提取索引键范围"""
+        # 简化实现：假设是等值查询或范围查询
+        # 实际应根据条件表达式解析出范围
+        if hasattr(condition, 'to_dict'):
+            condition_dict = condition.to_dict()
+            if condition_dict.get('type') == 'BinaryExpr':
+                left = condition_dict.get('left', {})
+                right = condition_dict.get('right', {})
+                operator = condition_dict.get('operator', '')
+
+                if (left.get('type') == 'IdentifierExpr' and
+                        left.get('name') in index_columns and
+                        right.get('type') == 'LiteralExpr'):
+
+                    value = right.get('value')
+                    if operator == '=':
+                        return value, value
+                    elif operator == '>':
+                        return value, None
+                    elif operator == '>=':
+                        return value, None
+                    elif operator == '<':
+                        return None, value
+                    elif operator == '<=':
+                        return None, value
+                    elif operator == 'BETWEEN':
+                        # 处理BETWEEN操作符
+                        if (isinstance(value, list) and len(value) == 2):
+                            return value[0], value[1]
+
+        # 默认返回全范围
+        return None, None
+
+    def execute_drop_index(self, index_name: str) -> str:
+        """执行删除索引操作"""
+        try:
+            # 从 catalog 获取所有索引信息
+            all_indexes = self.catalog.get_all_indexes()
+
+            if index_name not in all_indexes:
+                return f"Index '{index_name}' does not exist"
+
+            # 获取索引信息
+            index_info = all_indexes[index_name]
+            table_name = index_info["table"]
+
+            # 调用存储引擎删除索引
+            success = self.storage_engine.drop_index(table_name, index_name)
+            if not success:
+                raise SemanticError(f"Failed to drop index '{index_name}'")
+
+            # 更新 catalog
+            self.catalog.drop_index(index_name)
+
+            return f"Index '{index_name}' dropped successfully"
+        except Exception as e:
+            raise SemanticError(f"Drop index error: {str(e)}")
 
 

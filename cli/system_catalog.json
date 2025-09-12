@@ -315,10 +315,93 @@
       ],
       "created_at": "2025-09-11T16:40:46.237210",
       "row_count": 0
+    },
+    "test_dml5": {
+      "name": "test_dml5",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INT",
+          "constraints": null
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR(50)",
+          "constraints": null
+        },
+        {
+          "name": "value",
+          "type": "INT",
+          "constraints": null
+        }
+      ],
+      "created_at": "2025-09-12T22:25:37.532548",
+      "row_count": 0
+    },
+    "student": {
+      "name": "student",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INT",
+          "constraints": null
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR(50)",
+          "constraints": null
+        },
+        {
+          "name": "age",
+          "type": "INT",
+          "constraints": null
+        }
+      ],
+      "created_at": "2025-09-13T00:22:42.788885",
+      "row_count": 0
+    },
+    "customers11": {
+      "name": "customers11",
+      "columns": [
+        {
+          "name": "customer_id",
+          "type": "INT",
+          "constraints": null
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR(50)",
+          "constraints": null
+        },
+        {
+          "name": "city",
+          "type": "VARCHAR(30)",
+          "constraints": null
+        },
+        {
+          "name": "age",
+          "type": "INT",
+          "constraints": null
+        }
+      ],
+      "created_at": "2025-09-13T01:08:33.774355",
+      "row_count": 0
     }
   },
   "metadata": {
     "version": "1.0",
     "created_at": null
+  },
+  "indexes": {
+    "idx_student_id": {
+      "name": "idx_student_id",
+      "table": "student",
+      "columns": [
+        "id"
+      ],
+      "unique": false,
+      "type": "BTREE",
+      "created_at": "2025-09-13T01:08:33.774355"
+    }
   }
 }

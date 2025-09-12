@@ -116,6 +116,14 @@ class CatalogManager:
         """检查表是否存在"""
         return table_name in self.catalog_data["tables"]
 
+    def column_exists(self, table_name: str, column_name: str) -> bool:
+        """检查表中的列是否存在"""
+        if table_name not in self.tables:
+            return False
+
+        table_info = self.tables[table_name]
+        return any(col['name'] == column_name for col in table_info['columns'])
+
     def get_table(self, table_name: str) -> Optional[Dict[str, Any]]:
         """获取表信息"""
         return self.catalog_data["tables"].get(table_name)

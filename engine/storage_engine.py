@@ -5,6 +5,7 @@ from storage.core.table_storage import TableStorage
 from storage.utils.serializer import RecordSerializer, PageSerializer
 from storage.utils.exceptions import StorageException, TableNotFoundException
 from storage.utils.logger import get_logger
+from sql_compiler.btree.BPlusTreeIndex import BPlusTreeIndex  # 导入B+树索引
 
 
 class StorageEngine:
@@ -14,23 +15,71 @@ class StorageEngine:
         self.catalog_manager = catalog_manager
         self.logger = get_logger("storage_engine")
 
+        # 表空间和区管理相关属性
+        self.current_table_context = None
+        self.table_tablespace_mapping = {}  # 表名到表空间的映射
+        self.table_indexes: Dict[str, Dict[str, BPlusTreeIndex]] = {}  # 表名 -> {索引名 -> BPlusTreeIndex实例}
+
     def create_table(self, table_name: str, columns: List[Dict]) -> None:
-        """为表分配初始存储空间"""
+        """为表分配初始存储空间 - 增强版，支持表空间和区管理"""
         try:
             # 计算预估记录大小
             schema = self._convert_to_schema_format(columns)
             estimated_size = RecordSerializer.calculate_record_size(schema)
 
+            # 智能选择表空间 - 强制使用表空间管理器
+            if self.storage_manager and hasattr(self.storage_manager, 'tablespace_manager'):
+                tablespace_name = self.storage_manager.tablespace_manager.allocate_tablespace_for_table(table_name)
+            else:
+                # 回退策略
+                tablespace_name = self._choose_tablespace_for_table(table_name)
+
+            self.table_tablespace_mapping[table_name] = tablespace_name
+
+            # 设置表上下文，启用区分配
+            self.storage_manager.set_table_context(table_name)
+
             # 通过TableStorage创建表存储空间
-            success = self.table_storage.create_table_storage(table_name, estimated_size)
+            success = self.table_storage.create_table_storage(
+                table_name,
+                estimated_size,
+                tablespace_name=tablespace_name  # 明确指定表空间
+            )
+
             if not success:
                 raise StorageException(f"Failed to create storage for table '{table_name}'")
 
-            self.logger.info(f"Created table storage for '{table_name}'")
+            self.logger.info(f"Created table storage for '{table_name}' in tablespace '{tablespace_name}'")
 
         except Exception as e:
             self.logger.error(f"Error creating table '{table_name}': {e}")
             raise
+
+    def _choose_tablespace_for_table(self, table_name: str) -> str:
+        """为表智能选择表空间"""
+        try:
+            # 优先使用存储管理器的表空间管理器
+            if (self.storage_manager and
+                    hasattr(self.storage_manager, 'tablespace_manager')):
+                return self.storage_manager.tablespace_manager.allocate_tablespace_for_table(table_name)
+
+            # 回退策略：基于表名特征选择
+            table_lower = table_name.lower()
+            if any(table_lower.startswith(prefix) for prefix in ['sys_', 'pg_', 'system_', 'catalog_']):
+                return "system"
+            elif any(table_lower.startswith(prefix) for prefix in ['temp_', 'tmp_', 'sort_']):
+                return "temp"
+            elif any(table_lower.startswith(prefix) for prefix in ['log_', 'audit_', 'history_']):
+                return "log"
+            elif any(table_lower.startswith(prefix) for prefix in ['user_', 'data_', 'main_', 'large_', 'big_']):
+                return "user_data"  # 确保用户表使用 user_data 表空间
+            else:
+                # 默认情况下也使用 user_data，而不是 default
+                return "user_data"
+
+        except Exception as e:
+            self.logger.warning(f"Failed to choose tablespace for table '{table_name}': {e}, using user_data")
+            return "user_data"  # 错误时也使用 user_data
 
     def serialize_row(self, row_data: Dict, schema: List[Dict]) -> bytes:
         """将一行数据序列化为二进制格式"""
@@ -62,9 +111,8 @@ class StorageEngine:
             self.logger.error(f"Error deserializing row: {e}")
             raise
 
-    # engine/storage_engine.py
     def insert_row(self, table_name: str, row_data: List[Any]) -> None:
-        """插入一行数据"""
+        """插入一行数据 - 增强版，支持表空间和区管理"""
         try:
             # 获取表schema - 从catalog获取真实schema
             schema = self._get_table_schema(table_name)
@@ -86,13 +134,15 @@ class StorageEngine:
                     row_dict[col_name] = None  # 设置默认值
 
             # 添加调试信息
-            print(f"DEBUG: Inserting row data: {row_dict}")
-            print(f"DEBUG: Schema: {schema}")
+            self.logger.debug(f"Inserting row data: {row_dict}")
+            self.logger.debug(f"Schema: {schema}")
+
+            # 设置表上下文，启用区分配优化
+            self.storage_manager.set_table_context(table_name)
 
             # 序列化记录
             binary_row = self.serialize_row(row_dict, schema)
-            print(f"DEBUG: Serialized binary data length: {len(binary_row)}")
-            print(f"DEBUG: Serialized data (first 50 bytes): {binary_row[:50]}")
+            self.logger.debug(f"Serialized binary data length: {len(binary_row)}")
 
             # 检查表是否存在
             if not self.table_storage.table_exists(table_name):
@@ -113,9 +163,21 @@ class StorageEngine:
                     # 成功添加到页，写入更新后的页
                     self.table_storage.write_table_page(table_name, page_index, new_page_data)
                     self.logger.debug(f"Inserted row into table '{table_name}', page {page_id}")
+
+                    # 维护所有索引
+                    if table_name in self.table_indexes:
+                        for index_name, index in self.table_indexes[table_name].items():
+                            # 获取索引对应的列名（需从catalog或索引元数据中获取，这里简化处理）
+                            col_name = index_name.split('_')[-1]  # 假设索引名为 idx_表名_列名
+                            key = row_dict.get(col_name)
+                            if key is not None:
+                                index.insert(key, row_dict)
+
+                    # 清除表上下文
+                    self.storage_manager.clear_table_context()
                     return
 
-            # 如果没有现有页有足够空间，分配新页
+            # 如果没有现有页有足够空间，分配新页（使用智能区分配）
             new_page_id = self.table_storage.allocate_table_page(table_name)
             page_index = len(page_ids)  # 新页的索引
 
@@ -128,9 +190,23 @@ class StorageEngine:
 
             # 写入新页
             self.table_storage.write_table_page(table_name, page_index, new_page_data)
+
+            # 维护所有索引
+            if table_name in self.table_indexes:
+                for index_name, index in self.table_indexes[table_name].items():
+                    col_name = index_name.split('_')[-1]
+                    key = row_dict.get(col_name)
+                    if key is not None:
+                        index.insert(key, row_dict)
+
+            # 清除表上下文
+            self.storage_manager.clear_table_context()
+
             self.logger.debug(f"Inserted row into new page {new_page_id} for table '{table_name}'")
 
         except Exception as e:
+            # 确保在异常时也清除上下文
+            self.storage_manager.clear_table_context()
             self.logger.error(f"Error inserting row into table '{table_name}': {e}")
             raise
 
@@ -146,22 +222,22 @@ class StorageEngine:
 
             # 获取表的所有页
             page_count = self.table_storage.get_table_page_count(table_name)
-            print(f"DEBUG: Table {table_name} has {page_count} pages")
+            self.logger.debug(f"Table {table_name} has {page_count} pages")
 
             # 遍历所有页提取记录
             for page_index in range(page_count):
                 # 读取页数据
                 page_data = self.table_storage.read_table_page(table_name, page_index)
-                print(f"DEBUG: Page {page_index} data length: {len(page_data)}")
+                self.logger.debug(f"Page {page_index} data length: {len(page_data)}")
 
                 # 从页中提取所有记录
                 schema_format = self._convert_to_schema_format(schema)
                 records = PageSerializer.get_records_from_page(page_data, schema_format)
 
                 # 添加调试信息
-                print(f"DEBUG: Page {page_index} contains {len(records)} records")
+                self.logger.debug(f"Page {page_index} contains {len(records)} records")
                 for i, record in enumerate(records):
-                    print(f"DEBUG: Record {i}: {record}")
+                    self.logger.debug(f"Record {i}: {record}")
 
                 all_rows.extend(records)
 
@@ -171,7 +247,6 @@ class StorageEngine:
             self.logger.error(f"Error getting all rows from table '{table_name}': {e}")
             raise
 
-    # engine/storage_engine.py
     def _convert_to_schema_format(self, columns: List[Dict]) -> List[tuple]:
         """将列定义转换为RecordSerializer需要的格式"""
         schema = []
@@ -200,8 +275,6 @@ class StorageEngine:
             schema.append((col_name, col_type, length))
         return schema
 
-    # storage_engine.py 中的 _get_table_schema 方法
-    # storage_engine.py 中的 _get_table_schema 方法
     def _get_table_schema(self, table_name: str) -> List[Dict]:
         """获取表schema - 从catalog获取真实schema"""
         try:
@@ -210,7 +283,7 @@ class StorageEngine:
                 table_info = self.catalog_manager.get_table(table_name)
                 if table_info:
                     columns = table_info.get("columns", [])
-                    print(f"DEBUG: Got table info from catalog for '{table_name}': {table_info}")
+                    self.logger.debug(f"Got table info from catalog for '{table_name}': {table_info}")
 
                     # 验证 schema 的正确性
                     valid_schema = []
@@ -230,10 +303,10 @@ class StorageEngine:
                                 if base_type in valid_types:
                                     col_type = base_type
                                 else:
-                                    print(f"WARNING: Invalid column type '{col_type}' in table '{table_name}'")
+                                    self.logger.warning(f"Invalid column type '{col_type}' in table '{table_name}'")
                                     continue
                             else:
-                                print(f"WARNING: Invalid column type '{col_type}' in table '{table_name}'")
+                                self.logger.warning(f"Invalid column type '{col_type}' in table '{table_name}'")
                                 continue
 
                         valid_schema.append({
@@ -242,18 +315,17 @@ class StorageEngine:
                             'length': self._extract_length_from_type(col.get('type', ''))
                         })
 
-                    print(f"DEBUG: Converted schema for storage: {valid_schema}")
+                    self.logger.debug(f"Converted schema for storage: {valid_schema}")
                     return valid_schema
 
             # 如果从catalog获取失败，返回空schema
-            print(f"WARNING: Could not get schema from catalog for table '{table_name}'")
+            self.logger.warning(f"Could not get schema from catalog for table '{table_name}'")
             return []
 
         except Exception as e:
             self.logger.error(f"Error getting schema from catalog for table '{table_name}': {e}")
             return []
 
-    # storage_engine.py 中添加这个方法
     def _extract_length_from_type(self, type_str: str) -> Optional[int]:
         """从类型字符串中提取长度信息"""
         if not type_str:
@@ -382,6 +454,15 @@ class StorageEngine:
                             # 写入更新后的页
                             self.table_storage.write_table_page(table_name, page_index, updated_page_data)
                             self.logger.debug(f"Deleted row from table '{table_name}', page {page_index}")
+
+                            # 维护所有索引
+                            if table_name in self.table_indexes:
+                                for index_name, index in self.table_indexes[table_name].items():
+                                    col_name = index_name.split('_')[-1]
+                                    key = row.get(col_name)
+                                    if key is not None:
+                                        index.delete(key)
+
                             return
                         else:
                             raise StorageException("Failed to remove record from page")
@@ -391,3 +472,128 @@ class StorageEngine:
         except Exception as e:
             self.logger.error(f"Error deleting row from table '{table_name}': {e}")
             raise
+
+    def get_table_tablespace(self, table_name: str) -> str:
+        """获取表所在的表空间"""
+        return self.table_tablespace_mapping.get(table_name, "default")
+
+    def get_storage_stats(self) -> Dict[str, Any]:
+        """获取存储统计信息"""
+        try:
+            # 获取存储管理器的统计信息
+            storage_info = self.storage_manager.get_storage_summary()
+
+            # 添加表空间信息
+            tablespace_info = {}
+            for table_name, tablespace in self.table_tablespace_mapping.items():
+                if tablespace not in tablespace_info:
+                    tablespace_info[tablespace] = []
+                tablespace_info[tablespace].append(table_name)
+
+            return {
+                "storage_manager": storage_info,
+                "tablespaces": tablespace_info,
+                "total_tables": len(self.table_tablespace_mapping)
+            }
+        except Exception as e:
+            self.logger.error(f"Error getting storage stats: {e}")
+            return {"error": str(e)}
+
+    def optimize_storage(self, table_name: str = None) -> None:
+        """优化存储空间"""
+        try:
+            if table_name:
+                # 优化特定表
+                self.storage_manager.defragment_table(table_name)
+                self.logger.info(f"Optimized storage for table '{table_name}'")
+            else:
+                # 优化所有表
+                for table in self.table_tablespace_mapping.keys():
+                    self.storage_manager.defragment_table(table)
+                self.logger.info("Optimized storage for all tables")
+        except Exception as e:
+            self.logger.error(f"Error optimizing storage: {e}")
+            raise
+
+    def verify_tablespace_allocation(self) -> Dict[str, List[str]]:
+        """
+        验证表空间分配情况
+
+        Returns:
+            每个表空间中的表列表
+        """
+        tablespace_tables = {}
+
+        for table_name, tablespace in self.table_tablespace_mapping.items():
+            if tablespace not in tablespace_tables:
+                tablespace_tables[tablespace] = []
+            tablespace_tables[tablespace].append(table_name)
+
+        # 记录验证结果
+        for tablespace, tables in tablespace_tables.items():
+            self.logger.info(f"Tablespace '{tablespace}' contains {len(tables)} tables: {tables}")
+
+        return tablespace_tables
+
+    def create_index(self, table_name: str, index_name: str, column_name: str) -> bool:
+        """为表创建索引"""
+        try:
+            # 首先确保表存在
+            if not self.table_storage.table_exists(table_name):
+                raise StorageException(f"Table '{table_name}' does not exist")
+
+            if table_name not in self.table_indexes:
+                self.table_indexes[table_name] = {}
+
+            # 创建B+树索引实例
+            index = BPlusTreeIndex(index_name)
+            self.table_indexes[table_name][index_name] = index
+
+            # 获取表schema - 从catalog获取真实schema
+            schema = self._get_table_schema(table_name)
+            if not schema:
+                # 如果从catalog获取失败，尝试使用默认schema
+                self.logger.warning(f"Could not get schema from catalog for table '{table_name}', using default schema")
+                # 这里需要根据实际情况提供默认schema，或者抛出异常
+                raise StorageException(f"Schema not found for table '{table_name}'")
+
+            # 为现有数据构建索引
+            rows = self.get_all_rows(table_name)
+            for row in rows:
+                key = row.get(column_name)
+                if key is not None:
+                    index.insert(key, row)  # 存储整个行数据（简化实现）
+
+            # 更新catalog信息
+            success = True
+            if self.catalog_manager:
+                self.catalog_manager.create_index(index_name, table_name, [column_name], False, "BTREE")
+
+            return success
+
+        except Exception as e:
+            self.logger.error(f"Error creating index '{index_name}' for table '{table_name}': {e}")
+            return False
+
+    def drop_index(self, table_name: str, index_name: str) -> bool:
+        """删除索引"""
+        try:
+            if table_name in self.table_indexes and index_name in self.table_indexes[table_name]:
+                del self.table_indexes[table_name][index_name]
+                return True
+            return False
+        except Exception as e:
+            self.logger.error(f"Error dropping index '{index_name}' from table '{table_name}': {e}")
+            return False
+
+    def get_rows_by_index(self, table_name: str, index_name: str, key: Any) -> List[Dict]:
+        """通过索引键查询行"""
+        try:
+            if table_name in self.table_indexes and index_name in self.table_indexes[table_name]:
+                index = self.table_indexes[table_name][index_name]
+                result = index.search(key)
+                return [result] if result else []
+            return []
+        except Exception as e:
+            self.logger.error(f"Error querying index '{index_name}' for key '{key}': {e}")
+            return []
