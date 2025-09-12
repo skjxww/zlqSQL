@@ -209,32 +209,154 @@ class JoinOp(Operator):
 class GroupByOp(Operator):
     """分组操作符"""
 
-    def __init__(self, group_columns: List[str], having_condition: Optional[Expression], children: List[Operator]):
-        super().__init__(children)
+    def __init__(self, group_columns: List[str], having_condition: Optional[Expression] = None,
+                 children: List[Operator] = None, aggregate_functions: List[tuple] = None):
+        super().__init__(children or [])
         self.group_columns = group_columns
         self.having_condition = having_condition
+        self.aggregate_functions = aggregate_functions or []  # 🔑 添加聚合函数属性
 
     def to_dict(self) -> Dict[str, Any]:
         return {
             "type": "GroupByOp",
             "group_columns": self.group_columns,
             "having_condition": self.having_condition.to_dict() if self.having_condition else None,
+            "aggregate_functions": self.aggregate_functions,  # 🔑 包含聚合函数信息
             "children": [child.to_dict() for child in self.children]
         }
 
     def execute(self) -> Iterator[Dict[str, Any]]:
-        # 模拟分组操作
-        groups = {}
+        """执行分组操作 - 改进版本"""
+        # 收集所有子结果
+        child_results = []
         for child in self.children:
-            for row in child.execute():
-                # 简化的分组逻辑
-                key = tuple(row.get(col, None) for col in self.group_columns)
-                if key not in groups:
-                    groups[key] = []
-                groups[key].append(row)
+            child_results.extend(list(child.execute()))
 
+        # 如果没有聚合函数但有GROUP BY，添加默认的COUNT(*)
+        aggregate_functions = self.aggregate_functions
+        if not aggregate_functions and self.group_columns:
+            aggregate_functions = [('COUNT', '*')]
+
+        # 分组操作
+        groups = {}
+        for row in child_results:
+            # 构建分组键
+            group_key = tuple(row.get(col, None) for col in self.group_columns)
+            if group_key not in groups:
+                groups[group_key] = []
+            groups[group_key].append(row)
+
+        # 对每个分组计算聚合结果
         for group_key, group_rows in groups.items():
-            yield {"group_key": group_key, "count": len(group_rows)}
+            result_row = {}
+
+            # 添加分组列
+            for i, col in enumerate(self.group_columns):
+                result_row[col] = group_key[i]
+
+            # 计算聚合函数
+            for func_name, column_name in aggregate_functions:
+                agg_result = self._calculate_aggregate(func_name, column_name, group_rows)
+                # 构建聚合列名
+                if column_name == '*':
+                    agg_column_name = f"{func_name.upper()}(*)"
+                else:
+                    agg_column_name = f"{func_name.upper()}({column_name})"
+                result_row[agg_column_name] = agg_result
+
+            # 应用HAVING条件
+            if self.having_condition:
+                if self._evaluate_having_condition(result_row):
+                    yield result_row
+            else:
+                yield result_row
+
+    def _calculate_aggregate(self, func_name: str, column_name: str, group_rows: List[Dict]) -> Any:
+        """计算聚合函数值"""
+        func_name = func_name.upper()
+
+        if func_name == 'COUNT':
+            if column_name == '*':
+                return len(group_rows)
+            else:
+                # COUNT(column) - 计算非空值数量
+                return len([row for row in group_rows if row.get(column_name) is not None])
+
+        elif func_name == 'SUM':
+            values = [row.get(column_name) for row in group_rows
+                      if row.get(column_name) is not None and isinstance(row.get(column_name), (int, float))]
+            return sum(values) if values else 0
+
+        elif func_name == 'AVG':
+            values = [row.get(column_name) for row in group_rows
+                      if row.get(column_name) is not None and isinstance(row.get(column_name), (int, float))]
+            return sum(values) / len(values) if values else None
+
+        elif func_name == 'MAX':
+            values = [row.get(column_name) for row in group_rows
+                      if row.get(column_name) is not None]
+            return max(values) if values else None
+
+        elif func_name == 'MIN':
+            values = [row.get(column_name) for row in group_rows
+                      if row.get(column_name) is not None]
+            return min(values) if values else None
+
+        else:
+            raise ValueError(f"不支持的聚合函数: {func_name}")
+
+    def _evaluate_having_condition(self, result_row: Dict[str, Any]) -> bool:
+        """评估HAVING条件 - 简化实现"""
+        try:
+            if not self.having_condition:
+                return True
+
+            # 这里需要根据你的Expression类型来实现条件评估
+            # 简化实现 - 假设是二元比较表达式
+            if hasattr(self.having_condition, 'left') and hasattr(self.having_condition, 'operator'):
+                left_value = self._evaluate_expression(self.having_condition.left, result_row)
+                right_value = self._evaluate_expression(self.having_condition.right, result_row)
+                operator = self.having_condition.operator
+
+                if operator == '>':
+                    return left_value > right_value
+                elif operator == '>=':
+                    return left_value >= right_value
+                elif operator == '<':
+                    return left_value < right_value
+                elif operator == '<=':
+                    return left_value <= right_value
+                elif operator == '=':
+                    return left_value == right_value
+                elif operator == '!=':
+                    return left_value != right_value
+
+            return True
+        except Exception:
+            return True
+
+    def _evaluate_expression(self, expr, result_row: Dict[str, Any]):
+        """评估表达式值"""
+        # 如果是函数表达式（如COUNT(*)）
+        if hasattr(expr, 'function_name'):
+            func_name = expr.function_name.upper()
+            if func_name == 'COUNT' and hasattr(expr, 'arguments'):
+                if expr.arguments and hasattr(expr.arguments[0], 'value') and expr.arguments[0].value == '*':
+                    return result_row.get('COUNT(*)', 0)
+                else:
+                    # COUNT(column)的情况
+                    column = expr.arguments[0].value if expr.arguments else '*'
+                    return result_row.get(f'COUNT({column})', 0)
+
+        # 如果是字面值
+        elif hasattr(expr, 'value'):
+            return expr.value
+
+        # 如果是列引用
+        elif hasattr(expr, 'column_name'):
+            return result_row.get(expr.column_name)
+
+        return 0
 
 
 class OrderByOp(Operator):

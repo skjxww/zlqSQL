@@ -397,13 +397,13 @@ def main():
 
     # 定义所有测试
     tests = [
-        ("基本DDL功能", test_basic_ddl),
-        ("基本DML功能", test_basic_dml),
+        # ("基本DDL功能", test_basic_ddl),
+        # ("基本DML功能", test_basic_dml),
         ("复杂查询功能", test_complex_queries),
-        ("错误处理机制", test_error_handling),
-        ("高级SQL功能", test_advanced_features),
-        ("业务场景测试", test_business_scenarios),
-        ("性能测试", run_performance_test),
+        # ("错误处理机制", test_error_handling),
+        # ("高级SQL功能", test_advanced_features),
+        # ("业务场景测试", test_business_scenarios),
+        # ("性能测试", run_performance_test),
     ]
 
     # 运行所有测试

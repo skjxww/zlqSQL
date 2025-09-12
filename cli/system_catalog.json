@@ -293,6 +293,28 @@
       ],
       "created_at": "2025-09-11T12:26:30.377022",
       "row_count": 0
+    },
+    "users1": {
+      "name": "users1",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INT",
+          "constraints": null
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR(50)",
+          "constraints": null
+        },
+        {
+          "name": "email",
+          "type": "VARCHAR(100)",
+          "constraints": null
+        }
+      ],
+      "created_at": "2025-09-11T16:40:46.237210",
+      "row_count": 0
     }
   },
   "metadata": {

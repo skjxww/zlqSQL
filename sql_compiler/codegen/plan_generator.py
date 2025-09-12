@@ -191,13 +191,13 @@ class PlanGenerator:
         return InsertOp(stmt.table_name, stmt.columns, stmt.values)
 
     def _generate_select_plan(self, stmt: SelectStmt) -> Operator:
-        """生成SELECT执行计划 - 修复版本"""
+        """生成SELECT执行计划 - 修复聚合函数传递"""
 
-        # 调试模式
         if not self.silent_mode:
             print(f"\n🔧 生成SELECT执行计划")
             print(f"   选择列: {stmt.columns}")
             print(f"   GROUP BY: {stmt.group_by}")
+            print(f"   HAVING: {'有' if stmt.having_clause else '无'}")
 
         # 从FROM子句开始构建计划
         plan = self._generate_from_plan(stmt.from_clause)
@@ -208,11 +208,24 @@ class PlanGenerator:
             if not self.silent_mode:
                 print(f"   ✅ 添加WHERE过滤")
 
-        # 添加GROUP BY
+        # 添加GROUP BY（包含HAVING条件和聚合函数）
         if stmt.group_by and len(stmt.group_by) > 0:
-            plan = GroupByOp(stmt.group_by, stmt.having_clause, [plan])
+            # 🔑 解析聚合函数
+            aggregate_functions = self._extract_aggregate_functions(stmt.columns)
+
+            # 创建GroupByOp，传递聚合函数
+            plan = GroupByOp(
+                group_columns=stmt.group_by,
+                having_condition=stmt.having_clause,
+                children=[plan],
+                aggregate_functions=aggregate_functions  # 🔑 传递聚合函数
+            )
+
             if not self.silent_mode:
                 print(f"   ✅ 添加GROUP BY，分组列: {stmt.group_by}")
+                print(f"   ✅ 聚合函数: {aggregate_functions}")
+                if stmt.having_clause:
+                    print(f"   ✅ 包含HAVING条件")
 
         # 添加投影
         if stmt.columns != ["*"]:
@@ -230,6 +243,56 @@ class PlanGenerator:
             print(f"   🎯 最终计划: {type(plan).__name__}")
 
         return plan
+
+    def _extract_aggregate_functions(self, columns: List[str]) -> List[tuple]:
+        """从选择列中提取聚合函数"""
+        aggregate_functions = []
+
+        for column in columns:
+            if isinstance(column, str):
+                # 检查是否是聚合函数
+                column_upper = column.upper()
+
+                if 'COUNT(' in column_upper:
+                    if 'COUNT(*)' in column_upper:
+                        aggregate_functions.append(('COUNT', '*'))
+                    else:
+                        # 提取列名 COUNT(column_name)
+                        start = column_upper.find('COUNT(') + 6
+                        end = column_upper.find(')', start)
+                        if end > start:
+                            col_name = column[start:end].strip()
+                            aggregate_functions.append(('COUNT', col_name))
+
+                elif 'SUM(' in column_upper:
+                    start = column_upper.find('SUM(') + 4
+                    end = column_upper.find(')', start)
+                    if end > start:
+                        col_name = column[start:end].strip()
+                        aggregate_functions.append(('SUM', col_name))
+
+                elif 'AVG(' in column_upper:
+                    start = column_upper.find('AVG(') + 4
+                    end = column_upper.find(')', start)
+                    if end > start:
+                        col_name = column[start:end].strip()
+                        aggregate_functions.append(('AVG', col_name))
+
+                elif 'MAX(' in column_upper:
+                    start = column_upper.find('MAX(') + 4
+                    end = column_upper.find(')', start)
+                    if end > start:
+                        col_name = column[start:end].strip()
+                        aggregate_functions.append(('MAX', col_name))
+
+                elif 'MIN(' in column_upper:
+                    start = column_upper.find('MIN(') + 4
+                    end = column_upper.find(')', start)
+                    if end > start:
+                        col_name = column[start:end].strip()
+                        aggregate_functions.append(('MIN', col_name))
+
+        return aggregate_functions
 
     def _generate_update_plan(self, stmt: UpdateStmt) -> Operator:
         """生成UPDATE执行计划"""

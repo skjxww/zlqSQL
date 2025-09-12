@@ -1,0 +1,33 @@
+2025-09-11 15:12:27,947 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-11 15:12:27,948 - page_manager - INFO - _log_with_context:97 - Metadata file not found, using default configuration
+2025-09-11 15:12:27,948 - page_manager - INFO - _log_with_context:97 - Created new data file | Context: file_path=data\database.db
+2025-09-11 15:12:27,948 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=0
+2025-09-11 15:12:27,949 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-11 15:12:27,950 - page_manager - INFO - _log_with_context:97 - Metadata file not found, using default configuration
+2025-09-11 15:12:27,950 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=0
+2025-09-11 15:12:55,935 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-11 15:12:55,935 - page_manager - INFO - _log_with_context:97 - PageManager cleanup completed
+2025-09-11 15:12:58,559 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-11 15:12:58,559 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=1 | allocated_count=0 | free_count=0
+2025-09-11 15:12:58,560 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=0
+2025-09-11 15:12:58,560 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-11 15:12:58,560 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=1 | allocated_count=0 | free_count=0
+2025-09-11 15:12:58,560 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=0
+2025-09-11 15:13:23,886 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-11 15:13:23,887 - page_manager - INFO - _log_with_context:97 - PageManager cleanup completed
+2025-09-11 15:19:34,925 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-11 15:19:34,925 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=1 | allocated_count=0 | free_count=0
+2025-09-11 15:19:34,925 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=0
+2025-09-11 15:19:34,925 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-11 15:19:34,925 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=1 | allocated_count=0 | free_count=0
+2025-09-11 15:19:34,925 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=0
+2025-09-11 15:19:54,782 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-11 15:19:54,782 - page_manager - INFO - _log_with_context:97 - PageManager cleanup completed
+2025-09-11 15:26:14,292 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-11 15:26:14,292 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=1 | allocated_count=0 | free_count=0
+2025-09-11 15:26:14,292 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=0
+2025-09-11 15:26:14,293 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-11 15:26:14,293 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=1 | allocated_count=0 | free_count=0
+2025-09-11 15:26:14,293 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=0
+2025-09-11 15:27:34,264 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-11 15:27:34,264 - page_manager - INFO - _log_with_context:97 - PageManager cleanup completed

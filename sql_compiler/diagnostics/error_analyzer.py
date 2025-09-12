@@ -1,498 +1,538 @@
-"""
-智能错误诊断器
-提供智能纠错提示和错误分析
-"""
-
 import re
-from typing import List, Dict, Any, Optional
-from difflib import SequenceMatcher, get_close_matches
-from sql_compiler.exceptions.compiler_errors import CompilerError
+from typing import List, Dict, Tuple, Optional, Any
+from dataclasses import dataclass
+from difflib import get_close_matches
+from sql_compiler.catalog.catalog_manager import CatalogManager
 
 
-class ErrorDiagnostics:
-    """错误诊断器"""
+@dataclass
+class ErrorSuggestion:
+    """错误建议"""
+    error_type: str
+    description: str
+    suggestion: str
+    corrected_sql: Optional[str] = None
+    confidence: float = 0.0  # 0.0 - 1.0
 
-    def __init__(self, catalog_manager=None):
-        self.catalog = catalog_manager
+
+class SQLErrorAnalyzer:
+    """SQL错误分析器"""
+
+    def __init__(self, catalog_manager: CatalogManager = None):
+        self.catalog_manager = catalog_manager
         self.sql_keywords = {
-            'SELECT', 'FROM', 'WHERE', 'INSERT', 'INTO', 'VALUES', 'UPDATE', 'SET',
-            'DELETE', 'CREATE', 'TABLE', 'JOIN', 'INNER', 'LEFT', 'RIGHT', 'ON',
-            'GROUP', 'BY', 'ORDER', 'HAVING', 'ASC', 'DESC', 'COUNT', 'SUM', 'AVG',
-            'MAX', 'MIN', 'AND', 'OR', 'NOT', 'IN', 'INT', 'VARCHAR', 'CHAR'
+            'SELECT', 'FROM', 'WHERE', 'GROUP BY', 'HAVING', 'ORDER', 'BY',
+            'INSERT', 'INTO', 'VALUES', 'UPDATE', 'SET', 'DELETE', 'CREATE',
+            'TABLE', 'DROP', 'ALTER', 'INDEX', 'PRIMARY', 'KEY', 'FOREIGN',
+            'REFERENCES', 'NOT', 'NULL', 'UNIQUE', 'DEFAULT', 'AUTO_INCREMENT',
+            'INT', 'VARCHAR', 'CHAR', 'TEXT', 'DATE', 'DATETIME', 'TIMESTAMP',
+            'DECIMAL', 'FLOAT', 'DOUBLE', 'BOOLEAN', 'TINYINT', 'SMALLINT',
+            'MEDIUMINT', 'BIGINT', 'AND', 'OR', 'IN', 'LIKE', 'BETWEEN',
+            'IS', 'EXISTS', 'INNER', 'LEFT', 'RIGHT', 'FULL', 'OUTER', 'JOIN',
+            'ON', 'UNION', 'DISTINCT', 'AS', 'ASC', 'DESC', 'LIMIT', 'OFFSET',
+            'COUNT', 'SUM', 'AVG', 'MAX', 'MIN', 'UPPER', 'LOWER', 'TRIM'
         }
 
-        # 常见错误模式
-        self.common_patterns = {
-            r'SELECT\s*\*\s*FROM\s*$': "SELECT * FROM 后面缺少表名",
-            r'INSERT\s+INTO\s+\w+\s*$': "INSERT INTO 语句缺少 VALUES 子句",
-            r'UPDATE\s+\w+\s*$': "UPDATE 语句缺少 SET 子句",
-            r'DELETE\s+FROM\s*$': "DELETE FROM 后面缺少表名",
-            r'WHERE\s*$': "WHERE 子句缺少条件",
-            r'GROUP\s+BY\s*$': "GROUP BY 后面缺少列名",
-            r'ORDER\s+BY\s*$': "ORDER BY 后面缺少列名",
+        self.common_functions = {
+            'COUNT', 'SUM', 'AVG', 'MAX', 'MIN', 'UPPER', 'LOWER', 'TRIM',
+            'SUBSTRING', 'CONCAT', 'LENGTH', 'ROUND', 'ABS', 'NOW', 'CURDATE'
         }
 
-    def diagnose_error(self, error: CompilerError, sql: str) -> Dict[str, Any]:
-        """诊断错误并提供修复建议"""
-        diagnosis = {
-            'original_error': str(error),
-            'error_type': self._classify_error(error),
-            'severity': 'ERROR',
-            'suggestions': [],
-            'corrected_sql': None,
-            'explanation': '',
-            'examples': []
-        }
-
-        # 根据错误类型提供不同的诊断
-        if 'lexical' in error.__class__.__name__.lower():
-            diagnosis.update(self._diagnose_lexical_error(error, sql))
-        elif 'syntax' in error.__class__.__name__.lower():
-            diagnosis.update(self._diagnose_syntax_error(error, sql))
-        elif 'semantic' in error.__class__.__name__.lower():
-            diagnosis.update(self._diagnose_semantic_error(error, sql))
-        else:
-            diagnosis.update(self._diagnose_general_error(error, sql))
-
-        return diagnosis
-
-    def _classify_error(self, error: CompilerError) -> str:
-        """分类错误类型"""
-        error_class = error.__class__.__name__.lower()
-        if 'lexical' in error_class:
-            return 'LEXICAL'
-        elif 'syntax' in error_class:
-            return 'SYNTAX'
-        elif 'semantic' in error_class:
-            return 'SEMANTIC'
-        else:
-            return 'GENERAL'
-
-    def _diagnose_lexical_error(self, error: CompilerError, sql: str) -> Dict[str, Any]:
-        """诊断词法错误"""
-        result = {}
-        error_msg = str(error)
-
-        # 未识别字符错误
-        if "未识别的字符" in error_msg:
-            char_match = re.search(r"未识别的字符: '(.)'", error_msg)
-            if char_match:
-                char = char_match.group(1)
-                result.update(self._handle_unrecognized_char(char, sql, error))
-
-        return result
-
-    def _diagnose_syntax_error(self, error: CompilerError, sql: str) -> Dict[str, Any]:
-        """诊断语法错误"""
-        result = {
-            'suggestions': [],
-            'corrected_sql': None,
-            'explanation': '',
-            'examples': []
-        }
-
-        error_msg = str(error)
-
-        # 期望token但遇到其他token
-        if "期望" in error_msg and "但遇到" in error_msg:
-            result.update(self._handle_unexpected_token(error_msg, sql))
-
-        # 检查常见语法模式错误
-        for pattern, suggestion in self.common_patterns.items():
-            if re.search(pattern, sql.upper()):
-                result['suggestions'].append(suggestion)
-                result['corrected_sql'] = self._suggest_pattern_fix(pattern, sql)
-                break
-
-        return result
-
-    def _diagnose_semantic_error(self, error: CompilerError, sql: str) -> Dict[str, Any]:
-        """诊断语义错误"""
-        result = {}
-        error_msg = str(error)
-
-        # 表不存在错误
-        if "不存在" in error_msg and "表" in error_msg:
-            result.update(self._handle_missing_table(error_msg, sql))
-
-        # 列不存在错误
-        elif "不存在" in error_msg and ("列" in error_msg or "column" in error_msg.lower()):
-            result.update(self._handle_missing_column(error_msg, sql))
-
-        # 类型不匹配错误
-        elif "类型" in error_msg and ("期望" in error_msg or "不匹配" in error_msg):
-            result.update(self._handle_type_mismatch(error_msg, sql))
-
-        # GROUP BY错误
-        elif "GROUP BY" in error_msg or "聚合" in error_msg:
-            result.update(self._handle_groupby_error(error_msg, sql))
-
-        return result
-
-    def _diagnose_general_error(self, error: CompilerError, sql: str) -> Dict[str, Any]:
-        """诊断一般错误"""
-        return {
-            'suggestions': ['检查SQL语法是否正确', '确认表名和列名存在'],
-            'explanation': '发生了未分类的错误，请检查SQL语句'
-        }
-
-    def _handle_unrecognized_char(self, char: str, sql: str, error: CompilerError) -> Dict[str, Any]:
-        """处理未识别字符错误"""
+    def analyze_error(self, sql: str, error: Exception) -> List[ErrorSuggestion]:
+        """分析SQL错误并提供建议"""
         suggestions = []
-        corrected_sql = sql
+        error_str = str(error).lower()
 
-        # 常见字符错误
-        char_fixes = {
-            '"': "使用单引号 ' 而不是双引号 \"",
-            '`': "使用标准SQL标识符，避免使用反引号",
-            '？': "使用英文问号 ? 而不是中文问号 ？",
-            '，': "使用英文逗号 , 而不是中文逗号 ，",
-            '（': "使用英文括号 ( 而不是中文括号 （",
-            '）': "使用英文括号 ) 而不是中文括号 ）",
-        }
+        # 根据错误类型进行分析
+        if "syntax error" in error_str or "unexpected token" in error_str:
+            suggestions.extend(self._analyze_syntax_errors(sql, error))
 
-        if char in char_fixes:
-            suggestions.append(char_fixes[char])
-            # 尝试修复
-            if char == '"':
-                corrected_sql = sql.replace('"', "'")
-            elif char in '，（）？':
-                replace_map = {'，': ',', '（': '(', '）': ')', '？': '?'}
-                corrected_sql = sql.replace(char, replace_map.get(char, char))
-        else:
-            suggestions.append(f"移除不支持的字符 '{char}'")
-            corrected_sql = sql.replace(char, '')
+        if "table" in error_str and ("not found" in error_str or "doesn't exist" in error_str):
+            suggestions.extend(self._analyze_table_errors(sql, error))
 
-        return {
-            'suggestions': suggestions,
-            'corrected_sql': corrected_sql,
-            'explanation': f"字符 '{char}' 不是有效的SQL字符",
-            'examples': ["正确: SELECT * FROM users;", "错误: SELECT * FROM users；"]
-        }
+        if "column" in error_str and ("not found" in error_str or "unknown" in error_str):
+            suggestions.extend(self._analyze_column_errors(sql, error))
 
-    def _handle_unexpected_token(self, error_msg: str, sql: str) -> Dict[str, Any]:
-        """处理意外token错误"""
-        # 解析期望的token和实际的token
-        expected_match = re.search(r"期望.*?'([^']*)'", error_msg)
-        actual_match = re.search(r"但遇到.*?'([^']*)'", error_msg)
+        if "function" in error_str and ("not found" in error_str or "unknown" in error_str):
+            suggestions.extend(self._analyze_function_errors(sql, error))
 
+        # 通用分析
+        suggestions.extend(self._analyze_common_mistakes(sql))
+
+        # 按置信度排序
+        suggestions.sort(key=lambda x: x.confidence, reverse=True)
+        return suggestions[:5]
+
+    def suggest_corrections(self, sql: str) -> List[ErrorSuggestion]:
+        """为SQL提供改进建议（即使没有错误）- 修复版本"""
         suggestions = []
-        corrected_sql = sql
-        expected = "未知token"
-        actual = "未知token"
+        sql_upper = sql.upper()
 
-        if expected_match and actual_match:
-            expected = expected_match.group(1)
-            actual = actual_match.group(1)
+        # 🔑 新增：主动进行语法检查
+        suggestions.extend(self._proactive_syntax_check(sql))
 
-            # 检查是否是关键字拼写错误
-            if actual.upper() not in self.sql_keywords:
-                close_keywords = get_close_matches(actual.upper(), self.sql_keywords, n=3, cutoff=0.6)
-                if close_keywords:
-                    suggestions.append(f"'{actual}' 可能是 '{close_keywords[0]}' 的拼写错误")
-                    corrected_sql = sql.replace(actual, close_keywords[0])
+        # 1. 性能建议
+        if 'SELECT *' in sql_upper and 'WHERE' not in sql_upper:
+            suggestions.append(ErrorSuggestion(
+                error_type="PERFORMANCE_TIP",
+                description="性能提示",
+                suggestion="考虑只选择需要的列，并添加WHERE条件来限制结果集",
+                confidence=0.4
+            ))
 
-            # 常见的token替换建议
-            token_fixes = {
-                ';': {
-                    'FROM': "在FROM后添加表名，然后使用分号",
-                    'SET': "在SET后添加赋值表达式，然后使用分号",
-                    'VALUES': "在VALUES后添加值列表，然后使用分号"
-                }
-            }
+        # 2. 安全建议
+        if any(dangerous in sql_upper for dangerous in ['DROP', 'DELETE FROM', 'TRUNCATE']):
+            suggestions.append(ErrorSuggestion(
+                error_type="SAFETY_WARNING",
+                description="安全警告",
+                suggestion="这个操作会修改或删除数据，请确认操作的正确性",
+                confidence=0.8
+            ))
 
-            if expected in token_fixes:
-                if actual in token_fixes[expected]:
-                    suggestions.append(token_fixes[expected][actual])
+        return suggestions
 
-        return {
-            'suggestions': suggestions,
-            'corrected_sql': corrected_sql,
-            'explanation': f"语法不符合期望，期望 '{expected}' 但遇到 '{actual}'",
-            'examples': self._get_syntax_examples(expected)
-        }
+    def _proactive_syntax_check(self, sql: str) -> List[ErrorSuggestion]:
+        """主动进行语法检查（不需要错误即可检查）"""
+        suggestions = []
+        sql_upper = sql.upper()
 
-    def _handle_missing_table(self, error_msg: str, sql: str) -> Dict[str, Any]:
-        """处理表不存在错误"""
+        # 1. 缺少分号检查
+        if not sql.strip().endswith(';'):
+            suggestions.append(ErrorSuggestion(
+                error_type="MISSING_SEMICOLON",
+                description="SQL语句缺少结尾分号",
+                suggestion="在SQL语句末尾添加分号 (;)",
+                corrected_sql=sql.strip() + ';',
+                confidence=0.9
+            ))
+
+        # 2. 括号不匹配检查
+        open_parens = sql.count('(')
+        close_parens = sql.count(')')
+        if open_parens != close_parens:
+            suggestions.append(ErrorSuggestion(
+                error_type="UNMATCHED_PARENTHESES",
+                description=f"括号不匹配：开括号{open_parens}个，闭括号{close_parens}个",
+                suggestion="检查并修正括号匹配",
+                confidence=0.8
+            ))
+
+        # 3. 常见关键字拼写错误检查 - 只在关键字位置检查
+        # 提取SQL中的关键字位置
+        keyword_positions = self._find_keyword_positions(sql_upper)
+
+        for position, word in keyword_positions:
+            if word not in self.sql_keywords and len(word) > 2:
+                matches = get_close_matches(word, self.sql_keywords, n=3, cutoff=0.6)
+                if matches:
+                    # 只替换关键字位置的单词，而不是所有出现的地方
+                    sql_list = list(sql_upper)
+                    sql_list[position:position + len(word)] = list(matches[0])
+                    corrected_sql = ''.join(sql_list).lower()
+
+                    suggestions.append(ErrorSuggestion(
+                        error_type="KEYWORD_TYPO",
+                        description=f"可能的关键字拼写错误：'{word}'",
+                        suggestion=f"你是否想写 '{matches[0]}'？其他可能：{', '.join(matches[1:])}",
+                        corrected_sql=corrected_sql,
+                        confidence=0.7
+                    ))
+
+        # 4. SELECT后缺少列名检查
+        if re.search(r'SELECT\s+FROM', sql_upper):
+            suggestions.append(ErrorSuggestion(
+                error_type="MISSING_COLUMNS",
+                description="SELECT和FROM之间缺少列名",
+                suggestion="在SELECT和FROM之间指定要查询的列，或使用 * 查询所有列",
+                corrected_sql=sql.upper().replace('SELECT FROM', 'SELECT * FROM').lower(),
+                confidence=0.8
+            ))
+
+        # 5. 字符串值可能缺少引号
+        equals_pattern = r'=\s*([a-zA-Z]\w*)\b'
+        matches = re.findall(equals_pattern, sql)
+        if matches:
+            suggestions.append(ErrorSuggestion(
+                error_type="MISSING_QUOTES",
+                description="字符串值可能缺少引号",
+                suggestion="字符串值应该用单引号或双引号包围，例如：name = 'John'",
+                confidence=0.5
+            ))
+
+        # 6. JOIN缺少ON子句检查
+        if 'JOIN' in sql_upper and 'ON' not in sql_upper:
+            suggestions.append(ErrorSuggestion(
+                error_type="MISSING_JOIN_CONDITION",
+                description="JOIN语句缺少ON条件",
+                suggestion="JOIN语句需要指定连接条件，例如：LEFT JOIN table2 ON table1.id = table2.id",
+                confidence=0.7
+            ))
+
+        return suggestions
+
+    def _find_keyword_positions(self, sql_upper: str) -> List[Tuple[int, str]]:
+        """找到SQL中可能的关键字位置"""
+        keyword_positions = []
+
+        # 查找SQL关键字的位置（在特定上下文中）
+        patterns = [
+            (
+            r'\b(SELECT|FROM|WHERE|GROUP BY|HAVING|ORDER BY|INSERT INTO|VALUES|UPDATE|SET|DELETE FROM|CREATE TABLE|DROP TABLE|ALTER TABLE|JOIN|LEFT JOIN|RIGHT JOIN|INNER JOIN|OUTER JOIN)\b',
+            1),
+            (r'\b(AND|OR|NOT|IN|LIKE|BETWEEN|IS NULL|IS NOT NULL|EXISTS)\b', 1),
+            (r'\b(INT|VARCHAR|CHAR|TEXT|DATE|DATETIME|TIMESTAMP|DECIMAL|FLOAT|DOUBLE|BOOLEAN)\b', 1),
+            (r'\b(PRIMARY KEY|FOREIGN KEY|REFERENCES|UNIQUE|NOT NULL|DEFAULT|AUTO_INCREMENT)\b', 2)
+        ]
+
+        for pattern, group in patterns:
+            for match in re.finditer(pattern, sql_upper):
+                keyword = match.group(group) if group <= len(match.groups()) else match.group(0)
+                keyword_positions.append((match.start(), keyword))
+
+        return keyword_positions
+
+    def _analyze_syntax_errors(self, sql: str, error: Exception) -> List[ErrorSuggestion]:
+        """分析语法错误"""
+        suggestions = []
+        sql_upper = sql.upper()
+
+        # 1. 缺少分号
+        if not sql.strip().endswith(';'):
+            suggestions.append(ErrorSuggestion(
+                error_type="MISSING_SEMICOLON",
+                description="SQL语句缺少结尾分号",
+                suggestion="在SQL语句末尾添加分号 (;)",
+                corrected_sql=sql.strip() + ';',
+                confidence=0.9
+            ))
+
+        # 2. 括号不匹配
+        open_parens = sql.count('(')
+        close_parens = sql.count(')')
+        if open_parens != close_parens:
+            suggestions.append(ErrorSuggestion(
+                error_type="UNMATCHED_PARENTHESES",
+                description=f"括号不匹配：开括号{open_parens}个，闭括号{close_parens}个",
+                suggestion="检查并修正括号匹配",
+                confidence=0.8
+            ))
+
+        # 3. 常见关键字拼写错误 - 只在关键字位置检查
+        keyword_positions = self._find_keyword_positions(sql_upper)
+
+        for position, word in keyword_positions:
+            if word not in self.sql_keywords and len(word) > 2:
+                matches = get_close_matches(word, self.sql_keywords, n=3, cutoff=0.6)
+                if matches:
+                    sql_list = list(sql_upper)
+                    sql_list[position:position + len(word)] = list(matches[0])
+                    corrected_sql = ''.join(sql_list).lower()
+
+                    suggestions.append(ErrorSuggestion(
+                        error_type="KEYWORD_TYPO",
+                        description=f"可能的关键字拼写错误：'{word}'",
+                        suggestion=f"你是否想写 '{matches[0]}'？其他可能：{', '.join(matches[1:])}",
+                        corrected_sql=corrected_sql,
+                        confidence=0.7
+                    ))
+
+        # 4. SELECT后缺少列名
+        if re.search(r'SELECT\s+FROM', sql_upper):
+            suggestions.append(ErrorSuggestion(
+                error_type="MISSING_COLUMNS",
+                description="SELECT和FROM之间缺少列名",
+                suggestion="在SELECT和FROM之间指定要查询的列，或使用 * 查询所有列",
+                corrected_sql=sql.upper().replace('SELECT FROM', 'SELECT * FROM').lower(),
+                confidence=0.8
+            ))
+
+        # 5. GROUP BY后缺少HAVING的错误使用
+        if 'GROUP BY' in sql_upper and 'WHERE' in sql_upper:
+            # 检查是否在WHERE中使用了聚合函数
+            where_part = sql_upper.split('GROUP BY')[0].split('WHERE')[1] if 'WHERE' in sql_upper.split('GROUP BY')[
+                0] else ""
+            if any(func in where_part for func in ['COUNT(', 'SUM(', 'AVG(', 'MAX(', 'MIN(']):
+                suggestions.append(ErrorSuggestion(
+                    error_type="AGGREGATE_IN_WHERE",
+                    description="WHERE子句中不能使用聚合函数",
+                    suggestion="聚合函数的条件应该放在HAVING子句中",
+                    confidence=0.7
+                ))
+
+        return suggestions
+
+    def _analyze_table_errors(self, sql: str, error: Exception) -> List[ErrorSuggestion]:
+        """分析表相关错误"""
+        suggestions = []
+
+        if not self.catalog_manager:
+            return suggestions
+
+        # 提取SQL中的表名
+        table_pattern = r'FROM\s+(\w+)|JOIN\s+(\w+)|INTO\s+(\w+)|UPDATE\s+(\w+)'
+        matches = re.findall(table_pattern, sql, re.IGNORECASE)
+
+        mentioned_tables = []
+        for match_group in matches:
+            for table in match_group:
+                if table:
+                    mentioned_tables.append(table.lower())
+
+        # 获取数据库中实际存在的表
+        try:
+            existing_tables = [t.lower() for t in self.catalog_manager.get_all_tables()]
+        except:
+            existing_tables = []
+
+        for table in mentioned_tables:
+            if table not in existing_tables:
+                # 查找相似的表名
+                similar_tables = get_close_matches(table, existing_tables, n=3, cutoff=0.6)
+
+                if similar_tables:
+                    corrected_sql = sql.lower().replace(table, similar_tables[0])
+                    suggestions.append(ErrorSuggestion(
+                        error_type="TABLE_NOT_FOUND",
+                        description=f"表 '{table}' 不存在",
+                        suggestion=f"你是否想要查询表 '{similar_tables[0]}'？其他可能：{', '.join(similar_tables[1:])}",
+                        corrected_sql=corrected_sql,
+                        confidence=0.8
+                    ))
+                else:
+                    # 显示存在的表
+                    if existing_tables:
+                        suggestions.append(ErrorSuggestion(
+                            error_type="TABLE_NOT_FOUND",
+                            description=f"表 '{table}' 不存在",
+                            suggestion=f"当前数据库中的表有：{', '.join(existing_tables)}",
+                            confidence=0.6
+                        ))
+                    else:
+                        suggestions.append(ErrorSuggestion(
+                            error_type="NO_TABLES",
+                            description="数据库中没有任何表",
+                            suggestion="请先创建表，例如：CREATE TABLE table_name (id INT, name VARCHAR(50));",
+                            confidence=0.7
+                        ))
+
+        return suggestions
+
+    def _analyze_column_errors(self, sql: str, error: Exception) -> List[ErrorSuggestion]:
+        """分析列相关错误"""
+        suggestions = []
+
+        if not self.catalog_manager:
+            return suggestions
+
+        # 简化的列名提取（实际项目中需要更复杂的解析）
+        # 提取SELECT后的列名
+        select_match = re.search(r'SELECT\s+(.*?)\s+FROM', sql, re.IGNORECASE | re.DOTALL)
+        if select_match:
+            columns_str = select_match.group(1)
+            # 简单分割列名（忽略复杂的表达式）
+            mentioned_columns = []
+            for col in columns_str.split(','):
+                col = col.strip()
+                if col != '*' and not any(func in col.upper() for func in self.common_functions):
+                    # 提取纯列名（去除别名等）
+                    col_name = col.split()[0] if col else ""
+                    if col_name and col_name.isalpha():
+                        mentioned_columns.append(col_name.lower())
+
         # 提取表名
-        table_match = re.search(r"表\s*'([^']*)'.*不存在", error_msg)
-        if not table_match:
-            return {}
+        table_match = re.search(r'FROM\s+(\w+)', sql, re.IGNORECASE)
+        if table_match:
+            table_name = table_match.group(1).lower()
 
-        missing_table = table_match.group(1)
+            try:
+                # 获取表的列信息
+                table_columns = []
+                schema = self.catalog_manager.get_table_schema(table_name)
+                if schema:
+                    table_columns = [col[0].lower() for col in schema]
+
+                for mentioned_col in mentioned_columns:
+                    if mentioned_col not in table_columns:
+                        # 查找相似的列名
+                        similar_columns = get_close_matches(mentioned_col, table_columns, n=3, cutoff=0.6)
+
+                        if similar_columns:
+                            corrected_sql = sql.lower().replace(mentioned_col, similar_columns[0])
+                            suggestions.append(ErrorSuggestion(
+                                error_type="COLUMN_NOT_FOUND",
+                                description=f"表 '{table_name}' 中不存在列 '{mentioned_col}'",
+                                suggestion=f"你是否想要查询列 '{similar_columns[0]}'？其他可能：{', '.join(similar_columns[1:])}",
+                                corrected_sql=corrected_sql,
+                                confidence=0.8
+                            ))
+                        else:
+                            suggestions.append(ErrorSuggestion(
+                                error_type="COLUMN_NOT_FOUND",
+                                description=f"表 '{table_name}' 中不存在列 '{mentioned_col}'",
+                                suggestion=f"表 '{table_name}' 中的列有：{', '.join(table_columns)}",
+                                confidence=0.6
+                            ))
+            except Exception:
+                pass
+
+        return suggestions
+
+    def _analyze_function_errors(self, sql: str, error: Exception) -> List[ErrorSuggestion]:
+        """分析函数相关错误"""
         suggestions = []
-        corrected_sql = None
 
-        if self.catalog:
-            # 获取所有存在的表
-            existing_tables = self.catalog.get_all_tables()  # 这里返回的是列表
+        # 提取可能的函数名
+        function_pattern = r'(\w+)\s*\('
+        functions = re.findall(function_pattern, sql, re.IGNORECASE)
 
-            # 查找相似的表名
-            similar_tables = get_close_matches(missing_table, existing_tables, n=3, cutoff=0.6)
+        for func in functions:
+            func_upper = func.upper()
+            if func_upper not in self.common_functions and func_upper not in self.sql_keywords:
+                # 查找相似的函数名
+                similar_functions = get_close_matches(func_upper, self.common_functions, n=3, cutoff=0.6)
 
-            if similar_tables:
-                suggestions.append(f"表名 '{missing_table}' 不存在，您是否想要使用:")
-                for table in similar_tables:
-                    suggestions.append(f"  • {table}")
+                if similar_functions:
+                    corrected_sql = sql.replace(func, similar_functions[0].lower())
+                    suggestions.append(ErrorSuggestion(
+                        error_type="FUNCTION_NOT_FOUND",
+                        description=f"未知函数 '{func}'",
+                        suggestion=f"你是否想使用 '{similar_functions[0]}'？其他可能：{', '.join(similar_functions[1:])}",
+                        corrected_sql=corrected_sql,
+                        confidence=0.7
+                    ))
 
-                # 提供修正建议
-                best_match = similar_tables[0]
-                corrected_sql = sql.replace(missing_table, best_match)
-                suggestions.append(f"建议修正: 将 '{missing_table}' 改为 '{best_match}'")
-            else:
-                suggestions.append(f"表 '{missing_table}' 不存在")
-                if existing_tables:
-                    suggestions.append("当前数据库中的表有:")
-                    for table in existing_tables[:5]:  # 只显示前5个
-                        suggestions.append(f"  • {table}")
-                    if len(existing_tables) > 5:
-                        suggestions.append(f"  ... 还有 {len(existing_tables) - 5} 个表")
+        return suggestions
+
+    def _analyze_common_mistakes(self, sql: str) -> List[ErrorSuggestion]:
+        """分析常见错误"""
+        suggestions = []
+        sql_upper = sql.upper()
+
+        # 1. 字符串值没有引号
+        # 简化检测：查找 = 后面的非数字值
+        equals_pattern = r'=\s*([a-zA-Z]\w*)\b'
+        matches = re.findall(equals_pattern, sql)
+        if matches:
+            suggestions.append(ErrorSuggestion(
+                error_type="MISSING_QUOTES",
+                description="字符串值可能缺少引号",
+                suggestion="字符串值应该用单引号或双引号包围，例如：name = 'John'",
+                confidence=0.5
+            ))
+
+        # 2. LIMIT子句语法错误
+        if 'LIMIT' in sql_upper and 'OFFSET' not in sql_upper:
+            limit_pattern = r'LIMIT\s+(\d+)\s*,\s*(\d+)'
+            if re.search(limit_pattern, sql, re.IGNORECASE):
+                suggestions.append(ErrorSuggestion(
+                    error_type="LIMIT_SYNTAX",
+                    description="LIMIT子句语法可能不正确",
+                    suggestion="标准语法是 LIMIT count 或 LIMIT offset, count",
+                    confidence=0.6
+                ))
+
+        # 3. JOIN缺少ON子句
+        if 'JOIN' in sql_upper and 'ON' not in sql_upper:
+            suggestions.append(ErrorSuggestion(
+                error_type="MISSING_JOIN_CONDITION",
+                description="JOIN语句缺少ON条件",
+                suggestion="JOIN语句需要指定连接条件，例如：LEFT JOIN table2 ON table1.id = table2.id",
+                confidence=0.7
+            ))
+
+        # 4. 聚合函数与非聚合列混用
+        if 'GROUP BY' not in sql_upper:
+            has_aggregate = any(func in sql_upper for func in ['COUNT(', 'SUM(', 'AVG(', 'MAX(', 'MIN('])
+            select_match = re.search(r'SELECT\s+(.*?)\s+FROM', sql, re.IGNORECASE | re.DOTALL)
+            if has_aggregate and select_match:
+                columns_str = select_match.group(1)
+                # 简化检测：如果有聚合函数，但也有其他非聚合列
+                if ',' in columns_str and any(
+                        func not in columns_str.upper() for func in ['COUNT(', 'SUM(', 'AVG(', 'MAX(', 'MIN(']):
+                    suggestions.append(ErrorSuggestion(
+                        error_type="AGGREGATE_WITHOUT_GROUP_BY",
+                        description="使用聚合函数时可能需要GROUP BY",
+                        suggestion="当SELECT中有聚合函数时，所有非聚合列都需要在GROUP BY中",
+                        confidence=0.6
+                    ))
+
+        return suggestions
+
+
+class SmartSQLCorrector:
+    """智能SQL纠错器"""
+
+    def __init__(self, catalog_manager: CatalogManager = None):
+        self.analyzer = SQLErrorAnalyzer(catalog_manager)
+        self.correction_history = []
+
+    def analyze_and_suggest(self, sql: str, error: Exception = None) -> Dict[str, Any]:
+        """分析SQL并提供建议 - 修复版本"""
+        result = {
+            'original_sql': sql,
+            'has_error': error is not None,
+            'error_message': str(error) if error else None,
+            'suggestions': [],
+            'corrected_sql_options': [],
+            'improvement_tips': []
+        }
+
+        if error:
+            # 有错误时进行错误分析
+            suggestions = self.analyzer.analyze_error(sql, error)
+            result['suggestions'] = [self._format_suggestion(s) for s in suggestions]
+
+            # 提供可能的修正版本
+            corrected_options = [s for s in suggestions if s.corrected_sql]
+            result['corrected_sql_options'] = [
+                {
+                    'sql': s.corrected_sql,
+                    'description': s.suggestion,
+                    'confidence': s.confidence
+                }
+                for s in corrected_options[:3]  # 最多3个选项
+            ]
         else:
-            suggestions.append(f"表 '{missing_table}' 不存在，请先创建该表")
+            # 🔑 修复：没有错误时也进行完整的检查
+            improvements = self.analyzer.suggest_corrections(sql)
 
+            # 🔑 将语法问题也归类为改进建议
+            syntax_issues = [s for s in improvements if s.error_type in [
+                'MISSING_SEMICOLON', 'UNMATCHED_PARENTHESES', 'KEYWORD_TYPO',
+                'MISSING_COLUMNS', 'MISSING_QUOTES', 'MISSING_JOIN_CONDITION'
+            ]]
+
+            other_improvements = [s for s in improvements if s.error_type not in [
+                'MISSING_SEMICOLON', 'UNMATCHED_PARENTHESES', 'KEYWORD_TYPO',
+                'MISSING_COLUMNS', 'MISSING_QUOTES', 'MISSING_JOIN_CONDITION'
+            ]]
+
+            # 如果有语法问题，放到suggestions中
+            if syntax_issues:
+                result['suggestions'] = [self._format_suggestion(s) for s in syntax_issues]
+
+                # 提供修正选项
+                corrected_options = [s for s in syntax_issues if s.corrected_sql]
+                result['corrected_sql_options'] = [
+                    {
+                        'sql': s.corrected_sql,
+                        'description': s.suggestion,
+                        'confidence': s.confidence
+                    }
+                    for s in corrected_options[:3]
+                ]
+
+            # 其他改进建议
+            result['improvement_tips'] = [self._format_suggestion(s) for s in other_improvements]
+
+        return result
+
+    def _format_suggestion(self, suggestion: ErrorSuggestion) -> Dict[str, Any]:
+        """格式化建议"""
         return {
-            'suggestions': suggestions,
-            'corrected_sql': corrected_sql,
-            'explanation': f"引用了不存在的表 '{missing_table}'",
-            'examples': [
-                f"创建表: CREATE TABLE {missing_table} (id INT, name VARCHAR(50));",
-                "或检查表名拼写是否正确"
-            ]
+            'type': suggestion.error_type,
+            'description': suggestion.description,
+            'suggestion': suggestion.suggestion,
+            'confidence': suggestion.confidence,
+            'corrected_sql': suggestion.corrected_sql
         }
-
-    def _handle_missing_column(self, error_msg: str, sql: str) -> Dict[str, Any]:
-        """处理列不存在错误"""
-        # 提取列名
-        column_match = re.search(r"列.*?'([^']*)'.*不存在", error_msg) or \
-                       re.search(r"无效的列引用:\s*([^\s]+)", error_msg)
-
-        if not column_match:
-            return {}
-
-        missing_column = column_match.group(1)
-        suggestions = []
-        corrected_sql = None
-
-        # 提取可能的表名
-        table_name = self._extract_table_from_sql(sql)
-
-        if self.catalog and table_name:
-            table_info = self.catalog.get_table(table_name)
-            if table_info:
-                existing_columns = [col['name'] for col in table_info['columns']]
-
-                # 查找相似的列名
-                similar_columns = get_close_matches(missing_column, existing_columns, n=3, cutoff=0.6)
-
-                if similar_columns:
-                    suggestions.append(f"列 '{missing_column}' 不存在，您是否想要使用:")
-                    for col in similar_columns:
-                        suggestions.append(f"  • {col}")
-
-                    best_match = similar_columns[0]
-                    corrected_sql = sql.replace(missing_column, best_match)
-                    suggestions.append(f"建议修正: 将 '{missing_column}' 改为 '{best_match}'")
-                else:
-                    suggestions.append(f"列 '{missing_column}' 不存在")
-                    suggestions.append(f"表 '{table_name}' 中的列有:")
-                    for col in existing_columns:
-                        suggestions.append(f"  • {col}")
-        else:
-            suggestions.append(f"列 '{missing_column}' 不存在，请检查列名拼写")
-
-        return {
-            'suggestions': suggestions,
-            'corrected_sql': corrected_sql,
-            'explanation': f"引用了不存在的列 '{missing_column}'",
-            'examples': [
-                f"检查表结构: DESCRIBE {table_name};",
-                "确认列名拼写正确"
-            ]
-        }
-
-    def _handle_type_mismatch(self, error_msg: str, sql: str) -> Dict[str, Any]:
-        """处理类型不匹配错误"""
-        suggestions = []
-        corrected_sql = None
-
-        # 解析类型不匹配信息
-        type_match = re.search(r"期望类型\s*'([^']*)'.*得到\s*'([^']*)'", error_msg)
-        if type_match:
-            expected_type = type_match.group(1)
-            actual_type = type_match.group(2)
-
-            suggestions.append(f"类型不匹配: 期望 {expected_type}，但得到 {actual_type}")
-
-            # 提供类型转换建议
-            if expected_type == 'INT' and actual_type == 'VARCHAR':
-                suggestions.append("如果是数字字符串，请移除引号")
-                suggestions.append("例如: 将 '123' 改为 123")
-                corrected_sql = re.sub(r"'(\d+)'", r'\1', sql)
-
-            elif expected_type.startswith('VARCHAR') and actual_type == 'INT':
-                suggestions.append("如果是字符串，请添加引号")
-                suggestions.append("例如: 将 123 改为 '123'")
-                # 简单的数字到字符串转换
-                corrected_sql = re.sub(r'\b(\d+)\b', r"'\1'", sql)
-
-        return {
-            'suggestions': suggestions,
-            'corrected_sql': corrected_sql,
-            'explanation': '数据类型不匹配',
-            'examples': [
-                "正确: INSERT INTO users (id, name) VALUES (1, 'Alice');",
-                "错误: INSERT INTO users (id, name) VALUES ('1', 123);"
-            ]
-        }
-
-    def _handle_groupby_error(self, error_msg: str, sql: str) -> Dict[str, Any]:
-        """处理GROUP BY相关错误"""
-        suggestions = []
-        corrected_sql = None
-
-        if "必须使用GROUP BY" in error_msg:
-            # 提取非聚合列
-            non_agg_match = re.search(r"非聚合列:\s*([^}]+)", error_msg)
-            if non_agg_match:
-                non_agg_columns = non_agg_match.group(1).strip()
-                suggestions.append(f"查询包含聚合函数和非聚合列，需要添加GROUP BY子句")
-                suggestions.append(f"添加: GROUP BY {non_agg_columns}")
-
-                # 尝试修正SQL
-                if not re.search(r'GROUP\s+BY', sql, re.IGNORECASE):
-                    # 在适当位置添加GROUP BY
-                    corrected_sql = self._add_group_by_clause(sql, non_agg_columns)
-
-        elif "必须出现在GROUP BY子句中" in error_msg:
-            column_match = re.search(r"列\s*'([^']*)'", error_msg)
-            if column_match:
-                column = column_match.group(1)
-                suggestions.append(f"列 '{column}' 必须添加到GROUP BY子句中")
-                corrected_sql = self._add_column_to_group_by(sql, column)
-
-        return {
-            'suggestions': suggestions,
-            'corrected_sql': corrected_sql,
-            'explanation': 'GROUP BY 规则违反',
-            'examples': [
-                "正确: SELECT dept, COUNT(*) FROM employees GROUP BY dept;",
-                "错误: SELECT dept, COUNT(*) FROM employees;"
-            ]
-        }
-
-    def _extract_table_from_sql(self, sql: str) -> str:
-        """从SQL中提取表名"""
-        # 简单的表名提取
-        from_match = re.search(r'FROM\s+(\w+)', sql, re.IGNORECASE)
-        if from_match:
-            return from_match.group(1)
-
-        into_match = re.search(r'INTO\s+(\w+)', sql, re.IGNORECASE)
-        if into_match:
-            return into_match.group(1)
-
-        update_match = re.search(r'UPDATE\s+(\w+)', sql, re.IGNORECASE)
-        if update_match:
-            return update_match.group(1)
-
-        return None
-
-    def _get_syntax_examples(self, expected_token: str) -> List[str]:
-        """获取语法示例"""
-        examples = {
-            ';': [
-                "完整语句: SELECT * FROM users;",
-                "完整语句: INSERT INTO users VALUES (1, 'Alice');"
-            ],
-            'FROM': [
-                "正确: SELECT * FROM users;",
-                "错误: SELECT *;"
-            ],
-            'SET': [
-                "正确: UPDATE users SET name = 'Alice';",
-                "错误: UPDATE users;"
-            ]
-        }
-        return examples.get(expected_token, ["检查SQL语法手册"])
-
-    def _suggest_pattern_fix(self, pattern: str, sql: str) -> str:
-        """根据模式建议修复"""
-        if "FROM.*$" in pattern:
-            return sql + " table_name"
-        elif "VALUES.*$" in pattern:
-            return sql + " VALUES (value1, value2)"
-        elif "SET.*$" in pattern:
-            return sql + " SET column = value"
-        return sql
-
-    def _add_group_by_clause(self, sql: str, columns: str) -> str:
-        """添加GROUP BY子句"""
-        # 查找插入点（在WHERE之后，ORDER BY之前，或语句末尾）
-        order_by_match = re.search(r'\s+ORDER\s+BY', sql, re.IGNORECASE)
-        having_match = re.search(r'\s+HAVING', sql, re.IGNORECASE)
-
-        if order_by_match:
-            insert_pos = order_by_match.start()
-        elif having_match:
-            insert_pos = having_match.start()
-        else:
-            # 在分号前插入
-            semicolon_pos = sql.rfind(';')
-            insert_pos = semicolon_pos if semicolon_pos != -1 else len(sql)
-
-        return sql[:insert_pos] + f" GROUP BY {columns}" + sql[insert_pos:]
-
-    def _add_column_to_group_by(self, sql: str, column: str) -> str:
-        """向GROUP BY子句添加列"""
-        group_by_match = re.search(r'GROUP\s+BY\s+([^;]+)', sql, re.IGNORECASE)
-        if group_by_match:
-            existing_columns = group_by_match.group(1).strip()
-            new_columns = existing_columns + f", {column}"
-            return sql.replace(group_by_match.group(0), f"GROUP BY {new_columns}")
-        return sql
-
-
-class SmartErrorReporter:
-    """智能错误报告器"""
-
-    def __init__(self, catalog_manager=None):
-        self.diagnostics = ErrorDiagnostics(catalog_manager)
-
-    def report_error(self, error: CompilerError, sql: str):
-        """报告错误并提供智能诊断"""
-        print(f"\n{'❌' * 20}")
-        print("SQL编译错误诊断")
-        print("❌" * 20)
-
-        diagnosis = self.diagnostics.diagnose_error(error, sql)
-
-        # 显示基本错误信息
-        print(f"\n🔍 错误类型: {diagnosis['error_type']}")
-        print(f"📍 原始错误: {diagnosis['original_error']}")
-
-        # 显示错误说明
-        if diagnosis['explanation']:
-            print(f"\n💡 问题说明: {diagnosis['explanation']}")
-
-        # 显示建议
-        if diagnosis['suggestions']:
-            print(f"\n🛠️  修复建议:")
-            for i, suggestion in enumerate(diagnosis['suggestions'], 1):
-                if suggestion.startswith('  •'):
-                    print(f"    {suggestion}")
-                else:
-                    print(f"   {i}. {suggestion}")
-
-        # 显示修正后的SQL
-        if diagnosis['corrected_sql'] and diagnosis['corrected_sql'] != sql:
-            print(f"\n✨ 建议的修正:")
-            print(f"   原始: {sql.strip()}")
-            print(f"   修正: {diagnosis['corrected_sql'].strip()}")
-
-        # 显示示例
-        if diagnosis['examples']:
-            print(f"\n📚 参考示例:")
-            for example in diagnosis['examples']:
-                print(f"   • {example}")
-
-        print("❌" * 50)
