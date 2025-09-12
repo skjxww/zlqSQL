@@ -10,7 +10,7 @@ from sql_compiler.codegen.plan_generator import PlanGenerator
 from storage.core.page_manager import PageManager
 from storage.core.buffer_pool import BufferPool
 from storage.core.storage_manager import StorageManager
-from sql_compiler.catalog.catalog_manager import CatalogManager
+from catalog.catalog_manager import CatalogManager
 from engine.storage_engine import StorageEngine
 from engine.execution_engine import ExecutionEngine
 from sql_compiler.diagnostics.error_analyzer import SmartSQLCorrector

@@ -32,6 +32,85 @@ class CostModel:
     def __init__(self, stats_manager: StatisticsManager, params: SystemParameters = None):
         self.stats_manager = stats_manager
         self.params = params or SystemParameters()
+        self.btree_params = {
+            'btree_page_cost': 0.1,      # B+树页访问成本
+            'btree_cpu_cost': 0.001,     # B+树CPU处理成本
+            'index_correlation': 0.8,     # 索引与数据的相关性
+        }
+
+    def _cost_btree_index_scan(self, btree_scan_op: 'BTreeIndexScanOp') -> Dict[str, float]:
+        """计算B+树索引扫描成本 - 精确模型"""
+        table_stats = self.stats_manager.get_table_stats(btree_scan_op.table_name)
+        index_stats = self.stats_manager.index_stats[btree_scan_op.table_name].get(btree_scan_op.index_name)
+
+        if not table_stats or not index_stats:
+            return self._fallback_index_cost()
+
+        # 1. 计算选择率
+        selectivity = self.stats_manager.get_btree_selectivity(
+            btree_scan_op.index_name,
+            btree_scan_op.scan_condition
+        )
+
+        # 2. 索引访问成本
+        index_pages_accessed = self.stats_manager.estimate_index_pages_accessed(
+            btree_scan_op.index_name,
+            selectivity
+        )
+        index_io_cost = index_pages_accessed * self.btree_params['btree_page_cost']
+
+        # 3. 表数据访问成本（如果不是覆盖索引）
+        rows_returned = table_stats.row_count * selectivity
+
+        if btree_scan_op.is_covering_index:
+            # 覆盖索引，无需回表
+            table_io_cost = 0
+        else:
+            # 需要回表，考虑聚簇因子
+            clustering_factor = index_stats.clustering_factor
+            if clustering_factor < 0.1:  # 数据高度有序
+                pages_accessed = max(1, rows_returned / table_stats.density)
+            else:  # 数据无序，可能每行都需要随机访问
+                pages_accessed = min(rows_returned, table_stats.page_count)
+
+            table_io_cost = pages_accessed * self.params.random_page_cost
+
+        # 4. CPU 成本
+        cpu_cost = (rows_returned * self.params.cpu_tuple_cost +
+                    index_pages_accessed * self.btree_params['btree_cpu_cost'])
+
+        # 5. 总成本
+        startup_cost = index_stats.height * self.btree_params['btree_page_cost']
+        total_cost = startup_cost + index_io_cost + table_io_cost + cpu_cost
+
+        return {
+            'startup_cost': startup_cost,
+            'total_cost': total_cost,
+            'rows': rows_returned,
+            'width': table_stats.avg_row_size,
+            'index_pages': index_pages_accessed,
+            'table_pages': pages_accessed if not btree_scan_op.is_covering_index else 0
+        }
+
+    def _cost_index_nested_loop_join(self, join_op: 'IndexNestedLoopJoinOp') -> Dict[str, float]:
+        """计算索引嵌套循环连接成本"""
+        outer_cost = self.calculate_cost(join_op.children[0])
+
+        # 内表每次通过索引查找的成本
+        inner_index_cost = self._cost_btree_index_scan(join_op.inner_index_scan)
+
+        # 外表每行都要在内表索引中查找
+        total_inner_cost = outer_cost['rows'] * inner_index_cost['total_cost']
+
+        join_selectivity = self._estimate_join_selectivity(join_op)
+        output_rows = outer_cost['rows'] * inner_index_cost['rows'] * join_selectivity
+
+        return {
+            'startup_cost': outer_cost['startup_cost'] + inner_index_cost['startup_cost'],
+            'total_cost': outer_cost['total_cost'] + total_inner_cost,
+            'rows': output_rows,
+            'width': outer_cost['width'] + inner_index_cost['width']
+        }
 
     def calculate_cost(self, operator: Operator) -> Dict[str, float]:
         """计算操作符的详细成本"""

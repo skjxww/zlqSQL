@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from sql_compiler.lexer.token import Token, TokenType
 from sql_compiler.parser.ast_nodes import *
 from sql_compiler.exceptions.compiler_errors import SyntaxError as SyntaxErr
@@ -54,7 +54,16 @@ class SyntaxAnalyzer:
         current_token = self._current_token()
 
         if self._match(TokenType.CREATE):
-            return self._parse_create_table()
+            if self._check(TokenType.INDEX):
+                return self._parse_create_index()
+            elif self._check(TokenType.TABLE):
+                return self._parse_create_table()
+        elif self._match(TokenType.DROP):
+            if self._check(TokenType.INDEX):
+                return self._parse_drop_index()
+        elif self._match(TokenType.SHOW):
+            if self._check(TokenType.INDEXES):
+                return self._parse_show_indexes()
         elif self._match(TokenType.INSERT):
             return self._parse_insert()
         elif self._match(TokenType.SELECT):
@@ -67,6 +76,49 @@ class SyntaxAnalyzer:
             raise SyntaxErr(f"无效的语句开头: '{current_token.lexeme}'",
                             current_token.line, current_token.column,
                             "CREATE, INSERT, SELECT, UPDATE, DELETE")
+
+    def _parse_create_index(self) -> CreateIndexStmt:
+        """解析CREATE INDEX语句"""
+        # CREATE [UNIQUE] INDEX index_name ON table_name (column1, column2, ...)
+        unique = False
+        if self._match(TokenType.UNIQUE):
+            unique = True
+
+        self._expect(TokenType.INDEX)
+        index_name = self._expect(TokenType.IDENTIFIER).lexeme
+        self._expect(TokenType.ON)
+        table_name = self._expect(TokenType.IDENTIFIER).lexeme
+
+        self._expect(TokenType.LEFT_PAREN)
+        columns = []
+        columns.append(self._expect(TokenType.IDENTIFIER).lexeme)
+
+        while self._match(TokenType.COMMA):
+            columns.append(self._expect(TokenType.IDENTIFIER).lexeme)
+
+        self._expect(TokenType.RIGHT_PAREN)
+
+        # 可选的索引类型
+        index_type = "BTREE"
+        if self._match(TokenType.BTREE):
+            index_type = "BTREE"
+
+        return CreateIndexStmt(index_name, table_name, columns, unique, index_type)
+
+    def _parse_drop_index(self) -> DropIndexStmt:
+        """解析DROP INDEX语句"""
+        self._expect(TokenType.INDEX)
+        index_name = self._expect(TokenType.IDENTIFIER).lexeme
+        return DropIndexStmt(index_name)
+
+    def _parse_show_indexes(self) -> ShowIndexesStmt:
+        """解析SHOW INDEXES语句"""
+        self._expect(TokenType.INDEXES)
+        table_name = None
+        if self._match(TokenType.FROM):
+            table_name = self._expect(TokenType.IDENTIFIER).lexeme
+        return ShowIndexesStmt(table_name)
+
     # ==================== CREATE TABLE 解析 ====================
 
     def _parse_create_table(self) -> CreateTableStmt:
@@ -705,3 +757,32 @@ class SyntaxAnalyzer:
         else:
             raise SyntaxErr(f"期望 '{token_type.value}'，但遇到 '{current.lexeme}'",
                             current.line, current.column, token_type.value)
+
+    def _parse_order_by(self) -> List[Tuple[str, str]]:
+        """解析ORDER BY子句"""
+        order_by = []
+
+        # 解析第一个排序表达式
+        column = self._expect(TokenType.IDENTIFIER).lexeme
+        direction = "ASC"  # 默认升序
+
+        if self._match(TokenType.ASC):
+            direction = "ASC"
+        elif self._match(TokenType.DESC):
+            direction = "DESC"
+
+        order_by.append((column, direction))
+
+        # 解析后续的排序表达式
+        while self._match(TokenType.COMMA):
+            column = self._expect(TokenType.IDENTIFIER).lexeme
+            direction = "ASC"
+
+            if self._match(TokenType.ASC):
+                direction = "ASC"
+            elif self._match(TokenType.DESC):
+                direction = "DESC"
+
+            order_by.append((column, direction))
+
+        return order_by

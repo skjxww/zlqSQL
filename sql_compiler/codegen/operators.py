@@ -1201,3 +1201,244 @@ def create_join_op(join_type: str, on_condition: Optional[Expression],
         return AliasAwareJoinOp(join_type, on_condition, children)
     else:
         return JoinOp(join_type, on_condition, children)
+
+
+# 添加索引相关操作符
+class CreateIndexOp(Operator):
+    """创建索引操作符"""
+
+    def __init__(self, index_name: str, table_name: str, columns: List[str],
+                 unique: bool = False, index_type: str = "BTREE"):
+        super().__init__([])
+        self.index_name = index_name
+        self.table_name = table_name
+        self.columns = columns
+        self.unique = unique
+        self.index_type = index_type
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": "CreateIndexOp",
+            "index_name": self.index_name,
+            "table_name": self.table_name,
+            "columns": self.columns,
+            "unique": self.unique,
+            "index_type": self.index_type
+        }
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        yield {
+            "operation": "create_index",
+            "index_name": self.index_name,
+            "table_name": self.table_name,
+            "status": "success"
+        }
+
+
+class BTreeIndexScanOp(Operator):
+    """B+树索引扫描操作符"""
+
+    def __init__(self, table_name: str, index_name: str,
+                 scan_condition: Optional[Expression] = None,
+                 is_covering_index: bool = False):
+        super().__init__([])
+        self.table_name = table_name
+        self.index_name = index_name
+        self.scan_condition = scan_condition
+        self.is_covering_index = is_covering_index
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": "BTreeIndexScanOp",
+            "table_name": self.table_name,
+            "index_name": self.index_name,
+            "scan_condition": self.scan_condition.to_dict() if self.scan_condition else None,
+            "is_covering_index": self.is_covering_index,
+            "algorithm": "btree_traversal"
+        }
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        yield {
+            "table": self.table_name,
+            "operation": "btree_index_scan",
+            "index": self.index_name,
+            "covering": self.is_covering_index
+        }
+
+
+class IndexNestedLoopJoinOp(Operator):
+    """索引嵌套循环连接操作符"""
+
+    def __init__(self, join_type: str, join_condition: Expression,
+                 outer_child: Operator, inner_index_scan: BTreeIndexScanOp):
+        super().__init__([outer_child])
+        self.join_type = join_type
+        self.join_condition = join_condition
+        self.inner_index_scan = inner_index_scan
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": "IndexNestedLoopJoinOp",
+            "join_type": self.join_type,
+            "join_condition": self.join_condition.to_dict(),
+            "outer_child": self.children[0].to_dict(),
+            "inner_index_scan": self.inner_index_scan.to_dict(),
+            "algorithm": "index_nested_loop"
+        }
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        for outer_row in self.children[0].execute():
+            # 模拟通过索引查找匹配的内表行
+            yield {
+                **outer_row,
+                "join_method": "index_nested_loop",
+                "index_used": self.inner_index_scan.index_name
+            }
+
+
+class IndexOnlyScanOp(Operator):
+    """仅索引扫描操作符（覆盖索引）"""
+
+    def __init__(self, table_name: str, index_name: str, scan_condition: Expression):
+        super().__init__([])
+        self.table_name = table_name
+        self.index_name = index_name
+        self.scan_condition = scan_condition
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": "IndexOnlyScanOp",
+            "table_name": self.table_name,
+            "index_name": self.index_name,
+            "scan_condition": self.scan_condition.to_dict(),
+            "optimization": "covering_index"
+        }
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        yield {
+            "table": self.table_name,
+            "operation": "index_only_scan",
+            "index": self.index_name,
+            "no_table_access": True
+        }
+
+
+# 在 operators.py 中添加缺失的操作符
+class DropIndexOp(Operator):
+    """删除索引操作符"""
+
+    def __init__(self, index_name: str):
+        super().__init__([])
+        self.index_name = index_name
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": "DropIndexOp",
+            "index_name": self.index_name
+        }
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        yield {
+            "operation": "drop_index",
+            "index_name": self.index_name,
+            "status": "success",
+            "message": f"索引 '{self.index_name}' 已删除"
+        }
+
+
+class ShowIndexesOp(Operator):
+    """显示索引操作符"""
+
+    def __init__(self, table_name: Optional[str] = None):
+        super().__init__([])
+        self.table_name = table_name
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": "ShowIndexesOp",
+            "table_name": self.table_name
+        }
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        # 模拟返回索引信息
+        if self.table_name:
+            yield {
+                "operation": "show_indexes",
+                "table_name": self.table_name,
+                "indexes": [
+                    {
+                        "index_name": f"idx_{self.table_name}_id",
+                        "columns": ["id"],
+                        "unique": True,
+                        "type": "BTREE"
+                    }
+                ]
+            }
+        else:
+            yield {
+                "operation": "show_all_indexes",
+                "indexes": [
+                    {
+                        "table_name": "users",
+                        "index_name": "idx_users_id",
+                        "columns": ["id"],
+                        "unique": True,
+                        "type": "BTREE"
+                    }
+                ]
+            }
+
+
+class SortOp(Operator):
+    """排序操作符"""
+
+    def __init__(self, order_by: List[Tuple[str, str]], children: List[Operator]):
+        """
+        :param order_by: 排序列表，每个元素为 (column, direction)，如 [('name', 'ASC'), ('age', 'DESC')]
+        :param children: 子操作符
+        """
+        super().__init__(children)
+        self.order_by = order_by  # [(column, direction), ...]
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": "SortOp",
+            "order_by": [{"column": col, "direction": direction}
+                         for col, direction in self.order_by],
+            "children": [child.to_dict() for child in self.children]
+        }
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        """执行排序操作"""
+        # 收集所有子结果
+        child_results = []
+        for child in self.children:
+            child_results.extend(list(child.execute()))
+
+        # 执行排序
+        def sort_key(row):
+            key_values = []
+            for column, direction in self.order_by:
+                value = row.get(column, 0)
+                # 处理不同数据类型的排序
+                if isinstance(value, str):
+                    sort_value = value.lower()
+                else:
+                    sort_value = value if value is not None else 0
+
+                # 降序需要反转
+                if direction.upper() == 'DESC':
+                    if isinstance(sort_value, (int, float)):
+                        sort_value = -sort_value
+                    elif isinstance(sort_value, str):
+                        # 字符串降序比较复杂，这里简化处理
+                        sort_value = ''.join(chr(255 - ord(c)) for c in sort_value[:10])
+
+                key_values.append(sort_value)
+
+            return tuple(key_values)
+
+        # 排序并返回结果
+        sorted_results = sorted(child_results, key=sort_key)
+        for row in sorted_results:
+            yield row

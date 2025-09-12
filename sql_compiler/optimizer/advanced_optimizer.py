@@ -10,7 +10,7 @@ from sql_compiler.parser.ast_nodes import *
 class AdvancedQueryOptimizer:
     """高级查询优化器 - 智能分层保护策略"""
 
-    def __init__(self, stats_manager: StatisticsManager = None, silent_mode: bool = False):
+    def __init__(self, stats_manager: StatisticsManager = None, silent_mode: bool = False,catalog_manager=None):
         self.stats_manager = stats_manager or StatisticsManager()
         self.silent_mode = silent_mode
 
@@ -28,6 +28,8 @@ class AdvancedQueryOptimizer:
         self.enable_cost_based_optimization = True
         self.enable_advanced_enumeration = True
         self.enable_statistics = True
+
+        self.catalog_manager = catalog_manager
 
     def optimize(self, plan: Operator) -> Operator:
         """主优化入口 - 智能分层保护"""
@@ -224,30 +226,424 @@ class AdvancedQueryOptimizer:
         return optimized
 
     def _apply_selective_physical_optimizations(self, plan: Operator, analysis: Dict[str, Any]) -> Operator:
-        """有选择性地应用物理优化"""
-        safety_level = analysis['optimization_safety_level']
+        """应用有选择性的物理优化 - 完整版本"""
+        try:
+            optimized_plan = plan
+            safety_level = analysis.get('optimization_safety_level', 'MEDIUM')
 
-        if safety_level == 'VERY_HIGH':
+            # 根据安全级别决定优化策略
+            if safety_level == 'VERY_HIGH':
+                if not self.silent_mode:
+                    print("   🚫 跳过物理优化（VERY_HIGH安全级别）")
+                return plan
+
+            if safety_level == 'HIGH':
+                if not self.silent_mode:
+                    print("   ⚠️ 保守物理优化（HIGH安全级别）")
+                return self._apply_conservative_physical_optimization(plan, analysis)
+
+            # MEDIUM 和 LOW 级别可以应用更多优化
             if not self.silent_mode:
-                print("   🚫 跳过物理优化（VERY_HIGH安全级别）")
+                print("   🚀 标准物理优化")
+
+            # 1. B+树索引选择优化
+            if not self.silent_mode:
+                print("   📊 B+树索引选择优化")
+
+            index_optimized = self._optimize_with_btree_indexes(optimized_plan, analysis)
+            if index_optimized is not optimized_plan:
+                optimized_plan = index_optimized
+                if not self.silent_mode:
+                    print("     ✅ 应用了B+树索引优化")
+
+            # 2. 连接算法选择（考虑索引）
+            if analysis.get('join_complexity', 0) > 0:
+                if not self.silent_mode:
+                    print("   🔗 索引连接优化")
+
+                join_optimized = self._optimize_joins_with_indexes(optimized_plan, analysis)
+                if join_optimized is not optimized_plan:
+                    optimized_plan = join_optimized
+                    if not self.silent_mode:
+                        print("     ✅ 应用了索引连接优化")
+
+            # 3. 排序优化（使用索引避免排序）
+            if analysis.get('has_order_by', False):
+                if not self.silent_mode:
+                    print("   📈 排序索引优化")
+
+                sort_optimized = self._optimize_sort_with_indexes(optimized_plan, analysis)
+                if sort_optimized is not optimized_plan:
+                    optimized_plan = sort_optimized
+                    if not self.silent_mode:
+                        print("     ✅ 应用了排序索引优化")
+
+            # 4. 分组优化（使用索引优化GROUP BY）
+            if analysis.get('has_group_by', False):
+                if not self.silent_mode:
+                    print("   📊 分组索引优化")
+
+                group_optimized = self._optimize_group_with_indexes(optimized_plan, analysis)
+                if group_optimized is not optimized_plan:
+                    optimized_plan = group_optimized
+                    if not self.silent_mode:
+                        print("     ✅ 应用了分组索引优化")
+
+            # 5. 检查查询复杂度，决定是否应用成本优化
+            if self._is_complex_query(optimized_plan):
+                if not self.silent_mode:
+                    print("   💰 成本基础优化")
+                cost_optimized = self._cost_based_optimization(optimized_plan)
+                if cost_optimized is not optimized_plan:
+                    optimized_plan = cost_optimized
+                    if not self.silent_mode:
+                        print("     ✅ 应用了成本基础优化")
+            else:
+                if not self.silent_mode:
+                    print("   ⏭️ 查询较简单，跳过成本优化")
+
+            return optimized_plan
+
+        except Exception as e:
+            if not self.silent_mode:
+                print(f"   ⚠️ 物理优化部分失败: {e}")
             return plan
 
-        if safety_level == 'HIGH':
-            if not self.silent_mode:
-                print("   ⚠️ 保守物理优化（HIGH安全级别）")
-            return self._apply_conservative_physical_optimization(plan, analysis)
+    def _apply_conservative_physical_optimization(self, plan: Operator, analysis: Dict[str, Any]) -> Operator:
+        """应用保守的物理优化"""
+        try:
+            # 只应用最安全的优化
+            optimized_plan = plan
 
-        # MEDIUM 和 LOW 级别可以应用更多优化
-        if not self.silent_mode:
-            print("   🚀 标准物理优化")
+            # 1. 只应用明显有益的索引优化
+            if self._has_obvious_index_opportunity(plan, analysis):
+                if not self.silent_mode:
+                    print("     🔍 保守索引优化")
+                optimized_plan = self._apply_safe_index_optimization(optimized_plan, analysis)
 
-        # 但仍要检查复杂度
-        if self._is_complex_query(plan):
-            return self._cost_based_optimization(plan)
-        else:
+            # 2. 只优化简单的连接
+            if analysis.get('join_complexity', 0) == 1:  # 只有一个连接
+                if not self.silent_mode:
+                    print("     🔗 简单连接优化")
+                optimized_plan = self._apply_safe_join_optimization(optimized_plan, analysis)
+
+            return optimized_plan
+
+        except Exception as e:
             if not self.silent_mode:
-                print("   ⏭️ 查询过于简单，跳过成本优化")
+                print(f"     ⚠️ 保守优化失败: {e}")
             return plan
+
+    def _optimize_sort_with_indexes(self, plan: Operator, analysis: Dict[str, Any]) -> Operator:
+        """使用索引优化排序"""
+        # 遍历计划树，寻找排序操作
+        if isinstance(plan, SortOp):
+            return self._try_replace_sort_with_index(plan, analysis)
+
+        # 递归处理子节点
+        new_children = []
+        changed = False
+
+        for child in plan.children:
+            optimized_child = self._optimize_sort_with_indexes(child, analysis)
+            new_children.append(optimized_child)
+            if optimized_child is not child:
+                changed = True
+
+        if changed:
+            return self._clone_operator(plan, new_children)
+
+        return plan
+
+    def _optimize_group_with_indexes(self, plan: Operator, analysis: Dict[str, Any]) -> Operator:
+        """使用索引优化分组"""
+        # 类似排序优化，但针对GROUP BY
+        if isinstance(plan, GroupByOp):
+            return self._try_optimize_group_with_index(plan, analysis)
+
+        # 递归处理
+        new_children = []
+        changed = False
+
+        for child in plan.children:
+            optimized_child = self._optimize_group_with_indexes(child, analysis)
+            new_children.append(optimized_child)
+            if optimized_child is not child:
+                changed = True
+
+        if changed:
+            return self._clone_operator(plan, new_children)
+
+        return plan
+
+    def _has_obvious_index_opportunity(self, plan: Operator, analysis: Dict[str, Any]) -> bool:
+        """检查是否有明显的索引优化机会"""
+        # 检查是否有等值查询条件
+        return (analysis.get('has_equality_filters', False) and
+                analysis.get('filter_selectivity', 1.0) < 0.1)
+
+    def _apply_safe_index_optimization(self, plan: Operator, analysis: Dict[str, Any]) -> Operator:
+        """应用安全的索引优化"""
+        # 只替换明显有益的表扫描
+        if isinstance(plan, SeqScanOp):
+            # 检查是否有高选择性的过滤条件
+            if analysis.get('filter_selectivity', 1.0) < 0.01:  # 选择率 < 1%
+                return self._try_replace_with_index_scan(plan, analysis)
+
+        return plan
+
+    def _apply_safe_join_optimization(self, plan: Operator, analysis: Dict[str, Any]) -> Operator:
+        """应用安全的连接优化"""
+        # 只优化简单的等值连接
+        if isinstance(plan, JoinOp) and plan.join_type == "INNER":
+            # 检查连接条件是否为简单等值
+            if self._is_simple_equi_join(plan.join_condition):
+                return self._try_index_nested_loop_join(plan)
+
+        return plan
+
+    def _is_simple_equi_join(self, condition: Expression) -> bool:
+        """检查是否为简单等值连接"""
+        return (isinstance(condition, BinaryExpr) and
+                condition.operator == '=' and
+                isinstance(condition.left, ColumnRef) and
+                isinstance(condition.right, ColumnRef))
+
+    def _optimize_with_btree_indexes(self, plan: Operator, query_analysis: Dict[str, Any]) -> Operator:
+        """使用B+树索引优化查询计划"""
+        if isinstance(plan, SeqScanOp):
+            return self._try_replace_with_index_scan(plan, query_analysis)
+        elif isinstance(plan, FilterOp) and len(plan.children) == 1:
+            child = plan.children[0]
+            if isinstance(child, SeqScanOp):
+                return self._try_replace_filter_with_index_scan(plan, child, query_analysis)
+
+        # 递归处理子节点
+        new_children = []
+        changed = False
+
+        for child in plan.children:
+            optimized_child = self._optimize_with_btree_indexes(child, query_analysis)
+            new_children.append(optimized_child)
+            if optimized_child is not child:
+                changed = True
+
+        if changed:
+            return self._clone_operator(plan, new_children)
+
+        return plan
+
+    def _get_table_btree_indexes(self, table_name: str) -> List[Dict]:
+        """获取表的B+树索引"""
+        if self.catalog_manager:
+            return self.catalog_manager.get_table_indexes(table_name)
+        return []
+
+    def _try_replace_with_index_scan(self, seq_scan: SeqScanOp, query_analysis: Dict[str, Any]) -> Operator:
+        """尝试用索引扫描替换全表扫描"""
+        table_name = seq_scan.table_name
+
+        # 获取可用的索引
+        available_indexes = self._get_table_btree_indexes(table_name)
+
+        if not available_indexes:
+            return seq_scan
+
+        # 选择最佳索引（简化版本）
+        best_index = available_indexes[0]  # 实际应该基于成本选择
+
+        # 创建索引扫描
+        index_scan = BTreeIndexScanOp(
+            table_name=table_name,
+            index_name=best_index['name'],
+            scan_condition=None,  # 全索引扫描
+            is_covering_index=False
+        )
+
+        # 比较成本
+        seq_cost = self.cost_model.calculate_cost(seq_scan)['total_cost']
+        index_cost = self.cost_model.calculate_cost(index_scan)['total_cost']
+
+        return index_scan if index_cost < seq_cost else seq_scan
+
+    def _try_replace_sort_with_index(self, sort_op: SortOp, analysis: Dict[str, Any]) -> Operator:
+        """尝试用索引替换排序"""
+        if len(sort_op.children) != 1:
+            return sort_op
+
+        child = sort_op.children[0]
+        if isinstance(child, SeqScanOp):
+            # 提取排序列名
+            sort_columns = []
+            for column, direction in sort_op.order_by:
+                if isinstance(column, str):
+                    sort_columns.append(column)
+                # 如果有更复杂的表达式，这里需要额外处理
+
+            # 检查是否有匹配排序列的索引
+            suitable_indexes = self._find_indexes_for_columns(child.table_name, sort_columns)
+
+            if suitable_indexes:
+                # 用索引扫描替换，索引天然有序
+                index_scan = BTreeIndexScanOp(
+                    child.table_name,
+                    suitable_indexes[0],
+                    None,  # 全扫描，但有序
+                    is_covering_index=False
+                )
+                # 如果索引完全匹配排序需求，可以省略排序
+                if self._index_matches_sort(suitable_indexes[0], sort_op.order_by):
+                    return index_scan
+
+        return sort_op
+
+    def _try_optimize_group_with_index(self, group_op: GroupByOp, analysis: Dict[str, Any]) -> Operator:
+        """尝试用索引优化GROUP BY"""
+        if len(group_op.children) != 1:
+            return group_op
+
+        child = group_op.children[0]
+
+        # 提取分组列名
+        group_columns = []
+        if hasattr(group_op, 'group_columns') and group_op.group_columns:
+            for col in group_op.group_columns:
+                if isinstance(col, str):
+                    group_columns.append(col)
+                elif isinstance(col, ColumnRef):
+                    group_columns.append(col.column)
+                # 处理其他可能的列引用格式
+
+        # 检查是否有匹配分组列的索引
+        if isinstance(child, SeqScanOp) and group_columns:
+            suitable_indexes = self._find_indexes_for_columns(child.table_name, group_columns)
+
+            if suitable_indexes:
+                # 用索引扫描替换，利用索引的有序性
+                index_scan = BTreeIndexScanOp(
+                    child.table_name,
+                    suitable_indexes[0],
+                    None,
+                    is_covering_index=False
+                )
+
+                # 创建新的GROUP BY，可能可以优化聚合算法
+                optimized_group = GroupByOp(
+                    group_op.group_columns,
+                    group_op.having_condition,
+                    group_op.aggregate_functions,
+                    [index_scan]
+                )
+                # 添加优化标记
+                if hasattr(optimized_group, '__dict__'):
+                    optimized_group.use_index_order = True
+                return optimized_group
+
+        return group_op
+
+    def _index_matches_sort(self, index_name: str, order_by: List[Tuple[str, str]]) -> bool:
+        """检查索引是否匹配排序需求"""
+        try:
+            # 获取索引的列顺序
+            index_columns = self._get_index_columns(index_name)
+            if not index_columns:
+                return False
+
+            # 检查排序列是否匹配索引前缀
+            for i, (column, direction) in enumerate(order_by):
+                if i >= len(index_columns):
+                    return False
+
+                index_col = index_columns[i]
+                sort_col = column
+
+                # 简化比较：只检查列名匹配
+                if isinstance(sort_col, str):
+                    if sort_col != index_col:
+                        return False
+                else:
+                    return False
+
+            return True
+
+        except Exception:
+            return False
+
+    def _get_index_columns(self, index_name: str) -> List[str]:
+        """获取索引的列列表"""
+        if self.catalog_manager:
+            index_info = self.catalog_manager.get_index_info(index_name)
+            if index_info:
+                return index_info["columns"]
+        return []
+
+    def _find_indexes_for_columns(self, table_name: str, columns: List[str]) -> List[str]:
+        """查找匹配列的索引"""
+        if self.catalog_manager:
+            return self.catalog_manager.find_indexes_for_columns(table_name, columns)
+        return []
+
+    def _optimize_joins_with_indexes(self, plan: Operator, query_analysis: Dict[str, Any]) -> Operator:
+        """优化连接算法，考虑索引"""
+        if isinstance(plan, JoinOp):
+            return self._try_index_nested_loop_join(plan)
+
+        # 递归处理子节点
+        new_children = []
+        changed = False
+
+        for child in plan.children:
+            optimized_child = self._optimize_joins_with_indexes(child, query_analysis)
+            new_children.append(optimized_child)
+            if optimized_child is not child:
+                changed = True
+
+        if changed:
+            return self._clone_operator(plan, new_children)
+
+        return plan
+
+    def _try_index_nested_loop_join(self, join_op: JoinOp) -> Operator:
+        """尝试使用索引嵌套循环连接"""
+        if len(join_op.children) != 2:
+            return join_op
+
+        left_child, right_child = join_op.children
+
+        # 检查右表是否有适合的索引
+        right_table = self._extract_table_from_operator(right_child)
+        if not right_table:
+            return join_op
+
+        join_columns = self._extract_join_columns_from_condition(join_op.join_condition, right_table)
+        suitable_indexes = self._find_indexes_for_columns(right_table, join_columns)
+
+        if not suitable_indexes:
+            return join_op
+
+        # 选择最佳索引
+        best_index = suitable_indexes[0]  # 简化选择
+
+        # 创建内表索引扫描
+        inner_index_scan = BTreeIndexScanOp(
+            table_name=right_table,
+            index_name=best_index,
+            scan_condition=join_op.join_condition
+        )
+
+        # 创建索引嵌套循环连接
+        index_nl_join = IndexNestedLoopJoinOp(
+            join_type=join_op.join_type,
+            join_condition=join_op.join_condition,
+            outer_child=left_child,
+            inner_index_scan=inner_index_scan
+        )
+
+        # 比较成本
+        original_cost = self.cost_model.calculate_cost(join_op)['total_cost']
+        index_cost = self.cost_model.calculate_cost(index_nl_join)['total_cost']
+
+        return index_nl_join if index_cost < original_cost else join_op
 
     def _apply_conservative_physical_optimization(self, plan: Operator, analysis: Dict[str, Any]) -> Operator:
         """保守的物理优化"""

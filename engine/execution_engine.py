@@ -1,11 +1,11 @@
 # engine/execution_engine.py
-from typing import List, Dict, Any, Iterator, Optional, Tuple
+from typing import List, Dict, Any, Optional, Tuple
 from engine.storage_engine import StorageEngine
-from sql_compiler.catalog.catalog_manager import CatalogManager
+from catalog.catalog_manager import CatalogManager
 from sql_compiler.codegen.operators import Operator, CreateTableOp, InsertOp, SeqScanOp, FilterOp, ProjectOp, UpdateOp, \
     DeleteOp, OptimizedSeqScanOp, GroupByOp, OrderByOp, JoinOp, FilteredSeqScanOp
 from sql_compiler.exceptions.compiler_errors import SemanticError
-from sql_compiler.semantic.symbol_table import SymbolTable, SymbolType
+from sql_compiler.semantic.symbol_table import SymbolTable
 from sql_compiler.semantic.type_checker import TypeChecker
 
 

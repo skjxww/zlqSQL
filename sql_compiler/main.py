@@ -3,7 +3,7 @@ from sql_compiler.lexer.lexical_analyzer import LexicalAnalyzer
 from sql_compiler.parser.syntax_analyzer import SyntaxAnalyzer
 from sql_compiler.semantic.semantic_analyzer import SemanticAnalyzer
 from sql_compiler.codegen.plan_generator import PlanGenerator
-from sql_compiler.catalog.catalog_manager import CatalogManager
+from catalog.catalog_manager import CatalogManager
 from sql_compiler.exceptions.compiler_errors import CompilerError
 from sql_compiler.utils.helpers import print_tokens, format_json
 

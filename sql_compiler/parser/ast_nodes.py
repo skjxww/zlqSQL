@@ -278,3 +278,97 @@ class FunctionExpr(Expression):
             "function_name": self.function_name,
             "arguments": [arg.to_dict() for arg in self.arguments]
         }
+
+
+# 添加索引相关的AST节点
+class CreateIndexStmt(Statement):
+    """CREATE INDEX语句"""
+
+    def __init__(self, index_name: str, table_name: str, columns: List[str],
+                 unique: bool = False, index_type: str = "BTREE"):
+        self.index_name = index_name
+        self.table_name = table_name
+        self.columns = columns
+        self.unique = unique
+        self.index_type = index_type
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": "CreateIndexStmt",
+            "index_name": self.index_name,
+            "table_name": self.table_name,
+            "columns": self.columns,
+            "unique": self.unique,
+            "index_type": self.index_type
+        }
+
+
+class DropIndexStmt(Statement):
+    """DROP INDEX语句"""
+
+    def __init__(self, index_name: str):
+        self.index_name = index_name
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": "DropIndexStmt",
+            "index_name": self.index_name
+        }
+
+
+class ShowIndexesStmt(Statement):
+    """SHOW INDEXES语句"""
+
+    def __init__(self, table_name: Optional[str] = None):
+        self.table_name = table_name
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": "ShowIndexesStmt",
+            "table_name": self.table_name
+        }
+
+
+class ColumnRef(Expression):
+    """列引用表达式"""
+
+    def __init__(self, column: str, table_alias: Optional[str] = None):
+        """
+        :param column: 列名
+        :param table_alias: 表别名（可选）
+        """
+        self.column = column
+        self.table_alias = table_alias
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": "ColumnRef",
+            "column": self.column,
+            "table_alias": self.table_alias
+        }
+
+    @property
+    def full_name(self) -> str:
+        """获取完整的列名"""
+        if self.table_alias:
+            return f"{self.table_alias}.{self.column}"
+        return self.column
+
+
+class OrderByExpr(ASTNode):
+    """ORDER BY表达式"""
+
+    def __init__(self, column_ref: ColumnRef, direction: str = "ASC"):
+        """
+        :param column_ref: 列引用
+        :param direction: 排序方向 ASC/DESC
+        """
+        self.column_ref = column_ref
+        self.direction = direction.upper()
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": "OrderByExpr",
+            "column_ref": self.column_ref.to_dict(),
+            "direction": self.direction
+        }

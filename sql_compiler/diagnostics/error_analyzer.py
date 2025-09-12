@@ -2,7 +2,7 @@ import re
 from typing import List, Dict, Tuple, Optional, Any
 from dataclasses import dataclass
 from difflib import get_close_matches
-from sql_compiler.catalog.catalog_manager import CatalogManager
+from catalog.catalog_manager import CatalogManager
 
 
 @dataclass
