@@ -11,7 +11,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from sql_compiler.lexer.lexical_analyzer import LexicalAnalyzer
 from sql_compiler.parser.syntax_analyzer import SyntaxAnalyzer
 from sql_compiler.semantic.semantic_analyzer import SemanticAnalyzer
-from sql_compiler.catalog.catalog_manager import CatalogManager
+from catalog.catalog_manager import CatalogManager
 from sql_compiler.codegen.plan_generator import PlanGenerator
 from sql_compiler.codegen.operators import *
 

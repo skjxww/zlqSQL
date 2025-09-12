@@ -85,6 +85,16 @@ class TokenType(Enum):
     EOF = "EOF"
     NEWLINE = "NEWLINE"
 
+    # 索引相关
+    INDEX = "INDEX"
+    UNIQUE = "UNIQUE"
+    PRIMARY = "PRIMARY"
+    KEY = "KEY"
+    BTREE = "BTREE"
+    DROP = "DROP"
+    SHOW = "SHOW"
+    INDEXES = "INDEXES"
+
 
 class Token:
     def __init__(self, token_type: TokenType, lexeme: str, line: int, column: int, value: Any = None):

@@ -1,12 +1,10 @@
 # engine/storage_engine.py
-import struct
 from typing import List, Dict, Any, Optional
 from storage.core.storage_manager import StorageManager
 from storage.core.table_storage import TableStorage
 from storage.utils.serializer import RecordSerializer, PageSerializer
 from storage.utils.exceptions import StorageException, TableNotFoundException
 from storage.utils.logger import get_logger
-from sql_compiler.catalog.catalog_manager import CatalogManager
 
 
 class StorageEngine:

@@ -10,7 +10,7 @@ import pickle
 import threading
 from collections import defaultdict
 import math
-
+from sql_compiler.parser.ast_nodes import Expression,BinaryExpr
 
 @dataclass
 class Histogram:
@@ -125,8 +125,79 @@ class StatisticsManager:
         self.index_stats: Dict[str, Dict[str, IndexStatistics]] = defaultdict(dict)
         self.join_stats: Dict[Tuple[str, str], float] = {}  # 表间连接选择率
         self._lock = threading.RLock()
+        self.btree_stats: Dict[str, Dict[str, 'BTreeIndexStatistics']] = defaultdict(dict)
 
         self._load_statistics()
+
+    def analyze_btree_index(self, index_name: str, table_name: str, btree: 'BPlusTreeIndex'):
+        """分析B+树索引统计信息"""
+        with self._lock:
+            # 计算B+树高度和页数
+            height = self._calculate_btree_height(btree)
+            leaf_pages = self._estimate_leaf_pages(btree)
+
+            # 计算聚簇因子（数据的物理有序性）
+            clustering_factor = self._calculate_clustering_factor(table_name, index_name)
+
+            index_stats = IndexStatistics(
+                table_name=table_name,
+                index_name=index_name,
+                columns=self._get_index_columns(index_name),
+                index_type="BTREE",
+                unique=self._is_unique_index(index_name),
+                height=height,
+                leaf_pages=leaf_pages,
+                clustering_factor=clustering_factor,
+                last_analyzed=self._get_current_time()
+            )
+
+            self.index_stats[table_name][index_name] = index_stats
+            self._save_statistics()
+
+    def get_btree_selectivity(self, index_name: str, condition: Expression) -> float:
+        """计算B+树索引的选择率"""
+        # 根据条件类型计算选择率
+        if isinstance(condition, BinaryExpr):
+            operator = condition.operator
+            if operator == '=':
+                return 0.001  # 等值查询选择率很低
+            elif operator in ['<', '>', '<=', '>=']:
+                return 0.1  # 范围查询选择率适中
+            elif operator in ['LIKE']:
+                return 0.05  # 模糊查询选择率
+        return 0.5  # 默认选择率
+
+    def estimate_index_pages_accessed(self, index_name: str, selectivity: float) -> int:
+        """估算索引访问的页数"""
+        table_name = self._get_table_by_index(index_name)
+        index_stats = self.index_stats[table_name].get(index_name)
+
+        if index_stats:
+            # 内部节点访问：等于树的高度
+            internal_pages = index_stats.height - 1
+
+            # 叶子节点访问：根据选择率估算
+            leaf_pages_accessed = max(1, int(index_stats.leaf_pages * selectivity))
+
+            return internal_pages + leaf_pages_accessed
+
+        return 10  # 默认值
+
+    def _calculate_btree_height(self, btree: 'BPlusTreeIndex') -> int:
+        """计算B+树高度"""
+        if btree.root is None:
+            return 0
+
+        height = 1
+        current = btree.root
+        while not current.is_leaf:
+            height += 1
+            if current.values:  # 有子节点
+                current = current.values[0]
+            else:
+                break
+
+        return height
 
     def analyze_table(self, table_name: str, sample_data: List[Dict] = None):
         """分析表，生成统计信息"""

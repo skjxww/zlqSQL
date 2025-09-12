@@ -63,6 +63,12 @@ class PlanGenerator:
             plan = self._generate_update_plan(stmt)
         elif isinstance(stmt, DeleteStmt):
             plan = self._generate_delete_plan(stmt)
+        elif isinstance(stmt, CreateIndexStmt):
+            return self._generate_create_index_plan(stmt)
+        elif isinstance(stmt, DropIndexStmt):
+            return self._generate_drop_index_plan(stmt)
+        elif isinstance(stmt, ShowIndexesStmt):
+            return self._generate_show_indexes_plan(stmt)
         else:
             raise SemanticError(f"不支持的语句类型: {type(stmt).__name__}")
 
@@ -91,6 +97,43 @@ class PlanGenerator:
             except Exception as e:
                 if not self.silent_mode:
                     print(f"⚠️ 查询优化失败: {e}，使用原始计划")
+
+        return plan
+
+    def _generate_create_index_plan(self, stmt: CreateIndexStmt) -> CreateIndexOp:
+        """生成创建索引计划"""
+        return CreateIndexOp(
+            stmt.index_name,
+            stmt.table_name,
+            stmt.columns,
+            stmt.unique,
+            stmt.index_type
+        )
+
+    def _generate_drop_index_plan(self, stmt: DropIndexStmt) -> 'DropIndexOp':
+        """生成删除索引计划"""
+        return DropIndexOp(stmt.index_name)
+
+    def _generate_show_indexes_plan(self, stmt: ShowIndexesStmt) -> 'ShowIndexesOp':
+        """生成显示索引计划"""
+        return ShowIndexesOp(stmt.table_name)
+
+    def _optimize_with_indexes(self, plan: Operator, stmt: SelectStmt) -> Operator:
+        """使用索引优化查询计划"""
+        if not isinstance(stmt.from_clause, TableRef):
+            return plan
+
+        table_name = stmt.from_clause.table_name
+
+        # 分析WHERE条件中的列
+        condition_columns = self._extract_condition_columns(stmt.where_clause)
+
+        # 寻找最佳索引
+        best_index = self.catalog_manager.find_best_index(table_name, condition_columns)
+
+        if best_index:
+            # 用索引扫描替换表扫描
+            return BTreeIndexScanOp(table_name, best_index, stmt.where_clause)
 
         return plan
 
@@ -233,11 +276,20 @@ class PlanGenerator:
             if not self.silent_mode:
                 print(f"   ✅ 添加投影，列: {stmt.columns}")
 
-        # 添加ORDER BY
-        if stmt.order_by:
-            plan = OrderByOp(stmt.order_by, [plan])
+        # 添加ORDER BY排序
+        if stmt.order_by and len(stmt.order_by) > 0:
+            # 转换为 (column, direction) 格式
+            order_by_list = []
+            for col, direction in stmt.order_by:
+                if isinstance(col, str):
+                    order_by_list.append((col, direction))
+                else:
+                    # 处理复杂表达式
+                    order_by_list.append((str(col), direction))
+
+            plan = SortOp(order_by_list, [plan])
             if not self.silent_mode:
-                print(f"   ✅ 添加ORDER BY")
+                print(f"   ✅ 添加ORDER BY排序: {order_by_list}")
 
         if not self.silent_mode:
             print(f"   🎯 最终计划: {type(plan).__name__}")

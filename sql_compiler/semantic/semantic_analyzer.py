@@ -1,7 +1,6 @@
-from typing import List, Any, Dict, Union
 from sql_compiler.parser.ast_nodes import *
 from sql_compiler.semantic.symbol_table import SymbolTable
-from sql_compiler.catalog.catalog_manager import CatalogManager
+from catalog.catalog_manager import CatalogManager
 from sql_compiler.exceptions.compiler_errors import SemanticError
 
 
@@ -21,7 +20,13 @@ class SemanticAnalyzer:
         self.current_aliases = {}
         self.alias_to_real = {}
 
-        if isinstance(stmt, CreateTableStmt):
+        if isinstance(stmt, CreateIndexStmt):
+            self._analyze_create_index(stmt)
+        elif isinstance(stmt, DropIndexStmt):
+            self._analyze_drop_index(stmt)
+        elif isinstance(stmt, ShowIndexesStmt):
+            self._analyze_show_indexes(stmt)
+        elif isinstance(stmt, CreateTableStmt):
             self._analyze_create_table(stmt)
         elif isinstance(stmt, InsertStmt):
             self._analyze_insert(stmt)
@@ -33,6 +38,62 @@ class SemanticAnalyzer:
             self._analyze_delete(stmt)
         else:
             raise SemanticError(f"不支持的语句类型: {type(stmt).__name__}")
+
+    def _analyze_create_index(self, stmt: CreateIndexStmt):
+        """分析CREATE INDEX语句"""
+        # 检查表是否存在
+        if not self.catalog.table_exists(stmt.table_name):
+            raise SemanticError(f"表 '{stmt.table_name}' 不存在")
+
+        # 检查列是否存在
+        table_columns = [col["name"] for col in self.catalog.get_table(stmt.table_name)["columns"]]
+        for col in stmt.columns:
+            if col not in table_columns:
+                raise SemanticError(f"表 '{stmt.table_name}' 中不存在列 '{col}'")
+
+        # 检查索引名是否重复
+        if stmt.index_name in self.catalog.indexes:
+            raise SemanticError(f"索引 '{stmt.index_name}' 已存在")
+
+    def _analyze_drop_index(self, stmt: DropIndexStmt):
+        """分析DROP INDEX语句"""
+        # 检查索引是否存在
+        if stmt.index_name not in self.catalog.indexes:
+            raise SemanticError(f"索引 '{stmt.index_name}' 不存在")
+
+        # 检查是否有权限删除索引（可选）
+        index_info = self.catalog.indexes[stmt.index_name]
+        if index_info.get('system_index', False):
+            raise SemanticError(f"无法删除系统索引 '{stmt.index_name}'")
+
+        # 检查是否有依赖的约束（如主键、唯一约束等）
+        if self._has_constraint_dependency(stmt.index_name):
+            raise SemanticError(f"索引 '{stmt.index_name}' 被约束依赖，无法删除")
+
+    def _analyze_show_indexes(self, stmt: ShowIndexesStmt):
+        """分析SHOW INDEXES语句"""
+        if stmt.table_name:
+            # 检查表是否存在
+            if not self.catalog.table_exists(stmt.table_name):
+                raise SemanticError(f"表 '{stmt.table_name}' 不存在")
+
+        # SHOW INDEXES语句不需要特殊的语义检查，主要是权限检查
+        # 这里可以添加权限检查逻辑
+        if not self._has_show_privilege():
+            raise SemanticError("没有查看索引信息的权限")
+
+    def _has_constraint_dependency(self, index_name: str) -> bool:
+        """检查索引是否被约束依赖"""
+        # 简化实现 - 实际应该检查主键、外键、唯一约束等
+        index_info = self.catalog.indexes.get(index_name)
+        if index_info:
+            return index_info.get('unique', False) or 'primary' in index_name.lower()
+        return False
+
+    def _has_show_privilege(self) -> bool:
+        """检查是否有显示权限"""
+        # 简化实现 - 实际应该检查用户权限
+        return True
 
     def _analyze_from_clause(self, from_clause: FromClause) -> Dict[str, List[str]]:
         """分析FROM子句，返回可用的表和列 - 增强别名支持"""

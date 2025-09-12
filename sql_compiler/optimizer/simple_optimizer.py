@@ -87,12 +87,71 @@ class SimpleQueryOptimizer:
                 if total_optimizations > 0:
                     print("优化后的执行计划已生成")
 
+            # 5. 应用索引优化
+            result = self._apply_index_optimization(optimized_plan)
+            if result is not None and len(result) == 2:
+                new_plan, count5 = result
+                if count5 > 0:
+                    if not self.silent_mode:
+                        print(f"✅ 索引优化: 应用了 {count5} 个优化")
+                    total_optimizations += count5
+                    optimized_plan = new_plan
+
             return optimized_plan
 
         except Exception as e:
             if not self.silent_mode:
                 print(f"⚠️ 优化过程中出现错误: {e}")
             return plan
+
+    def _apply_index_optimization(self, plan: Operator) -> tuple:
+        """应用基础索引优化"""
+        try:
+            optimizations = 0
+
+            # 将带条件的表扫描转换为索引扫描
+            if isinstance(plan, FilterOp) and len(plan.children) == 1:
+                child = plan.children[0]
+                if isinstance(child, SeqScanOp):
+                    # 检查是否有适合的索引
+                    if self._has_suitable_index(child.table_name, plan.condition):
+                        index_scan = BTreeIndexScanOp(
+                            child.table_name,
+                            f"idx_{child.table_name}_auto",
+                            plan.condition
+                        )
+                        optimizations += 1
+                        return index_scan, optimizations
+
+            # 递归处理子节点
+            new_children = []
+            children_changed = False
+
+            for child in plan.children:
+                result = self._apply_index_optimization(child)
+                if result is not None and len(result) == 2:
+                    new_child, child_opts = result
+                    new_children.append(new_child)
+                    optimizations += child_opts
+                    if new_child is not child:
+                        children_changed = True
+                else:
+                    new_children.append(child)
+
+            if children_changed:
+                new_plan = self._clone_operator(plan, new_children)
+                return new_plan, optimizations
+
+            return plan, optimizations
+
+        except Exception:
+            return plan, 0
+
+    def _has_suitable_index(self, table_name: str, condition: Expression) -> bool:
+        """检查是否有适合的索引（简化版本）"""
+        # 这里应该检查实际的索引元数据
+        # 简化实现：假设所有表都有基本索引
+        return isinstance(condition, BinaryExpr) and condition.operator in ['=', '<', '>', '<=', '>=']
 
     def _apply_projection_pushdown(self, plan: Operator) -> tuple:
         """应用投影下推优化"""

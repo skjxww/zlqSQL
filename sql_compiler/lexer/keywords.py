@@ -49,6 +49,16 @@ KEYWORDS = {
     'IN': TokenType.IN,
 
     'AS': TokenType.AS,
+
+    # 索引相关新关键字
+    'INDEX': TokenType.INDEX,
+    'UNIQUE': TokenType.UNIQUE,
+    'PRIMARY': TokenType.PRIMARY,
+    'KEY': TokenType.KEY,
+    'BTREE': TokenType.BTREE,
+    'DROP': TokenType.DROP,
+    'SHOW': TokenType.SHOW,
+    'INDEXES': TokenType.INDEXES,
 }
 
 # 符号映射表 - 更新

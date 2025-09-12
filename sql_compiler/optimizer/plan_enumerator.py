@@ -144,8 +144,9 @@ class PlanEnumerator:
         plans.sort(key=lambda x: x[1])
         return plans[:10]  # 最多保留10个最优计划
 
-    def _generate_join_algorithms(self, left_plan: Operator, right_plan: Operator,
-                                  join_condition: Any) -> List[Tuple[Operator, float]]:
+    def _generate_join_algorithms(self, left_plan: Operator, left_cost: float,
+                                 right_plan: Operator, right_cost: float,
+                                 join_condition: Expression) -> List[Tuple[Operator, float]]:
         """为给定的子计划生成不同的连接算法"""
         algorithms = []
 
@@ -169,7 +170,49 @@ class PlanEnumerator:
         nl_cost_swapped = self.cost_model.calculate_cost(nl_join_swapped)['total_cost']
         algorithms.append((nl_join_swapped, nl_cost_swapped))
 
+        # 5.  引嵌套循环连接
+        right_table = self._extract_table_name(right_plan)
+        if right_table:
+            join_columns = self._extract_join_columns(join_condition, right_table)
+            suitable_indexes = self._find_suitable_indexes(right_table, join_columns)
+
+            for index_name in suitable_indexes:
+                # 创建内表的索引扫描
+                inner_index_scan = BTreeIndexScanOp(
+                    table_name=right_table,
+                    index_name=index_name,
+                    scan_condition=join_condition
+                )
+
+                # 创建索引嵌套循环连接
+                index_nl_join = IndexNestedLoopJoinOp(
+                    join_type="INNER",
+                    join_condition=join_condition,
+                    outer_child=left_plan,
+                    inner_index_scan=inner_index_scan
+                )
+
+                cost_info = self.cost_model.calculate_cost(index_nl_join)
+                algorithms.append((index_nl_join, cost_info['total_cost']))
+
         return algorithms
+
+    def _get_available_btree_indexes(self, table: str, plan_space: PlanSpace) -> List[Dict]:
+        """获取表上可用的B+树索引"""
+        # 从目录管理器获取索引信息
+        if hasattr(plan_space, 'catalog_manager'):
+            return plan_space.catalog_manager.get_table_indexes(table)
+        return []
+
+    def _is_covering_index(self, index_info: Dict, select_columns: List[str]) -> bool:
+        """判断是否为覆盖索引"""
+        if select_columns == ['*']:
+            return False
+
+        index_columns = set(index_info['columns'])
+        required_columns = set(select_columns)
+
+        return required_columns.issubset(index_columns)
 
     def _greedy_enumeration(self, plan_space: PlanSpace) -> List[Tuple[Operator, float]]:
         """贪心算法枚举（适用于大查询）"""
@@ -291,6 +334,50 @@ class AdvancedPlanEnumerator(PlanEnumerator):
         super().__init__(cost_model, max_join_tables)
         self.bushy_trees = True  # 支持bushy树形结构
         self.star_join_optimization = True  # 星型连接优化
+
+    def _generate_access_paths(self, table: str, plan_space: PlanSpace) -> List[Tuple[Operator, float]]:
+        """生成单表访问路径 - 增强B+树索引支持"""
+        plans = []
+
+        # 1. 全表扫描
+        seq_scan = SeqScanOp(table)
+        cost_info = self.cost_model.calculate_cost(seq_scan)
+        plans.append((seq_scan, cost_info['total_cost']))
+
+        # 2. B+树索引扫描
+        available_indexes = self._get_available_btree_indexes(table, plan_space)
+
+        for index_info in available_indexes:
+            index_name = index_info['name']
+            applicable_conditions = self._find_applicable_conditions(
+                index_info['columns'],
+                plan_space.filters
+            )
+
+            if applicable_conditions:
+                for condition in applicable_conditions:
+                    # 普通B+树索引扫描
+                    btree_scan = BTreeIndexScanOp(
+                        table_name=table,
+                        index_name=index_name,
+                        scan_condition=condition,
+                        is_covering_index=self._is_covering_index(index_info, plan_space.select_columns)
+                    )
+
+                    cost_info = self.cost_model.calculate_cost(btree_scan)
+                    plans.append((btree_scan, cost_info['total_cost']))
+
+                    # 如果是范围查询，考虑仅索引扫描
+                    if self._is_range_condition(condition) and btree_scan.is_covering_index:
+                        index_only_scan = IndexOnlyScanOp(
+                            table_name=table,
+                            index_name=index_name,
+                            scan_condition=condition
+                        )
+                        cost_info = self.cost_model.calculate_cost(index_only_scan)
+                        plans.append((index_only_scan, cost_info['total_cost']))
+
+        return plans
 
     def enumerate_plans(self, plan_space: PlanSpace) -> List[Tuple[Operator, float]]:
         """高级计划枚举"""

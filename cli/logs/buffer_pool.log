@@ -2408,3 +2408,6 @@
 2025-09-12 00:22:44,263 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized | Context: capacity=100 | max_size=1000 | min_size=10
 2025-09-12 00:22:44,264 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized | Context: capacity=100 | max_size=1000 | min_size=10
 2025-09-12 00:23:02,434 - buffer_pool - INFO - _log_with_context:97 - Flushed 0 dirty pages
+2025-09-12 08:43:20,661 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized | Context: capacity=100 | max_size=1000 | min_size=10
+2025-09-12 08:43:20,662 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized | Context: capacity=100 | max_size=1000 | min_size=10
+2025-09-12 08:43:50,665 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages

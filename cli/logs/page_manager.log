@@ -1014,3 +1014,11 @@
 2025-09-12 00:22:44,264 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=19
 2025-09-12 00:23:02,437 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
 2025-09-12 00:23:02,438 - page_manager - INFO - _log_with_context:97 - PageManager cleanup completed
+2025-09-12 08:43:20,660 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-12 08:43:20,661 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=20 | allocated_count=19 | free_count=0
+2025-09-12 08:43:20,661 - page_manager - WARNING - _log_with_context:97 - Data file size inconsistent with metadata | Context: file_size=73728 | expected_size=77824
+2025-09-12 08:43:20,661 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=19
+2025-09-12 08:43:20,662 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-12 08:43:20,662 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=20 | allocated_count=19 | free_count=0
+2025-09-12 08:43:20,662 - page_manager - WARNING - _log_with_context:97 - Data file size inconsistent with metadata | Context: file_size=73728 | expected_size=77824
+2025-09-12 08:43:20,662 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=19
