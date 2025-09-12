@@ -1,0 +1,47 @@
+{
+  "default": {
+    "name": "default",
+    "file_path": "test_data\\default_tablespace.db",
+    "size_mb": 100,
+    "used_mb": 0,
+    "created_time": 1757596751.333055,
+    "is_default": true,
+    "status": "active"
+  },
+  "system": {
+    "name": "system",
+    "file_path": "test_data\\system_tablespace.db",
+    "size_mb": 50,
+    "used_mb": 0,
+    "created_time": 1757605502.7745826,
+    "is_default": false,
+    "status": "active"
+  },
+  "user_data": {
+    "name": "user_data",
+    "file_path": "test_data\\user_data_tablespace.db",
+    "size_mb": 200,
+    "used_mb": 0,
+    "created_time": 1757605502.8200765,
+    "is_default": false,
+    "status": "active"
+  },
+  "temp": {
+    "name": "temp",
+    "file_path": "test_data\\temp_tablespace.db",
+    "size_mb": 100,
+    "used_mb": 0,
+    "created_time": 1757605503.5018303,
+    "is_default": false,
+    "status": "active"
+  },
+  "log": {
+    "name": "log",
+    "file_path": "test_data\\log_tablespace.db",
+    "size_mb": 50,
+    "used_mb": 0,
+    "created_time": 1757605505.0158713,
+    "is_default": false,
+    "status": "active"
+  }
+}

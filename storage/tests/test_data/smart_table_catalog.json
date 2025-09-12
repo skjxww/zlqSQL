@@ -1,0 +1,72 @@
+{
+  "version": "1.0",
+  "created_time": 1757605505.6471553,
+  "table_count": 5,
+  "tables": [
+    {
+      "table_name": "student",
+      "pages": [
+        4
+      ],
+      "estimated_record_size": 1024,
+      "tablespace_name": "user_data",
+      "created_time": 1757605505.629514,
+      "last_modified": 1757605505.629514,
+      "total_page_allocations": 1,
+      "total_page_reads": 0,
+      "total_page_writes": 0
+    },
+    {
+      "table_name": "sys_catalog",
+      "pages": [
+        5
+      ],
+      "estimated_record_size": 1024,
+      "tablespace_name": "system",
+      "created_time": 1757605505.6325095,
+      "last_modified": 1757605505.6325095,
+      "total_page_allocations": 1,
+      "total_page_reads": 0,
+      "total_page_writes": 0
+    },
+    {
+      "table_name": "temp_sort",
+      "pages": [
+        6
+      ],
+      "estimated_record_size": 1024,
+      "tablespace_name": "temp",
+      "created_time": 1757605505.6365092,
+      "last_modified": 1757605505.6365092,
+      "total_page_allocations": 1,
+      "total_page_reads": 0,
+      "total_page_writes": 0
+    },
+    {
+      "table_name": "log_access",
+      "pages": [
+        7
+      ],
+      "estimated_record_size": 1024,
+      "tablespace_name": "log",
+      "created_time": 1757605505.6410382,
+      "last_modified": 1757605505.6410382,
+      "total_page_allocations": 1,
+      "total_page_reads": 0,
+      "total_page_writes": 0
+    },
+    {
+      "table_name": "customer_order",
+      "pages": [
+        8
+      ],
+      "estimated_record_size": 1024,
+      "tablespace_name": "user_data",
+      "created_time": 1757605505.6471553,
+      "last_modified": 1757605505.6471553,
+      "total_page_allocations": 1,
+      "total_page_reads": 0,
+      "total_page_writes": 0
+    }
+  ]
+}

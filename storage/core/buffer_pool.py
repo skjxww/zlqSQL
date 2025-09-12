@@ -14,6 +14,12 @@ from ..utils.exceptions import (
 )
 from ..utils.logger import get_logger, PerformanceTimer, performance_monitor
 
+from .cache_strategies import LRUStrategy, FIFOStrategy, AdaptiveStrategy
+from ..utils.constants import (
+    CACHE_STRATEGY_LRU, CACHE_STRATEGY_FIFO, CACHE_STRATEGY_ADAPTIVE,
+    DEFAULT_CACHE_STRATEGY
+)
+
 
 class BufferPool:
     """缓存池类，实现LRU缓存算法（增强版）"""
@@ -50,6 +56,22 @@ class BufferPool:
         # 日志器
         self.logger = get_logger("buffer")
 
+        # 策略模式支持（内部使用，不影响外部接口）
+        self.enable_adaptive = True  # 可以后续通过参数控制
+        self._use_strategy_mode = True  # 开关，出问题时可以fallback
+
+        if self._use_strategy_mode:
+            if self.enable_adaptive:
+                self._strategy = AdaptiveStrategy(capacity)
+            else:
+                self._strategy = LRUStrategy(capacity)
+
+            self.logger.info("BufferPool initialized with strategy mode",
+                             strategy_type=type(self._strategy).__name__)
+        else:
+            self._strategy = None
+            self.logger.info("BufferPool initialized with legacy OrderedDict mode")
+
         self.logger.info(f"BufferPool initialized",
                          capacity=capacity,
                          max_size=MAX_CACHE_SIZE,
@@ -76,21 +98,43 @@ class BufferPool:
         self.total_requests += 1
         current_time = time.time()
 
-        if page_id in self.cache:
-            # 缓存命中，移到最后（最近使用）
-            data, is_dirty, _ = self.cache.pop(page_id)
-            self.cache[page_id] = (data, is_dirty, current_time)
-            self.hit_count += 1
+        if self._use_strategy_mode and self._strategy is not None:
+            # 使用策略模式
+            result = self._strategy.get(page_id)
+            if result is not None:
+                data, is_dirty, access_time = result
+                self.hit_count += 1
 
-            self.logger.debug(f"Cache hit for page {page_id}",
-                              page_id=page_id,
-                              hit_rate=self.get_hit_rate())
-            return data
+                # 同步到原有cache以保持统计一致性
+                self.cache[page_id] = (data, is_dirty, current_time)
+
+                self.logger.debug(f"Strategy cache hit for page {page_id}",
+                                  page_id=page_id,
+                                  strategy=type(self._strategy).__name__,
+                                  hit_rate=self.get_hit_rate())
+                return data
+            else:
+                self.logger.debug(f"Strategy cache miss for page {page_id}",
+                                  page_id=page_id,
+                                  strategy=type(self._strategy).__name__)
+                return None
         else:
-            self.logger.debug(f"Cache miss for page {page_id}",
-                              page_id=page_id,
-                              cache_size=len(self.cache))
-            return None
+            # 原有的OrderedDict实现（fallback）
+            if page_id in self.cache:
+                # 缓存命中，移到最后（最近使用）
+                data, is_dirty, _ = self.cache.pop(page_id)
+                self.cache[page_id] = (data, is_dirty, current_time)
+                self.hit_count += 1
+
+                self.logger.debug(f"Legacy cache hit for page {page_id}",
+                                  page_id=page_id,
+                                  hit_rate=self.get_hit_rate())
+                return data
+            else:
+                self.logger.debug(f"Legacy cache miss for page {page_id}",
+                                  page_id=page_id,
+                                  cache_size=len(self.cache))
+                return None
 
     @handle_storage_exceptions
     @performance_monitor("buffer_put")
@@ -115,36 +159,75 @@ class BufferPool:
 
         current_time = time.time()
 
-        if page_id in self.cache:
-            # 更新已存在的页
-            old_data, old_dirty, _ = self.cache.pop(page_id)
-            # 保持脏页标记（一旦标记为脏页，直到写入磁盘前都是脏的）
-            final_dirty = is_dirty or old_dirty
-            self.cache[page_id] = (data, final_dirty, current_time)
+        if self._use_strategy_mode and self._strategy is not None:
+            # 使用策略模式
+            if page_id in self._strategy:
+                # 更新已存在的页
+                old_data, old_dirty, _ = self._strategy.get(page_id)
+                final_dirty = is_dirty or old_dirty
+                self._strategy.put(page_id, (data, final_dirty, current_time))
 
-            self.logger.debug(f"Updated cache entry for page {page_id}",
-                              page_id=page_id,
-                              is_dirty=final_dirty,
-                              data_size=len(data))
+                # 同步到原有cache
+                self.cache[page_id] = (data, final_dirty, current_time)
+
+                self.logger.debug(f"Strategy updated cache entry for page {page_id}",
+                                  page_id=page_id,
+                                  is_dirty=final_dirty,
+                                  strategy=type(self._strategy).__name__)
+            else:
+                # 添加新页
+                if len(self._strategy) >= self.capacity:
+                    # 缓存已满，执行策略淘汰
+                    evicted = self._strategy.evict()
+                    if evicted:
+                        evicted_id, evicted_data, evicted_dirty = evicted
+                        # 从原有cache中也移除
+                        if evicted_id in self.cache:
+                            self.cache.pop(evicted_id)
+                        self.eviction_count += 1
+                        self.logger.debug(f"Strategy evicted page {evicted_id}",
+                                          evicted_page=evicted_id,
+                                          was_dirty=evicted_dirty,
+                                          strategy=type(self._strategy).__name__)
+
+                self._strategy.put(page_id, (data, is_dirty, current_time))
+                self.cache[page_id] = (data, is_dirty, current_time)
+                self.write_count += 1
+
+                self.logger.debug(f"Strategy added new cache entry for page {page_id}",
+                                  page_id=page_id,
+                                  is_dirty=is_dirty,
+                                  cache_size=len(self._strategy),
+                                  strategy=type(self._strategy).__name__)
         else:
-            # 添加新页
-            if len(self.cache) >= self.capacity:
-                # 缓存已满，执行LRU淘汰
-                evicted_page = self._evict_lru()
-                if evicted_page:
-                    evicted_id, evicted_data, evicted_dirty = evicted_page
-                    self.logger.debug(f"LRU evicted page {evicted_id}",
-                                      evicted_page=evicted_id,
-                                      was_dirty=evicted_dirty)
+            # 原有的OrderedDict实现（fallback）
+            if page_id in self.cache:
+                # 更新已存在的页
+                old_data, old_dirty, _ = self.cache.pop(page_id)
+                final_dirty = is_dirty or old_dirty
+                self.cache[page_id] = (data, final_dirty, current_time)
 
-            self.cache[page_id] = (data, is_dirty, current_time)
-            self.write_count += 1
+                self.logger.debug(f"Legacy updated cache entry for page {page_id}",
+                                  page_id=page_id,
+                                  is_dirty=final_dirty)
+            else:
+                # 添加新页
+                if len(self.cache) >= self.capacity:
+                    # 缓存已满，执行LRU淘汰
+                    evicted_page = self._evict_lru()
+                    if evicted_page:
+                        evicted_id, evicted_data, evicted_dirty = evicted_page
+                        self.logger.debug(f"Legacy LRU evicted page {evicted_id}",
+                                          evicted_page=evicted_id,
+                                          was_dirty=evicted_dirty)
 
-            self.logger.debug(f"Added new cache entry for page {page_id}",
-                              page_id=page_id,
-                              is_dirty=is_dirty,
-                              cache_size=len(self.cache),
-                              data_size=len(data))
+                self.cache[page_id] = (data, is_dirty, current_time)
+                self.write_count += 1
+
+                self.logger.debug(f"Legacy added new cache entry for page {page_id}",
+                                  page_id=page_id,
+                                  is_dirty=is_dirty,
+                                  cache_size=len(self.cache))
 
     def _evict_lru(self) -> Optional[Tuple[int, bytes, bool]]:
         """
@@ -178,13 +261,26 @@ class BufferPool:
         Raises:
             BufferPoolException: 页不在缓存中
         """
-        if page_id in self.cache:
-            data, _, access_time = self.cache[page_id]
-            self.cache[page_id] = (data, True, access_time)
-            self.logger.debug(f"Marked page {page_id} as dirty", page_id=page_id)
+        if self._use_strategy_mode and self._strategy is not None:
+            # 策略模式
+            if page_id in self._strategy:
+                data, _, access_time = self._strategy.get(page_id)
+                self._strategy.put(page_id, (data, True, access_time))
+                # 同步到原有cache
+                self.cache[page_id] = (data, True, access_time)
+                self.logger.debug(f"Strategy marked page {page_id} as dirty", page_id=page_id)
+            else:
+                raise BufferPoolException(f"Page {page_id} not in cache, cannot mark dirty",
+                                          page_id=page_id)
         else:
-            raise BufferPoolException(f"Page {page_id} not in cache, cannot mark dirty",
-                                      page_id=page_id)
+            # 原有实现
+            if page_id in self.cache:
+                data, _, access_time = self.cache[page_id]
+                self.cache[page_id] = (data, True, access_time)
+                self.logger.debug(f"Legacy marked page {page_id} as dirty", page_id=page_id)
+            else:
+                raise BufferPoolException(f"Page {page_id} not in cache, cannot mark dirty",
+                                          page_id=page_id)
 
     def get_dirty_pages(self) -> Dict[int, bytes]:
         """
@@ -194,11 +290,23 @@ class BufferPool:
             Dict[int, bytes]: {page_id: data} 脏页字典
         """
         dirty_pages = {}
-        for page_id, (data, is_dirty, _) in self.cache.items():
-            if is_dirty:
-                dirty_pages[page_id] = data
 
-        self.logger.debug(f"Retrieved {len(dirty_pages)} dirty pages")
+        if self._use_strategy_mode and self._strategy is not None:
+            # 策略模式：需要遍历策略中的所有页
+            # 由于策略对象可能没有直接遍历接口，我们通过原有cache来获取
+            for page_id, (data, is_dirty, _) in self.cache.items():
+                if is_dirty:
+                    dirty_pages[page_id] = data
+
+            self.logger.debug(f"Strategy retrieved {len(dirty_pages)} dirty pages")
+        else:
+            # 原有实现
+            for page_id, (data, is_dirty, _) in self.cache.items():
+                if is_dirty:
+                    dirty_pages[page_id] = data
+
+            self.logger.debug(f"Legacy retrieved {len(dirty_pages)} dirty pages")
+
         return dirty_pages
 
     @handle_storage_exceptions
@@ -212,13 +320,26 @@ class BufferPool:
         Raises:
             BufferPoolException: 页不在缓存中
         """
-        if page_id in self.cache:
-            data, _, access_time = self.cache[page_id]
-            self.cache[page_id] = (data, False, access_time)
-            self.logger.debug(f"Cleared dirty flag for page {page_id}", page_id=page_id)
+        if self._use_strategy_mode and self._strategy is not None:
+            # 策略模式
+            if page_id in self._strategy:
+                data, _, access_time = self._strategy.get(page_id)
+                self._strategy.put(page_id, (data, False, access_time))
+                # 同步到原有cache
+                self.cache[page_id] = (data, False, access_time)
+                self.logger.debug(f"Strategy cleared dirty flag for page {page_id}", page_id=page_id)
+            else:
+                raise BufferPoolException(f"Page {page_id} not in cache, cannot clear dirty flag",
+                                          page_id=page_id)
         else:
-            raise BufferPoolException(f"Page {page_id} not in cache, cannot clear dirty flag",
-                                      page_id=page_id)
+            # 原有实现
+            if page_id in self.cache:
+                data, _, access_time = self.cache[page_id]
+                self.cache[page_id] = (data, False, access_time)
+                self.logger.debug(f"Legacy cleared dirty flag for page {page_id}", page_id=page_id)
+            else:
+                raise BufferPoolException(f"Page {page_id} not in cache, cannot clear dirty flag",
+                                          page_id=page_id)
 
     @handle_storage_exceptions
     def remove(self, page_id: int) -> Optional[Tuple[bytes, bool]]:
@@ -231,15 +352,32 @@ class BufferPool:
         Returns:
             被移除页的数据和脏标记 (data, is_dirty) 或 None
         """
-        if page_id in self.cache:
-            data, is_dirty, _ = self.cache.pop(page_id)
-            self.logger.debug(f"Removed page {page_id} from cache",
-                              page_id=page_id,
-                              was_dirty=is_dirty)
-            return data, is_dirty
+        if self._use_strategy_mode and self._strategy is not None:
+            # 策略模式
+            result = self._strategy.remove(page_id)
+            if result is not None:
+                data, is_dirty = result
+                # 从原有cache中也移除
+                if page_id in self.cache:
+                    self.cache.pop(page_id)
+                self.logger.debug(f"Strategy removed page {page_id} from cache",
+                                  page_id=page_id,
+                                  was_dirty=is_dirty)
+                return data, is_dirty
+            else:
+                self.logger.debug(f"Strategy page {page_id} not in cache", page_id=page_id)
+                return None
         else:
-            self.logger.debug(f"Page {page_id} not in cache", page_id=page_id)
-            return None
+            # 原有实现
+            if page_id in self.cache:
+                data, is_dirty, _ = self.cache.pop(page_id)
+                self.logger.debug(f"Legacy removed page {page_id} from cache",
+                                  page_id=page_id,
+                                  was_dirty=is_dirty)
+                return data, is_dirty
+            else:
+                self.logger.debug(f"Legacy page {page_id} not in cache", page_id=page_id)
+                return None
 
     def get_statistics(self) -> dict:
         """

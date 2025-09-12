@@ -1,0 +1,21 @@
+{
+  "version": "1.0",
+  "created_time": 1757606161.7825434,
+  "table_count": 1,
+  "tables": [
+    {
+      "table_name": "test_user",
+      "pages": [
+        9,
+        10
+      ],
+      "estimated_record_size": 1024,
+      "tablespace_name": "user_data",
+      "created_time": 1757606161.779562,
+      "last_modified": 1757606161.7825434,
+      "total_page_allocations": 2,
+      "total_page_reads": 0,
+      "total_page_writes": 0
+    }
+  ]
+}

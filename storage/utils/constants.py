@@ -215,3 +215,22 @@ if AUTO_CREATE_DIRECTORIES:
 assert validate_page_size(PAGE_SIZE), f"Invalid page size: {PAGE_SIZE}"
 assert validate_buffer_size(BUFFER_SIZE), f"Invalid buffer size: {BUFFER_SIZE}"
 assert MAX_RECORD_SIZE < PAGE_SIZE, "Max record size must be less than page size"
+
+
+# ==================== 缓存策略相关常量 ====================
+# 缓存策略类型
+CACHE_STRATEGY_LRU = "LRU"
+CACHE_STRATEGY_FIFO = "FIFO"
+CACHE_STRATEGY_ADAPTIVE = "ADAPTIVE"
+
+# 默认策略
+DEFAULT_CACHE_STRATEGY = CACHE_STRATEGY_ADAPTIVE
+
+# 自适应策略参数
+ADAPTIVE_ANALYSIS_INTERVAL = 100  # 每100次访问分析一次
+ADAPTIVE_MIN_SWITCH_INTERVAL = 1  # 最小切换间隔
+ADAPTIVE_DECISION_THRESHOLD = 3  # 连续3次建议才切换
+
+# 访问模式阈值
+REPEAT_ACCESS_THRESHOLD = 0.4  # 重复访问率阈值40%
+SEQUENTIAL_ACCESS_THRESHOLD = 0.6  # 顺序访问率阈值60%

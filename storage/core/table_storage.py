@@ -19,6 +19,7 @@ class TableStorageMetadata:
         self.table_name = table_name
         self.pages = []  # 表占用的页号列表
         self.estimated_record_size = estimated_record_size
+        self.tablespace_name = "default"  # 新增：表所属的表空间
         self.created_time = time.time()
         self.last_modified = time.time()
 
@@ -46,6 +47,7 @@ class TableStorageMetadata:
             'table_name': self.table_name,
             'pages': self.pages,
             'estimated_record_size': self.estimated_record_size,
+            'tablespace_name': self.tablespace_name,  # 新增：保存表空间信息
             'created_time': self.created_time,
             'last_modified': self.last_modified,
             'total_page_allocations': self.total_page_allocations,
@@ -58,6 +60,7 @@ class TableStorageMetadata:
         """从字典创建实例"""
         metadata = cls(data['table_name'], data.get('estimated_record_size', 1024))
         metadata.pages = data.get('pages', [])
+        metadata.tablespace_name = data.get('tablespace_name', 'default')  # 新增：加载表空间信息
         metadata.created_time = data.get('created_time', time.time())
         metadata.last_modified = data.get('last_modified', time.time())
         metadata.total_page_allocations = data.get('total_page_allocations', 0)
@@ -86,24 +89,34 @@ class TableStorage:
 
         self.logger.info(f"TableStorage initialized with {len(self.tables)} tables")
 
-    def create_table_storage(self, table_name: str, estimated_record_size: int = 1024) -> bool:
+    def create_table_storage(self, table_name: str, estimated_record_size: int = 1024,
+                             tablespace_name: str = None) -> bool:
         """
         为表创建存储空间
 
         Args:
             table_name: 表名
             estimated_record_size: 估算的记录大小（用于优化页分配）
+            tablespace_name: 指定的表空间，如果为None则自动选择
         """
         if table_name in self.tables:
             self.logger.warning(f"Table storage for '{table_name}' already exists")
             return False
 
         try:
-            # 分配初始页
-            initial_page = self.storage_manager.allocate_page()
+            # 确定表空间
+            if tablespace_name is None:
+                # 通过存储管理器的表空间管理器自动选择
+                tablespace_name = self.storage_manager.tablespace_manager.allocate_tablespace_for_table(table_name)
+
+            self.logger.info(f"Creating table '{table_name}' in tablespace '{tablespace_name}'")
+
+            # 使用表空间感知的页分配
+            initial_page = self.storage_manager.allocate_page_for_table(table_name)
 
             # 创建表存储元数据
             metadata = TableStorageMetadata(table_name, estimated_record_size)
+            metadata.tablespace_name = tablespace_name  # 记录表空间
             metadata.add_page(initial_page)
 
             # 初始化页内容（空页）
@@ -114,7 +127,8 @@ class TableStorage:
             self.tables[table_name] = metadata
             self._save_catalog()
 
-            self.logger.info(f"Created storage for table '{table_name}' with initial page {initial_page}")
+            self.logger.info(
+                f"Created storage for table '{table_name}' with initial page {initial_page} in tablespace '{tablespace_name}'")
             return True
 
         except Exception as e:
@@ -156,7 +170,11 @@ class TableStorage:
             raise TableNotFoundException(table_name)
 
         try:
-            new_page = self.storage_manager.allocate_page()
+            metadata = self.tables[table_name]
+
+            # 使用表的指定表空间分配新页
+            tablespace_name = getattr(metadata, 'tablespace_name', 'default')
+            new_page = self.storage_manager.allocate_page(tablespace_name)
 
             # 初始化新页
             from ..utils.serializer import PageSerializer
@@ -164,10 +182,11 @@ class TableStorage:
             self.storage_manager.write_page(new_page, empty_page)
 
             # 添加到表的页列表
-            self.tables[table_name].add_page(new_page)
+            metadata.add_page(new_page)
             self._save_catalog()
 
-            self.logger.debug(f"Allocated new page {new_page} for table '{table_name}'")
+            self.logger.debug(
+                f"Allocated new page {new_page} for table '{table_name}' in tablespace '{tablespace_name}'")
             return new_page
 
         except Exception as e:

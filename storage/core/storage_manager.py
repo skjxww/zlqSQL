@@ -24,7 +24,8 @@ class StorageManager:
     def __init__(self, buffer_size: int = BUFFER_SIZE,
                  data_file: str = DATA_FILE,
                  meta_file: str = META_FILE,
-                 auto_flush_interval: int = FLUSH_INTERVAL_SECONDS):
+                 auto_flush_interval: int = FLUSH_INTERVAL_SECONDS,
+                 enable_extent_management: bool = True):
         """
         初始化存储管理器
 
@@ -33,12 +34,22 @@ class StorageManager:
             data_file: 数据文件路径
             meta_file: 元数据文件路径
             auto_flush_interval: 自动刷盘间隔（秒）
+            enable_extent_management: 是否启用区管理功能（实验性）
 
         Raises:
             StorageException: 初始化失败
         """
         try:
-            self.page_manager = PageManager(data_file, meta_file)
+            # 初始化表空间管理器
+            from .tablespace_manager import TablespaceManager
+            # 从data_file路径中提取目录
+            import os
+            data_dir = os.path.dirname(data_file) if os.path.dirname(data_file) else "data"
+            self.tablespace_manager = TablespaceManager(data_dir)
+            # 将表空间管理器传递给页管理器
+            self.page_manager = PageManager(data_file, meta_file, tablespace_manager=self.tablespace_manager)
+            # 新增：设置文件映射更新回调
+            self.tablespace_manager._notify_file_mapping_update = self._update_page_manager_files
             self.buffer_pool = BufferPool(buffer_size)
             self.auto_flush_interval = auto_flush_interval
 
@@ -54,6 +65,20 @@ class StorageManager:
 
             # 日志器
             self.logger = get_logger("storage")
+
+            # 新增：ExtentManager集成
+            self.enable_extent_management = enable_extent_management
+            if enable_extent_management:
+                from .extent_manager import ExtentManager
+                self.extent_manager = ExtentManager(self.page_manager, extent_size=64)
+                self.logger.info("ExtentManager enabled (experimental feature)")
+            else:
+                self.extent_manager = None
+                self.logger.info("ExtentManager disabled, using direct page allocation")
+
+            # 新增：表上下文管理
+            self._current_table_context = None
+            self._context_lock = threading.Lock()  # 线程安全
 
             # 自动刷盘定时器（可选）
             self._flush_timer = None
@@ -110,6 +135,20 @@ class StorageManager:
         if self.is_shutdown:
             raise SystemShutdownException()
 
+    def _update_page_manager_files(self):
+        """更新页管理器的表空间文件映射"""
+        try:
+            # 获取最新的表空间文件映射
+            updated_files = self.tablespace_manager.get_all_tablespace_files()
+
+            # 更新页管理器的文件映射
+            self.page_manager.tablespace_files.update(updated_files)
+
+            self.logger.debug(f"Updated PageManager file mapping with {len(updated_files)} tablespaces")
+
+        except Exception as e:
+            self.logger.error(f"Failed to update PageManager file mapping: {e}")
+
     @handle_storage_exceptions
     @performance_monitor("read_page")
     def read_page(self, page_id: int) -> bytes:
@@ -162,7 +201,7 @@ class StorageManager:
             self.operation_count += 1
 
             # 修复：确保数据填充到PAGE_SIZE再放入缓存
-            from .utils.constants import PAGE_SIZE
+            from ..utils.constants import PAGE_SIZE  # 修改这一行
             if len(data) < PAGE_SIZE:
                 data = data + b'\x00' * (PAGE_SIZE - len(data))
             elif len(data) > PAGE_SIZE:
@@ -172,11 +211,40 @@ class StorageManager:
             self.buffer_pool.put(page_id, data, is_dirty=True)
 
             self.logger.debug(f"Page {page_id} written to cache and marked dirty")
+
+    def set_table_context(self, table_name: str):
+        """
+        设置当前表上下文，后续的allocate_page调用将使用此表名进行智能分配
+
+        Args:
+            table_name: 表名
+        """
+        with self._context_lock:
+            self._current_table_context = table_name
+            self.logger.debug(f"Set table context to '{table_name}'")
+
+    def clear_table_context(self):
+        """清除表上下文"""
+        with self._context_lock:
+            old_context = self._current_table_context
+            self._current_table_context = None
+            if old_context:
+                self.logger.debug(f"Cleared table context (was '{old_context}')")
+
+    def get_current_table_context(self) -> Optional[str]:
+        """获取当前表上下文"""
+        with self._context_lock:
+            return self._current_table_context
+
     @handle_storage_exceptions
     @performance_monitor("allocate_page")
-    def allocate_page(self) -> int:
+    def allocate_page(self, tablespace_name: str = None, table_name: str = None) -> int:
         """
-        分配一个新页
+        分配一个新页 - 增强版，完全向后兼容
+
+        Args:
+            tablespace_name: 指定的表空间名称，如果为None则使用默认表空间
+            table_name: 表名，用于智能分配。如果不指定，会尝试使用表上下文
 
         Returns:
             int: 新分配的页号
@@ -188,22 +256,32 @@ class StorageManager:
         self._check_shutdown()
 
         with self._lock:
-            page_id = self.page_manager.allocate_page()
-            self.logger.info(f"Allocated new page {page_id}")
+            if tablespace_name is None:
+                tablespace_name = "default"
+
+            # 智能决策表名：优先级 = 显式参数 > 上下文 > "unknown"
+            effective_table_name = table_name
+            if effective_table_name is None:
+                with self._context_lock:
+                    effective_table_name = self._current_table_context
+            if effective_table_name is None:
+                effective_table_name = "unknown"
+
+            # 使用统一的智能分配逻辑
+            if self.extent_manager:
+                page_id = self.extent_manager.allocate_page_smart(effective_table_name, tablespace_name)
+            else:
+                page_id = self.page_manager.allocate_page(tablespace_name)
+
+            self.logger.info(
+                f"Allocated page {page_id} for table '{effective_table_name}' in tablespace '{tablespace_name}'")
             return page_id
 
     @handle_storage_exceptions
     @performance_monitor("deallocate_page")
     def deallocate_page(self, page_id: int):
         """
-        释放一个页
-
-        Args:
-            page_id: 要释放的页号
-
-        Raises:
-            SystemShutdownException: 系统已关闭
-            PageException: 页操作错误
+        释放一个页 - 现在支持智能释放
         """
         self._check_shutdown()
 
@@ -213,14 +291,34 @@ class StorageManager:
             if removed:
                 data, is_dirty = removed
                 if is_dirty:
-                    # 如果是脏页，先写入磁盘
                     self.page_manager.write_page_to_disk(page_id, data)
                     self.logger.debug(f"Flushed dirty page {page_id} before deallocation")
 
-            # 从页管理器中释放
-            self.page_manager.deallocate_page(page_id)
+            # 如果启用了区管理，使用智能释放
+            if self.extent_manager:
+                self.extent_manager.deallocate_page_smart(page_id)
+            else:
+                self.page_manager.deallocate_page(page_id)
 
             self.logger.info(f"Deallocated page {page_id}")
+
+    def allocate_page_for_table(self, table_name: str) -> int:
+        """
+        为指定表分配页 - 现在是convenience wrapper
+
+        Args:
+            table_name: 表名
+
+        Returns:
+            int: 新分配的页号
+        """
+        self._check_shutdown()
+
+        # 通过表空间管理器选择合适的表空间
+        tablespace_name = self.tablespace_manager.allocate_tablespace_for_table(table_name)
+
+        # 直接调用增强版的allocate_page
+        return self.allocate_page(tablespace_name=tablespace_name, table_name=table_name)
 
     @handle_storage_exceptions
     @performance_monitor("flush_page")
@@ -535,6 +633,118 @@ class StorageManager:
         """详细字符串表示"""
         return self.__str__()
 
+    def create_tablespace(self, name: str, file_path: str = None, size_mb: int = 100) -> bool:
+        """
+        创建新的表空间
+
+        Args:
+            name: 表空间名称
+            file_path: 文件路径，如果为None则自动生成
+            size_mb: 表空间大小（MB）
+
+        Returns:
+            bool: 创建是否成功
+        """
+        try:
+            result = self.tablespace_manager.create_tablespace(name, file_path, size_mb)
+            if result:
+                # 更新页管理器的表空间文件映射
+                self.page_manager.tablespace_files = self.tablespace_manager.get_all_tablespace_files()
+                self.logger.info(f"Created tablespace '{name}' successfully")
+            return result
+        except Exception as e:
+            self.logger.error(f"Failed to create tablespace '{name}': {e}")
+            return False
+
+    def list_tablespaces(self) -> List[dict]:
+        """列出所有表空间"""
+        return self.tablespace_manager.list_tablespaces()
+
+    def get_tablespace_info(self, name: str) -> Optional[dict]:
+        """获取指定表空间的信息"""
+        return self.tablespace_manager.get_tablespace_info(name)
+
+    def get_table_tablespace(self, table_name: str) -> str:
+        """获取表所在的表空间"""
+        return self.tablespace_manager.get_tablespace_for_table(table_name)
+
+    def get_storage_summary(self) -> dict:
+        """
+        获取存储系统的完整摘要信息
+
+        Returns:
+            dict: 包含缓存、页管理、表空间的完整信息
+        """
+        storage_info = self.get_storage_info()
+        tablespace_list = self.list_tablespaces()
+
+        # 新增：区管理统计信息
+        extent_info = {}
+        if self.extent_manager:
+            extent_info = {
+                "enabled": True,
+                "stats": self.extent_manager.get_stats(),
+                "extents": self.extent_manager.list_extents()
+            }
+        else:
+            extent_info = {
+                "enabled": False,
+                "message": "Extent management is disabled"
+            }
+
+        return {
+            **storage_info,
+            "tablespaces": {
+                "count": len(tablespace_list),
+                "list": tablespace_list
+            },
+            "extent_management": extent_info,  # 新增这部分
+            "feature_status": {
+                "tablespace_support": True,
+                "multi_file_support": True,
+                "cache_strategies": True
+            }
+        }
+
+    def table_context(self, table_name: str):
+        """
+        返回表上下文管理器，支持 with 语句
+
+        Args:
+            table_name: 表名
+
+        Returns:
+            TableContext: 上下文管理器
+
+        Example:
+            with storage.table_context("user_profiles"):
+                page1 = storage.allocate_page()  # 自动使用区分配
+                page2 = storage.allocate_page()  # 自动使用区分配
+        """
+        return TableContext(self, table_name)
+
+
+class TableContext:
+    """表上下文管理器"""
+
+    def __init__(self, storage_manager: StorageManager, table_name: str):
+        self.storage_manager = storage_manager
+        self.table_name = table_name
+        self.previous_context = None
+
+    def __enter__(self):
+        # 保存之前的上下文
+        self.previous_context = self.storage_manager.get_current_table_context()
+        # 设置新的上下文
+        self.storage_manager.set_table_context(self.table_name)
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        # 恢复之前的上下文
+        if self.previous_context is not None:
+            self.storage_manager.set_table_context(self.previous_context)
+        else:
+            self.storage_manager.clear_table_context()
 
 # 便捷函数
 def create_storage_manager(buffer_size: int = BUFFER_SIZE,

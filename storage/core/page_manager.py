@@ -26,6 +26,7 @@ class PageMetadata:
         self.free_pages = []  # 已释放可重用的页号列表
         self.allocated_pages = set()  # 已分配的页号集合
         self.page_usage = {}  # 页使用情况 {page_id: usage_info}
+        self.page_tablespaces = {}  # 新增：页到表空间的映射 {page_id: tablespace_name}
         self.last_modification = time.time()  # 最后修改时间
         self.version = "1.0"  # 元数据版本
 
@@ -36,6 +37,7 @@ class PageMetadata:
             "free_pages": self.free_pages,
             "allocated_pages": list(self.allocated_pages),
             "page_usage": self.page_usage,
+            "page_tablespaces": self.page_tablespaces,  # 新增这一行
             "last_modification": self.last_modification,
             "version": self.version,
             "total_allocated": len(self.allocated_pages),
@@ -50,6 +52,7 @@ class PageMetadata:
         metadata.free_pages = data.get("free_pages", [])
         metadata.allocated_pages = set(data.get("allocated_pages", []))
         metadata.page_usage = data.get("page_usage", {})
+        metadata.page_tablespaces = data.get("page_tablespaces", {})  # 新增这一行
         metadata.last_modification = data.get("last_modification", time.time())
         metadata.version = data.get("version", "1.0")
         return metadata
@@ -58,13 +61,14 @@ class PageMetadata:
 class PageManager:
     """页管理器类（增强版）"""
 
-    def __init__(self, data_file: str = DATA_FILE, meta_file: str = META_FILE):
+    def __init__(self, data_file: str = DATA_FILE, meta_file: str = META_FILE, tablespace_manager=None):
         """
         初始化页管理器
 
         Args:
-            data_file: 数据文件路径
+            data_file: 默认数据文件路径（保持兼容性）
             meta_file: 元数据文件路径
+            tablespace_manager: 表空间管理器引用
 
         Raises:
             DiskIOException: 文件访问错误
@@ -72,6 +76,10 @@ class PageManager:
         self.data_file = Path(data_file)
         self.meta_file = Path(meta_file)
         self.metadata = PageMetadata()
+
+        # 新增：表空间支持
+        self.tablespace_manager = tablespace_manager
+        self.tablespace_files = {}  # {tablespace_name: file_path}
 
         # 线程锁，确保并发安全
         self._lock = threading.RLock()
@@ -89,11 +97,13 @@ class PageManager:
         self._init_directories()
         self._load_metadata()
         self._init_data_file()
+        self._init_tablespace_files()  # 新增：初始化表空间文件
 
         self.logger.info("PageManager initialized",
                          data_file=str(self.data_file),
                          meta_file=str(self.meta_file),
-                         allocated_pages=len(self.metadata.allocated_pages))
+                         allocated_pages=len(self.metadata.allocated_pages),
+                         tablespace_support=self.tablespace_manager is not None)
 
     def _init_directories(self):
         """初始化目录结构"""
@@ -131,6 +141,38 @@ class PageManager:
             raise DiskIOException(f"Failed to initialize data file: {e}",
                                   file_path=str(self.data_file),
                                   operation="file_initialization")
+
+    def _init_tablespace_files(self):
+        """初始化表空间文件映射"""
+        try:
+            if self.tablespace_manager is not None:
+                # 获取所有表空间的文件路径
+                self.tablespace_files = self.tablespace_manager.get_all_tablespace_files()
+
+                # 确保所有表空间文件存在
+                for tablespace_name, file_path in self.tablespace_files.items():
+                    file_path_obj = Path(file_path)
+                    if not file_path_obj.exists():
+                        # 创建空的表空间文件
+                        file_path_obj.parent.mkdir(parents=True, exist_ok=True)
+                        with open(file_path_obj, 'wb') as f:
+                            pass
+                        self.logger.info(f"Created tablespace file",
+                                         tablespace=tablespace_name,
+                                         file_path=str(file_path_obj))
+                    else:
+                        self.logger.debug(f"Tablespace file exists",
+                                          tablespace=tablespace_name,
+                                          file_path=str(file_path_obj))
+            else:
+                # 没有表空间管理器，使用默认文件
+                self.tablespace_files = {"default": str(self.data_file)}
+                self.logger.info("No tablespace manager, using default file mode")
+
+        except Exception as e:
+            self.logger.error(f"Failed to initialize tablespace files: {e}")
+            # 回退到默认模式
+            self.tablespace_files = {"default": str(self.data_file)}
 
     @handle_storage_exceptions
     def _load_metadata(self):
@@ -192,9 +234,12 @@ class PageManager:
 
     @handle_storage_exceptions
     @performance_monitor("page_allocation")
-    def allocate_page(self) -> int:
+    def allocate_page(self, tablespace_name: str = "default") -> int:
         """
         分配一个新页
+
+        Args:
+            tablespace_name: 指定的表空间名称，默认为"default"
 
         Returns:
             int: 新分配的页号
@@ -208,24 +253,33 @@ class PageManager:
                 if len(self.metadata.allocated_pages) >= MAX_PAGES:
                     raise PageException(f"Maximum page limit reached: {MAX_PAGES}")
 
+                # 检查表空间是否存在
+                if tablespace_name not in self.tablespace_files:
+                    self.logger.warning(f"Tablespace '{tablespace_name}' not found, using default")
+                    tablespace_name = "default"
+
                 # 优先重用释放的页号
                 if self.metadata.free_pages:
                     page_id = self.metadata.free_pages.pop(0)
-                    self.logger.debug(f"Reusing freed page {page_id}")
+                    self.logger.debug(f"Reusing freed page {page_id} in tablespace '{tablespace_name}'")
                 else:
                     # 分配新的页号
                     page_id = self.metadata.next_page_id
                     self.metadata.next_page_id += 1
-                    self.logger.debug(f"Allocated new page {page_id}")
+                    self.logger.debug(f"Allocated new page {page_id} in tablespace '{tablespace_name}'")
 
                 # 记录到已分配列表
                 self.metadata.allocated_pages.add(page_id)
+
+                # 记录页的表空间归属
+                self.metadata.page_tablespaces[str(page_id)] = tablespace_name
 
                 # 记录页使用信息
                 self.metadata.page_usage[str(page_id)] = {
                     "allocated_time": time.time(),
                     "access_count": 0,
-                    "last_access": None
+                    "last_access": None,
+                    "tablespace": tablespace_name  # 新增：记录表空间信息
                 }
 
                 # 保存元数据
@@ -236,6 +290,7 @@ class PageManager:
 
                 self.logger.info(f"Page allocated",
                                  page_id=page_id,
+                                 tablespace=tablespace_name,
                                  total_allocated=len(self.metadata.allocated_pages))
 
                 return page_id
@@ -305,12 +360,14 @@ class PageManager:
         if page_id <= 0:
             raise InvalidPageIdException(page_id)
 
-        # 检查页是否已分配（允许读取未分配的页，返回空数据）
-        # if page_id not in self.metadata.allocated_pages:
-        #     raise PageNotAllocatedException(page_id)
-
         try:
-            with open(self.data_file, 'rb') as f:
+            # 确定页所属的表空间和文件
+            tablespace_name = self.metadata.page_tablespaces.get(str(page_id), "default")
+            data_file_path = self.tablespace_files.get(tablespace_name, str(self.data_file))
+
+            self.logger.debug(f"Reading page {page_id} from tablespace '{tablespace_name}', file: {data_file_path}")
+
+            with open(data_file_path, 'rb') as f:
                 # 定位到指定页的位置
                 offset = (page_id - 1) * PAGE_SIZE
                 f.seek(offset)
@@ -331,18 +388,19 @@ class PageManager:
 
                 self.logger.debug(f"Read page from disk",
                                   page_id=page_id,
+                                  tablespace=tablespace_name,
                                   data_length=len(data),
                                   file_offset=offset)
 
                 return data
 
         except FileNotFoundError:
-            raise DiskIOException(f"Data file not found: {self.data_file}",
-                                  file_path=str(self.data_file),
+            raise DiskIOException(f"Tablespace file not found: {data_file_path}",
+                                  file_path=data_file_path,
                                   operation="page_read")
         except OSError as e:
             raise DiskIOException(f"Failed to read page {page_id}: {e}",
-                                  file_path=str(self.data_file),
+                                  file_path=data_file_path,
                                   operation="page_read")
 
     @handle_storage_exceptions
@@ -375,14 +433,17 @@ class PageManager:
             elif len(data) < PAGE_SIZE:
                 data += b'\x00' * (PAGE_SIZE - len(data))
 
+            # 确定页所属的表空间和文件
+            tablespace_name = self.metadata.page_tablespaces.get(str(page_id), "default")
+            data_file_path = self.tablespace_files.get(tablespace_name, str(self.data_file))
+
+            self.logger.debug(f"Writing page {page_id} to tablespace '{tablespace_name}', file: {data_file_path}")
+
             # 确保文件存在且足够大
             offset = (page_id - 1) * PAGE_SIZE
+            self._extend_file_if_needed(data_file_path, offset + PAGE_SIZE)
 
-            # 如果文件不存在或太小，扩展文件
-            if not self.data_file.exists() or self.data_file.stat().st_size < offset + PAGE_SIZE:
-                self._extend_file(offset + PAGE_SIZE)
-
-            with open(self.data_file, 'r+b') as f:
+            with open(data_file_path, 'r+b') as f:
                 # 定位到指定页的位置
                 f.seek(offset)
 
@@ -400,12 +461,13 @@ class PageManager:
 
                 self.logger.debug(f"Wrote page to disk",
                                   page_id=page_id,
+                                  tablespace=tablespace_name,
                                   data_length=len(data),
                                   file_offset=offset)
 
         except OSError as e:
             raise DiskIOException(f"Failed to write page {page_id}: {e}",
-                                  file_path=str(self.data_file),
+                                  file_path=data_file_path,
                                   operation="page_write")
 
     def _extend_file(self, target_size: int):
@@ -427,6 +489,40 @@ class PageManager:
         except Exception as e:
             raise DiskIOException(f"Failed to extend file: {e}",
                                   file_path=str(self.data_file),
+                                  operation="file_extend")
+
+    def _extend_file_if_needed(self, file_path: str, target_size: int):
+        """
+        如果需要，扩展指定文件到目标大小
+
+        Args:
+            file_path: 文件路径
+            target_size: 目标文件大小
+        """
+        try:
+            file_path_obj = Path(file_path)
+
+            # 如果文件不存在，创建它
+            if not file_path_obj.exists():
+                file_path_obj.parent.mkdir(parents=True, exist_ok=True)
+                with open(file_path_obj, 'wb') as f:
+                    f.write(b'\x00' * target_size)
+                return
+
+            # 如果文件太小，扩展它
+            current_size = file_path_obj.stat().st_size
+            if current_size < target_size:
+                with open(file_path_obj, 'ab') as f:
+                    f.write(b'\x00' * (target_size - current_size))
+                    f.flush()
+
+            self.logger.debug(f"File extended if needed",
+                              file_path=file_path,
+                              target_size=target_size)
+
+        except Exception as e:
+            raise DiskIOException(f"Failed to extend file {file_path}: {e}",
+                                  file_path=file_path,
                                   operation="file_extend")
 
     def get_page_count(self) -> int:
