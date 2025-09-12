@@ -25,7 +25,8 @@ class StorageManager:
                  data_file: str = DATA_FILE,
                  meta_file: str = META_FILE,
                  auto_flush_interval: int = FLUSH_INTERVAL_SECONDS,
-                 enable_extent_management: bool = True):
+                 enable_extent_management: bool = True,
+                 enable_wal: bool = True):
         """
         初始化存储管理器
 
@@ -39,6 +40,13 @@ class StorageManager:
         Raises:
             StorageException: 初始化失败
         """
+        # 日志器
+        self.logger = get_logger("storage")
+
+        # 先初始化WAL相关属性，避免属性不存在错误
+        self.wal_enabled = enable_wal
+        self.wal_manager = None  # 先设为None
+
         try:
             # 初始化表空间管理器
             from .tablespace_manager import TablespaceManager
@@ -66,9 +74,6 @@ class StorageManager:
             self.operation_count = 0
             self.flush_count = 0
 
-            # 日志器
-            self.logger = get_logger("storage")
-
             # 新增：ExtentManager集成
             self.enable_extent_management = enable_extent_management
             if enable_extent_management:
@@ -87,6 +92,21 @@ class StorageManager:
             self._flush_timer = None
             if auto_flush_interval > 0:
                 self._start_auto_flush()
+
+            # WAL集成（在所有其他组件初始化之后）
+            self.wal_enabled = enable_wal
+            if enable_wal:
+                from .wal import WALManager
+                self.wal_manager = WALManager(
+                    storage_manager=self,
+                    wal_dir=os.path.join(os.path.dirname(data_file), "wal"),
+                    enable_wal=True,
+                    sync_mode="fsync",
+                    checkpoint_interval=1000,
+                    enable_compression=False,
+                    enable_auto_recovery=True
+                )
+                self.logger.info("WAL enabled for enhanced durability")
 
             self.logger.info("StorageManager initialized successfully",
                              buffer_size=buffer_size,
@@ -203,14 +223,18 @@ class StorageManager:
         with self._lock:
             self.operation_count += 1
 
-            # 修复：确保数据填充到PAGE_SIZE再放入缓存
-            from ..utils.constants import PAGE_SIZE  # 修改这一行
+            # WAL: 先写日志（添加安全检查）
+            if self.wal_enabled and hasattr(self, 'wal_manager') and self.wal_manager:
+                self.wal_manager.write_page(page_id, data)
+
+            # 确保数据填充到PAGE_SIZE
+            from ..utils.constants import PAGE_SIZE
             if len(data) < PAGE_SIZE:
                 data = data + b'\x00' * (PAGE_SIZE - len(data))
             elif len(data) > PAGE_SIZE:
                 data = data[:PAGE_SIZE]
 
-            # 将填充后的数据写入缓存并标记为脏页
+            # 写入缓存并标记为脏页
             self.buffer_pool.put(page_id, data, is_dirty=True)
 
             self.logger.debug(f"Page {page_id} written to cache and marked dirty")
@@ -579,6 +603,10 @@ class StorageManager:
             return
 
         self.logger.info("Starting StorageManager shutdown")
+
+        # 关闭WAL
+        if self.wal_enabled and self.wal_manager:
+            self.wal_manager.shutdown()
 
         try:
             with self._lock:

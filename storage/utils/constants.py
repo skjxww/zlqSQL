@@ -15,7 +15,7 @@ DEFAULT_PAGE_ALLOCATION = 10  # 默认预分配页数
 BUFFER_SIZE = 100  # 缓存池大小：最多缓存100页
 DEFAULT_CACHE_SIZE = 50  # 默认缓存大小
 MAX_CACHE_SIZE = 1000  # 最大缓存大小
-MIN_CACHE_SIZE = 10  # 最小缓存大小
+MIN_CACHE_SIZE = 5  # 最小缓存大小
 
 # 缓存替换策略
 CACHE_POLICY_LRU = "LRU"  # 最近最少使用
