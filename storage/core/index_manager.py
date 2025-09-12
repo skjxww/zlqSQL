@@ -63,7 +63,7 @@ class IndexManager:
             column_name: 列名
 
         Returns:
-            BPlusTree or None
+            btree or None
         """
         # 查找索引
         for index_name, metadata in self.index_metadata.items():

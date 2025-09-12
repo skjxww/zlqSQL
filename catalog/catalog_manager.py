@@ -1,6 +1,7 @@
 import json
 import os
 from typing import Dict, List, Optional, Any
+from sql_compiler.btree.BPlusTreeIndex import BPlusTreeIndex
 
 
 class CatalogManager:
@@ -300,11 +301,10 @@ class CatalogManager:
 
     def create_index(self, index_name: str, table_name: str, columns: List[str],
                      unique: bool = False, index_type: str = "BTREE") -> bool:
-        """创建索引 - 修复版"""
+        """创建索引 - 使用适配后的B+树"""
         if index_name in self.indexes:
             return False
 
-        # 修复：应该检查 catalog_data["tables"] 而不是 self.tables
         if table_name not in self.catalog_data["tables"]:
             return False
 
@@ -314,13 +314,16 @@ class CatalogManager:
             if col not in table_columns:
                 return False
 
+        # 创建B+树实例
+        btree_instance = BPlusTreeIndex(index_name)
+
         index_info = {
             "name": index_name,
             "table": table_name,
             "columns": columns,
             "unique": unique,
             "type": index_type,
-            "btree": BPlusTreeIndex(),  # 创建B+树实例
+            "btree": btree_instance,  # 使用适配后的B+树
             "created_at": self._get_current_time()
         }
 
@@ -332,6 +335,8 @@ class CatalogManager:
 
         # 保存到持久化存储
         self._save_catalog()
+
+        print(f"✅ 创建索引 {index_name}，类型: {btree_instance.implementation}")
         return True
 
     def drop_index(self, index_name: str) -> bool:

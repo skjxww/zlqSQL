@@ -129,7 +129,7 @@ class StatisticsManager:
 
         self._load_statistics()
 
-    def analyze_btree_index(self, index_name: str, table_name: str, btree: 'BPlusTreeIndex'):
+    def analyze_btree_index(self, index_name: str, table_name: str, btree: 'btree'):
         """分析B+树索引统计信息"""
         with self._lock:
             # 计算B+树高度和页数
@@ -183,7 +183,7 @@ class StatisticsManager:
 
         return 10  # 默认值
 
-    def _calculate_btree_height(self, btree: 'BPlusTreeIndex') -> int:
+    def _calculate_btree_height(self, btree: 'btree') -> int:
         """计算B+树高度"""
         if btree.root is None:
             return 0
