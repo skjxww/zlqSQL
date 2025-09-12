@@ -44,6 +44,9 @@ class StorageManager:
             from .tablespace_manager import TablespaceManager
             # 从data_file路径中提取目录
             import os
+            # 添加索引管理器
+            from .index_manager import IndexManager
+            self.index_manager = IndexManager(self)
             data_dir = os.path.dirname(data_file) if os.path.dirname(data_file) else "data"
             self.tablespace_manager = TablespaceManager(data_dir)
             # 将表空间管理器传递给页管理器
