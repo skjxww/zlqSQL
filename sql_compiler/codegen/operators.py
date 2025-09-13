@@ -45,102 +45,7 @@ class CreateTableOp(Operator):
         # 实际的表创建逻辑会在存储层实现
         yield {"operation": "create_table", "table": self.table_name, "status": "success"}
 
-
-# ==================== DML操作符 ====================
-
-class InsertOp(Operator):
-    """INSERT操作符"""
-
-    def __init__(self, table_name: str, columns: Optional[List[str]], values: List[Expression]):
-        super().__init__()
-        self.table_name = table_name
-        self.columns = columns
-        self.values = values
-
-    def to_dict(self) -> Dict[str, Any]:
-        return {
-            "type": "InsertOp",
-            "table_name": self.table_name,
-            "columns": self.columns,
-            "values": [v.to_dict() for v in self.values]
-        }
-
-    def execute(self) -> Iterator[Dict[str, Any]]:
-        yield {"operation": "insert", "table": self.table_name, "rows_affected": 1}
-
-
-class UpdateOp(Operator):
-    """UPDATE操作符"""
-
-    def __init__(self, table_name: str, assignments: List[tuple], children: List[Operator]):
-        super().__init__(children)
-        self.table_name = table_name
-        self.assignments = assignments  # [(column, expression), ...]
-
-    def to_dict(self) -> Dict[str, Any]:
-        return {
-            "type": "UpdateOp",
-            "table_name": self.table_name,
-            "assignments": [
-                {"column": col, "expression": expr.to_dict()}
-                for col, expr in self.assignments
-            ],
-            "children": [child.to_dict() for child in self.children]
-        }
-
-    def execute(self) -> Iterator[Dict[str, Any]]:
-        # 从子操作符获取要更新的行
-        rows_affected = 0
-        for child in self.children:
-            for row in child.execute():
-                # 应用赋值操作
-                rows_affected += 1
-
-        yield {"operation": "update", "table": self.table_name, "rows_affected": rows_affected}
-
-
-class DeleteOp(Operator):
-    """DELETE操作符"""
-
-    def __init__(self, table_name: str, children: List[Operator]):
-        super().__init__(children)
-        self.table_name = table_name
-
-    def to_dict(self) -> Dict[str, Any]:
-        return {
-            "type": "DeleteOp",
-            "table_name": self.table_name,
-            "children": [child.to_dict() for child in self.children]
-        }
-
-    def execute(self) -> Iterator[Dict[str, Any]]:
-        rows_affected = 0
-        for child in self.children:
-            for row in child.execute():
-                rows_affected += 1
-
-        yield {"operation": "delete", "table": self.table_name, "rows_affected": rows_affected}
-
-
 # ==================== 查询操作符 ====================
-
-class SeqScanOp(Operator):
-    """顺序扫描操作符"""
-
-    def __init__(self, table_name: str):
-        super().__init__()
-        self.table_name = table_name
-
-    def to_dict(self) -> Dict[str, Any]:
-        return {
-            "type": "SeqScanOp",
-            "table_name": self.table_name
-        }
-
-    def execute(self) -> Iterator[Dict[str, Any]]:
-        # 模拟从表中扫描数据
-        yield {"table": self.table_name, "operation": "scan"}
-
 
 class FilterOp(Operator):
     """过滤操作符"""
@@ -431,33 +336,6 @@ class SubqueryOp(Operator):
         # 执行子查询
         for row in self.select_plan.execute():
             yield row
-
-
-# ==================== 优化操作符 ====================
-
-class OptimizedSeqScanOp(Operator):
-    """优化的表扫描操作符（支持列投影）"""
-
-    def __init__(self, table_name: str, selected_columns: Optional[List[str]] = None):
-        super().__init__([])
-        self.table_name = table_name
-        self.selected_columns = selected_columns or ["*"]
-
-    def to_dict(self) -> Dict[str, Any]:
-        return {
-            "type": "OptimizedSeqScanOp",
-            "table_name": self.table_name,
-            "selected_columns": self.selected_columns,
-            "optimization": "projection_pushdown"
-        }
-
-    def execute(self) -> Iterator[Dict[str, Any]]:
-        yield {
-            "table": self.table_name,
-            "operation": "optimized_scan",
-            "columns": self.selected_columns
-        }
-
 
 class FilteredSeqScanOp(Operator):
     """带过滤条件的表扫描操作符"""
@@ -1061,32 +939,6 @@ class WindowFunctionOp(Operator):
                 yield result_row
 
 
-# ==================== 并行操作符 ====================
-
-class ParallelSeqScanOp(SeqScanOp):
-    """并行顺序扫描操作符"""
-
-    def __init__(self, table_name: str, worker_count: int = 4):
-        super().__init__(table_name)
-        self.worker_count = worker_count
-
-    def to_dict(self) -> Dict[str, Any]:
-        result = super().to_dict()
-        result["type"] = "ParallelSeqScanOp"
-        result["worker_count"] = self.worker_count
-        result["parallelism"] = True
-        return result
-
-    def execute(self) -> Iterator[Dict[str, Any]]:
-        # 模拟并行扫描
-        for worker_id in range(self.worker_count):
-            yield {
-                "table": self.table_name,
-                "operation": "parallel_scan",
-                "worker_id": worker_id,
-                "total_workers": self.worker_count
-            }
-
 
 class GatherOp(Operator):
     """收集并行结果操作符"""
@@ -1107,47 +959,6 @@ class GatherOp(Operator):
             for row in child.execute():
                 yield row
 
-
-# 在operators.py文件末尾添加
-
-class AliasAwareSeqScanOp(SeqScanOp):
-    """支持别名的顺序扫描操作符"""
-
-    def __init__(self, table_name: str, table_alias: Optional[str] = None):
-        super().__init__(table_name)
-        self.table_alias = table_alias
-        self.real_table_name = table_name
-
-    def get_effective_name(self) -> str:
-        """获取有效的表名（优先使用别名）"""
-        return self.table_alias if self.table_alias else self.real_table_name
-
-    def to_dict(self) -> Dict[str, Any]:
-        result = {
-            "type": "SeqScanOp",
-            "table_name": self.real_table_name
-        }
-
-        if self.table_alias:
-            result["table_alias"] = self.table_alias
-            result["display_name"] = self.table_alias
-        else:
-            result["display_name"] = self.real_table_name
-
-        return result
-
-    def execute(self) -> Iterator[Dict[str, Any]]:
-        yield {
-            "table": self.real_table_name,
-            "alias": self.table_alias,
-            "operation": "scan",
-            "display_name": self.get_effective_name()
-        }
-
-    def __repr__(self):
-        if self.table_alias:
-            return f"SeqScanOp({self.real_table_name} AS {self.table_alias})"
-        return f"SeqScanOp({self.real_table_name})"
 
 
 class AliasAwareJoinOp(JoinOp):
@@ -1624,16 +1435,23 @@ class TransactionAwareOp(Operator):
 
 
 class SeqScanOp(TransactionAwareOp):
-    """顺序扫描操作符 - 支持事务"""
+    """顺序扫描操作符 - 支持事务（合并版）"""
 
     def __init__(self, table_name: str):
         super().__init__([])
         self.table_name = table_name
         self.requires_transaction = False  # 读操作可以在事务外执行
 
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": "SeqScanOp",
+            "table_name": self.table_name,
+            "transaction_id": self.transaction_id,
+            "requires_transaction": self.requires_transaction
+        }
+
     def execute(self) -> Iterator[Dict[str, Any]]:
-        """执行顺序扫描"""
-        # 传递事务ID给存储层
+        """执行顺序扫描 - 支持事务"""
         yield {
             "operation": "seq_scan",
             "table": self.table_name,
@@ -1641,3 +1459,204 @@ class SeqScanOp(TransactionAwareOp):
             "status": "ready_for_execution",
             "message": f"顺序扫描表 {self.table_name}，事务ID: {self.transaction_id or 'None'}"
         }
+
+
+class InsertOp(TransactionAwareOp):
+    """插入操作符 - 支持事务"""
+
+    def __init__(self, table_name: str, values: List[Any]):
+        super().__init__([])
+        self.table_name = table_name
+        self.values = values
+        self.requires_transaction = True  # 写操作必须在事务中执行
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": "InsertOp",
+            "table_name": self.table_name,
+            "values": self.values,
+            "transaction_id": self.transaction_id,
+            "requires_transaction": self.requires_transaction
+        }
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        """执行插入操作"""
+        yield {
+            "operation": "insert",
+            "table": self.table_name,
+            "values": self.values,
+            "transaction_id": self.transaction_id,
+            "status": "ready_for_execution",
+            "requires_transaction": self.requires_transaction,
+            "message": f"插入数据到表 {self.table_name}，事务ID: {self.transaction_id}"
+        }
+
+
+class UpdateOp(TransactionAwareOp):
+    """更新操作符 - 支持事务"""
+
+    def __init__(self, table_name: str, set_clauses: List[Tuple[str, Any]],
+                 where_condition: Optional[Any] = None):
+        super().__init__([])
+        self.table_name = table_name
+        self.set_clauses = set_clauses
+        self.where_condition = where_condition
+        self.requires_transaction = True
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": "UpdateOp",
+            "table_name": self.table_name,
+            "set_clauses": self.set_clauses,
+            "where_condition": str(self.where_condition) if self.where_condition else None,
+            "transaction_id": self.transaction_id,
+            "requires_transaction": self.requires_transaction
+        }
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        """执行更新操作"""
+        yield {
+            "operation": "update",
+            "table": self.table_name,
+            "set_clauses": self.set_clauses,
+            "where_condition": str(self.where_condition) if self.where_condition else None,
+            "transaction_id": self.transaction_id,
+            "status": "ready_for_execution",
+            "requires_transaction": self.requires_transaction,
+            "message": f"更新表 {self.table_name}，事务ID: {self.transaction_id}"
+        }
+
+
+class DeleteOp(TransactionAwareOp):
+    """删除操作符 - 支持事务（修复版）"""
+
+    def __init__(self, table_name: str, where_condition: Optional[Any] = None):
+        super().__init__([])  # 修复：初始化时不传入children
+        self.table_name = table_name
+        self.where_condition = where_condition
+        self.requires_transaction = True
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": "DeleteOp",
+            "table_name": self.table_name,
+            "where_condition": str(self.where_condition) if self.where_condition else None,
+            "transaction_id": self.transaction_id,
+            "requires_transaction": self.requires_transaction,
+            "children": [child.to_dict() for child in self.children]
+        }
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        """执行删除操作"""
+        yield {
+            "operation": "delete",
+            "table": self.table_name,
+            "where_condition": str(self.where_condition) if self.where_condition else None,
+            "transaction_id": self.transaction_id,
+            "status": "ready_for_execution",
+            "requires_transaction": self.requires_transaction,
+            "message": f"删除表 {self.table_name} 中的数据，事务ID: {self.transaction_id}"
+        }
+
+
+class OptimizedSeqScanOp(TransactionAwareOp):
+    """优化的表扫描操作符（支持列投影和事务）"""
+
+    def __init__(self, table_name: str, selected_columns: Optional[List[str]] = None):
+        super().__init__([])
+        self.table_name = table_name
+        self.selected_columns = selected_columns or ["*"]
+        self.requires_transaction = False  # 读操作可以在事务外执行
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": "OptimizedSeqScanOp",
+            "table_name": self.table_name,
+            "selected_columns": self.selected_columns,
+            "transaction_id": self.transaction_id,
+            "requires_transaction": self.requires_transaction,
+            "optimization": "projection_pushdown"
+        }
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        """执行优化扫描"""
+        yield {
+            "operation": "optimized_seq_scan",
+            "table": self.table_name,
+            "selected_columns": self.selected_columns,
+            "transaction_id": self.transaction_id,
+            "optimization": "projection_pushdown",
+            "status": "ready_for_execution"
+        }
+
+
+class ParallelSeqScanOp(TransactionAwareOp):
+    """并行顺序扫描操作符 - 支持事务"""
+
+    def __init__(self, table_name: str, worker_count: int = 4):
+        super().__init__([])
+        self.table_name = table_name
+        self.worker_count = worker_count
+        self.requires_transaction = False  # 读操作可以在事务外执行
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": "ParallelSeqScanOp",
+            "table_name": self.table_name,
+            "worker_count": self.worker_count,
+            "transaction_id": self.transaction_id,
+            "requires_transaction": self.requires_transaction,
+            "parallelism": True
+        }
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        """执行并行扫描"""
+        # 模拟并行扫描
+        for worker_id in range(self.worker_count):
+            yield {
+                "table": self.table_name,
+                "operation": "parallel_scan",
+                "worker_id": worker_id,
+                "worker_count": self.worker_count,
+                "transaction_id": self.transaction_id,
+                "status": "ready_for_execution"
+            }
+
+class AliasAwareSeqScanOp(SeqScanOp):
+    """支持别名的顺序扫描操作符"""
+
+    def __init__(self, table_name: str, table_alias: Optional[str] = None):
+        super().__init__(table_name)
+        self.table_alias = table_alias
+        self.real_table_name = table_name
+
+    def get_effective_name(self) -> str:
+        """获取有效的表名（优先使用别名）"""
+        return self.table_alias if self.table_alias else self.real_table_name
+
+    def to_dict(self) -> Dict[str, Any]:
+        result = {
+            "type": "SeqScanOp",
+            "table_name": self.real_table_name
+        }
+
+        if self.table_alias:
+            result["table_alias"] = self.table_alias
+            result["display_name"] = self.table_alias
+        else:
+            result["display_name"] = self.real_table_name
+
+        return result
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        yield {
+            "table": self.real_table_name,
+            "alias": self.table_alias,
+            "operation": "scan",
+            "display_name": self.get_effective_name()
+        }
+
+    def __repr__(self):
+        if self.table_alias:
+            return f"SeqScanOp({self.real_table_name} AS {self.table_alias})"
+        return f"SeqScanOp({self.real_table_name})"
