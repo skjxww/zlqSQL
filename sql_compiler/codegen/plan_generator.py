@@ -52,8 +52,18 @@ class PlanGenerator:
         if isinstance(stmt, SelectStmt):
             self._collect_aliases_from_select(stmt)
 
-        # 生成基础执行计划
-        if isinstance(stmt, CreateTableStmt):
+        # 生成执行计划
+        if isinstance(stmt, BeginTransactionStmt):
+            return self._generate_begin_transaction_plan(stmt)
+        elif isinstance(stmt, CommitStmt):
+            return self._generate_commit_plan(stmt)
+        elif isinstance(stmt, RollbackStmt):
+            return self._generate_rollback_plan(stmt)
+        elif isinstance(stmt, SavepointStmt):
+            return self._generate_savepoint_plan(stmt)
+        elif isinstance(stmt, ReleaseSavepointStmt):
+            return self._generate_release_savepoint_plan(stmt)
+        elif isinstance(stmt, CreateTableStmt):
             plan = self._generate_create_table_plan(stmt)
         elif isinstance(stmt, InsertStmt):
             plan = self._generate_insert_plan(stmt)
@@ -99,6 +109,77 @@ class PlanGenerator:
                     print(f"⚠️ 查询优化失败: {e}，使用原始计划")
 
         return plan
+
+    def _generate_begin_transaction_plan(self, stmt: BeginTransactionStmt) -> BeginTransactionOp:
+        """生成开始事务的执行计划"""
+        if not self.silent_mode:
+            print(f"   🔄 生成BEGIN TRANSACTION计划")
+            if stmt.isolation_level:
+                print(f"     隔离级别: {stmt.isolation_level.value}")
+            if stmt.transaction_mode:
+                print(f"     事务模式: {stmt.transaction_mode.value}")
+
+        return BeginTransactionOp(
+            isolation_level=stmt.isolation_level,
+            transaction_mode=stmt.transaction_mode
+        )
+
+    def _generate_commit_plan(self, stmt: CommitStmt) -> CommitTransactionOp:
+        """生成提交事务的执行计划"""
+        if not self.silent_mode:
+            print(f"   ✅ 生成COMMIT计划")
+            if stmt.work:
+                print(f"     包含WORK关键字")
+
+        return CommitTransactionOp(work=stmt.work)
+
+    def _generate_rollback_plan(self, stmt: RollbackStmt) -> RollbackTransactionOp:
+        """生成回滚事务的执行计划"""
+        if not self.silent_mode:
+            print(f"   ↩️ 生成ROLLBACK计划")
+            if stmt.work:
+                print(f"     包含WORK关键字")
+            if stmt.to_savepoint:
+                print(f"     回滚到保存点: {stmt.to_savepoint}")
+
+        return RollbackTransactionOp(
+            work=stmt.work,
+            to_savepoint=stmt.to_savepoint
+        )
+
+    def _generate_savepoint_plan(self, stmt: SavepointStmt) -> SavepointOp:
+        """生成保存点的执行计划"""
+        if not self.silent_mode:
+            print(f"   💾 生成SAVEPOINT计划: {stmt.savepoint_name}")
+
+        return SavepointOp(savepoint_name=stmt.savepoint_name)
+
+    def _generate_release_savepoint_plan(self, stmt: ReleaseSavepointStmt) -> ReleaseSavepointOp:
+        """生成释放保存点的执行计划"""
+        if not self.silent_mode:
+            print(f"   🗑️ 生成RELEASE SAVEPOINT计划: {stmt.savepoint_name}")
+
+        return ReleaseSavepointOp(savepoint_name=stmt.savepoint_name)
+
+    def _generate_insert_plan(self, stmt: InsertStmt) -> InsertOp:
+        """生成插入计划 - 支持事务"""
+        if not self.silent_mode:
+            print(f"   ➕ 生成INSERT计划: {stmt.table_name}")
+            if hasattr(stmt, 'transaction_id') and stmt.transaction_id:
+                print(f"     事务ID: {stmt.transaction_id}")
+
+        # 验证表是否存在
+        if not self.catalog_manager.table_exists(stmt.table_name):
+            raise ValueError(f"表不存在: {stmt.table_name}")
+
+        # 创建插入操作符
+        insert_op = InsertOp(stmt.table_name, stmt.values)
+
+        # 设置事务上下文（如果语句包含事务信息）
+        if hasattr(stmt, 'transaction_id'):
+            insert_op.set_transaction_context(stmt.transaction_id)
+
+        return insert_op
 
     def _generate_create_index_plan(self, stmt: CreateIndexStmt) -> CreateIndexOp:
         """生成创建索引计划"""
@@ -229,11 +310,32 @@ class PlanGenerator:
         """生成CREATE TABLE执行计划"""
         return CreateTableOp(stmt.table_name, stmt.columns)
 
-    def _generate_insert_plan(self, stmt: InsertStmt) -> Operator:
-        """生成INSERT执行计划"""
-        return InsertOp(stmt.table_name, stmt.columns, stmt.values)
+    def _set_transaction_context_for_plan(self, plan: Operator, transaction_id: Optional[str]):
+        """为执行计划树设置事务上下文"""
+        if isinstance(plan, TransactionAwareOp):
+            plan.set_transaction_context(transaction_id)
+
+        # 递归处理子节点
+        for child in plan.children:
+            self._set_transaction_context_for_plan(child, transaction_id)
 
     def _generate_select_plan(self, stmt: SelectStmt) -> Operator:
+        """生成查询计划 - 支持事务"""
+        if not self.silent_mode:
+            print(f"   🔍 生成SELECT计划")
+            if hasattr(stmt, 'transaction_id') and stmt.transaction_id:
+                print(f"     事务ID: {stmt.transaction_id}")
+
+        # 生成基本的查询计划
+        plan = self._generate_basic_select_plan(stmt)
+
+        # 为计划树中的所有事务感知操作符设置事务上下文
+        if hasattr(stmt, 'transaction_id'):
+            self._set_transaction_context_for_plan(plan, stmt.transaction_id)
+
+        return plan
+
+    def _generate_basic_select_plan(self, stmt: SelectStmt) -> Operator:
         """生成SELECT执行计划 - 修复聚合函数传递"""
 
         if not self.silent_mode:
@@ -346,26 +448,46 @@ class PlanGenerator:
 
         return aggregate_functions
 
-    def _generate_update_plan(self, stmt: UpdateStmt) -> Operator:
-        """生成UPDATE执行计划"""
-        # 先扫描表
-        scan_plan = SeqScanOp(stmt.table_name)
+    def _generate_update_plan(self, stmt: UpdateStmt) -> UpdateOp:
+        """生成更新计划 - 支持事务"""
+        if not self.silent_mode:
+            print(f"   🔄 生成UPDATE计划: {stmt.table_name}")
+            if hasattr(stmt, 'transaction_id') and stmt.transaction_id:
+                print(f"     事务ID: {stmt.transaction_id}")
 
-        # 如果有WHERE条件，添加过滤
-        if stmt.where_clause:
-            scan_plan = FilterOp(stmt.where_clause, [scan_plan])
+        # 验证表是否存在
+        if not self.catalog_manager.table_exists(stmt.table_name):
+            raise ValueError(f"表不存在: {stmt.table_name}")
 
-        # 添加UPDATE操作
-        return UpdateOp(stmt.table_name, stmt.assignments, [scan_plan])
+        # 创建更新操作符
+        update_op = UpdateOp(
+            stmt.table_name,
+            stmt.set_clauses,
+            stmt.where_condition
+        )
 
-    def _generate_delete_plan(self, stmt: DeleteStmt) -> Operator:
-        """生成DELETE执行计划"""
-        # 先扫描表
-        scan_plan = SeqScanOp(stmt.table_name)
+        # 设置事务上下文
+        if hasattr(stmt, 'transaction_id'):
+            update_op.set_transaction_context(stmt.transaction_id)
 
-        # 如果有WHERE条件，添加过滤
-        if stmt.where_clause:
-            scan_plan = FilterOp(stmt.where_clause, [scan_plan])
+        return update_op
 
-        # 添加DELETE操作
-        return DeleteOp(stmt.table_name, [scan_plan])
+    def _generate_delete_plan(self, stmt: DeleteStmt) -> DeleteOp:
+        """生成删除计划 - 支持事务"""
+        if not self.silent_mode:
+            print(f"   ❌ 生成DELETE计划: {stmt.table_name}")
+            if hasattr(stmt, 'transaction_id') and stmt.transaction_id:
+                print(f"     事务ID: {stmt.transaction_id}")
+
+        # 验证表是否存在
+        if not self.catalog_manager.table_exists(stmt.table_name):
+            raise ValueError(f"表不存在: {stmt.table_name}")
+
+        # 创建删除操作符
+        delete_op = DeleteOp(stmt.table_name, stmt.where_condition)
+
+        # 设置事务上下文
+        if hasattr(stmt, 'transaction_id'):
+            delete_op.set_transaction_context(stmt.transaction_id)
+
+        return delete_op

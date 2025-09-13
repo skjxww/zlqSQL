@@ -3,7 +3,6 @@ from sql_compiler.semantic.symbol_table import SymbolTable
 from catalog.catalog_manager import CatalogManager
 from sql_compiler.exceptions.compiler_errors import SemanticError
 
-
 class SemanticAnalyzer:
     """语义分析器 - 扩展支持新语法和类型检查"""
 
@@ -20,7 +19,17 @@ class SemanticAnalyzer:
         self.current_aliases = {}
         self.alias_to_real = {}
 
-        if isinstance(stmt, CreateIndexStmt):
+        if isinstance(stmt, BeginTransactionStmt):
+            self._analyze_begin_transaction(stmt)
+        elif isinstance(stmt, CommitStmt):
+            self._analyze_commit(stmt)
+        elif isinstance(stmt, RollbackStmt):
+            self._analyze_rollback(stmt)
+        elif isinstance(stmt, SavepointStmt):
+            self._analyze_savepoint(stmt)
+        elif isinstance(stmt, ReleaseSavepointStmt):
+            self._analyze_release_savepoint(stmt)
+        elif isinstance(stmt, CreateIndexStmt):
             self._analyze_create_index(stmt)
         elif isinstance(stmt, DropIndexStmt):
             self._analyze_drop_index(stmt)
@@ -38,6 +47,79 @@ class SemanticAnalyzer:
             self._analyze_delete(stmt)
         else:
             raise SemanticError(f"不支持的语句类型: {type(stmt).__name__}")
+
+    def _analyze_begin_transaction(self, stmt: BeginTransactionStmt):
+        """分析BEGIN TRANSACTION语句"""
+        # 验证隔离级别合法性
+        if stmt.isolation_level:
+            if stmt.isolation_level not in IsolationLevel:
+                raise SemanticError(f"无效的隔离级别: {stmt.isolation_level}")
+
+        # 验证事务模式合法性
+        if stmt.transaction_mode:
+            if stmt.transaction_mode not in TransactionMode:
+                raise SemanticError(f"无效的事务模式: {stmt.transaction_mode}")
+
+        # 可以添加更多验证，如检查是否已在事务中等
+        if not self.silent_mode:
+            print(f"   ✅ BEGIN TRANSACTION语义验证通过")
+
+    def _analyze_commit(self, stmt: CommitStmt):
+        """分析COMMIT语句"""
+        # COMMIT语句相对简单，主要验证语法正确性
+        if not self.silent_mode:
+            print(f"   ✅ COMMIT语义验证通过")
+
+    def _analyze_rollback(self, stmt: RollbackStmt):
+        """分析ROLLBACK语句"""
+        # 如果指定了保存点，验证保存点名称格式
+        if stmt.to_savepoint:
+            if not self._is_valid_identifier(stmt.to_savepoint):
+                raise SemanticError(f"无效的保存点名称: {stmt.to_savepoint}")
+
+        if not self.silent_mode:
+            print(f"   ✅ ROLLBACK语义验证通过")
+
+    def _analyze_savepoint(self, stmt: SavepointStmt):
+        """分析SAVEPOINT语句"""
+        # 验证保存点名称
+        if not self._is_valid_identifier(stmt.savepoint_name):
+            raise SemanticError(f"无效的保存点名称: {stmt.savepoint_name}")
+
+        # 检查保存点名称是否为保留字
+        if self._is_reserved_word(stmt.savepoint_name):
+            raise SemanticError(f"保存点名称不能是保留字: {stmt.savepoint_name}")
+
+        if not self.silent_mode:
+            print(f"   ✅ SAVEPOINT语义验证通过")
+
+    def _analyze_release_savepoint(self, stmt: ReleaseSavepointStmt):
+        """分析RELEASE SAVEPOINT语句"""
+        # 验证保存点名称
+        if not self._is_valid_identifier(stmt.savepoint_name):
+            raise SemanticError(f"无效的保存点名称: {stmt.savepoint_name}")
+
+        if not self.silent_mode:
+            print(f"   ✅ RELEASE SAVEPOINT语义验证通过")
+
+    def _is_valid_identifier(self, name: str) -> bool:
+        """验证标识符是否有效"""
+        if not name:
+            return False
+
+        # 简单的标识符验证：字母或下划线开头，后跟字母、数字或下划线
+        import re
+        return bool(re.match(r'^[a-zA-Z_][a-zA-Z0-9_]*$', name))
+
+    def _is_reserved_word(self, word: str) -> bool:
+        """检查是否为保留字"""
+        reserved_words = {
+            'SELECT', 'INSERT', 'UPDATE', 'DELETE', 'CREATE', 'DROP',
+            'TABLE', 'INDEX', 'BEGIN', 'COMMIT', 'ROLLBACK', 'SAVEPOINT',
+            'TRANSACTION', 'WHERE', 'FROM', 'JOIN', 'ON', 'GROUP', 'BY',
+            'ORDER', 'HAVING', 'LIMIT', 'OFFSET'
+        }
+        return word.upper() in reserved_words
 
     def _analyze_create_index(self, stmt: CreateIndexStmt):
         """分析CREATE INDEX语句"""

@@ -12,3 +12,82 @@
 2025-09-11 15:26:44,309 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages
 2025-09-11 15:27:14,316 - buffer_pool - DEBUG - _log_with_context:97 - Retrieved 0 dirty pages
 2025-09-11 15:27:34,262 - buffer_pool - INFO - _log_with_context:97 - Flushed 0 dirty pages
+2025-09-13 18:45:13,458 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized with strategy mode | Context: strategy_type=AdaptiveStrategy
+2025-09-13 18:45:13,458 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized | Context: capacity=100 | max_size=1000 | min_size=5
+2025-09-13 18:45:13,463 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized with strategy mode | Context: strategy_type=AdaptiveStrategy
+2025-09-13 18:45:13,464 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized | Context: capacity=100 | max_size=1000 | min_size=5
+2025-09-13 18:45:43,477 - buffer_pool - DEBUG - _log_with_context:97 - Strategy retrieved 0 dirty pages
+2025-09-13 18:46:13,485 - buffer_pool - DEBUG - _log_with_context:97 - Strategy retrieved 0 dirty pages
+2025-09-13 18:46:43,492 - buffer_pool - DEBUG - _log_with_context:97 - Strategy retrieved 0 dirty pages
+2025-09-13 18:47:13,495 - buffer_pool - DEBUG - _log_with_context:97 - Strategy retrieved 0 dirty pages
+2025-09-13 18:47:43,507 - buffer_pool - DEBUG - _log_with_context:97 - Strategy retrieved 0 dirty pages
+2025-09-13 18:48:13,521 - buffer_pool - DEBUG - _log_with_context:97 - Strategy retrieved 0 dirty pages
+2025-09-13 18:48:43,526 - buffer_pool - DEBUG - _log_with_context:97 - Strategy retrieved 0 dirty pages
+2025-09-13 18:49:13,532 - buffer_pool - DEBUG - _log_with_context:97 - Strategy retrieved 0 dirty pages
+2025-09-13 18:49:43,538 - buffer_pool - DEBUG - _log_with_context:97 - Strategy retrieved 0 dirty pages
+2025-09-13 18:50:13,550 - buffer_pool - DEBUG - _log_with_context:97 - Strategy retrieved 0 dirty pages
+2025-09-13 18:52:52,641 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized with strategy mode | Context: strategy_type=AdaptiveStrategy
+2025-09-13 18:52:52,641 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized | Context: capacity=100 | max_size=1000 | min_size=5
+2025-09-13 18:52:52,645 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized with strategy mode | Context: strategy_type=AdaptiveStrategy
+2025-09-13 18:52:52,645 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized | Context: capacity=100 | max_size=1000 | min_size=5
+2025-09-13 18:53:22,650 - buffer_pool - DEBUG - _log_with_context:97 - Strategy retrieved 0 dirty pages
+2025-09-13 18:53:52,655 - buffer_pool - DEBUG - _log_with_context:97 - Strategy retrieved 0 dirty pages
+2025-09-13 18:54:22,670 - buffer_pool - DEBUG - _log_with_context:97 - Strategy retrieved 0 dirty pages
+2025-09-13 18:54:42,099 - buffer_pool - INFO - _log_with_context:97 - Flushed 0 dirty pages
+2025-09-13 18:58:45,977 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized with strategy mode | Context: strategy_type=AdaptiveStrategy
+2025-09-13 18:58:45,977 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized | Context: capacity=100 | max_size=1000 | min_size=5
+2025-09-13 18:58:45,980 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized with strategy mode | Context: strategy_type=AdaptiveStrategy
+2025-09-13 18:58:45,980 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized | Context: capacity=100 | max_size=1000 | min_size=5
+2025-09-13 18:59:15,988 - buffer_pool - DEBUG - _log_with_context:97 - Strategy retrieved 0 dirty pages
+2025-09-13 18:59:45,989 - buffer_pool - DEBUG - _log_with_context:97 - Strategy retrieved 0 dirty pages
+2025-09-13 19:02:30,823 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized with strategy mode | Context: strategy_type=AdaptiveStrategy
+2025-09-13 19:02:30,823 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized | Context: capacity=100 | max_size=1000 | min_size=5
+2025-09-13 19:02:30,828 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized with strategy mode | Context: strategy_type=AdaptiveStrategy
+2025-09-13 19:02:30,828 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized | Context: capacity=100 | max_size=1000 | min_size=5
+2025-09-13 19:02:34,748 - buffer_pool - INFO - _log_with_context:97 - Flushed 0 dirty pages
+2025-09-13 19:02:42,163 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized with strategy mode | Context: strategy_type=AdaptiveStrategy
+2025-09-13 19:02:42,163 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized | Context: capacity=100 | max_size=1000 | min_size=5
+2025-09-13 19:02:42,166 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized with strategy mode | Context: strategy_type=AdaptiveStrategy
+2025-09-13 19:02:42,166 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized | Context: capacity=100 | max_size=1000 | min_size=5
+2025-09-13 19:02:47,558 - buffer_pool - INFO - _log_with_context:97 - Flushed 0 dirty pages
+2025-09-13 19:03:16,064 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized with strategy mode | Context: strategy_type=AdaptiveStrategy
+2025-09-13 19:03:16,064 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized | Context: capacity=100 | max_size=1000 | min_size=5
+2025-09-13 19:03:16,067 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized with strategy mode | Context: strategy_type=AdaptiveStrategy
+2025-09-13 19:03:16,067 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized | Context: capacity=100 | max_size=1000 | min_size=5
+2025-09-13 19:03:31,034 - buffer_pool - INFO - _log_with_context:97 - Flushed 0 dirty pages
+2025-09-13 19:03:43,378 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized with strategy mode | Context: strategy_type=AdaptiveStrategy
+2025-09-13 19:03:43,378 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized | Context: capacity=100 | max_size=1000 | min_size=5
+2025-09-13 19:03:43,380 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized with strategy mode | Context: strategy_type=AdaptiveStrategy
+2025-09-13 19:03:43,380 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized | Context: capacity=100 | max_size=1000 | min_size=5
+2025-09-13 19:04:13,395 - buffer_pool - DEBUG - _log_with_context:97 - Strategy retrieved 0 dirty pages
+2025-09-13 19:04:43,404 - buffer_pool - DEBUG - _log_with_context:97 - Strategy retrieved 0 dirty pages
+2025-09-13 19:05:13,405 - buffer_pool - DEBUG - _log_with_context:97 - Strategy retrieved 0 dirty pages
+2025-09-13 19:05:43,407 - buffer_pool - DEBUG - _log_with_context:97 - Strategy retrieved 0 dirty pages
+2025-09-13 19:06:13,417 - buffer_pool - DEBUG - _log_with_context:97 - Strategy retrieved 0 dirty pages
+2025-09-13 19:06:43,431 - buffer_pool - DEBUG - _log_with_context:97 - Strategy retrieved 0 dirty pages
+2025-09-13 19:07:13,438 - buffer_pool - DEBUG - _log_with_context:97 - Strategy retrieved 0 dirty pages
+2025-09-13 19:07:43,442 - buffer_pool - DEBUG - _log_with_context:97 - Strategy retrieved 0 dirty pages
+2025-09-13 19:08:13,457 - buffer_pool - DEBUG - _log_with_context:97 - Strategy retrieved 0 dirty pages
+2025-09-13 19:08:43,459 - buffer_pool - DEBUG - _log_with_context:97 - Strategy retrieved 0 dirty pages
+2025-09-13 19:09:13,476 - buffer_pool - DEBUG - _log_with_context:97 - Strategy retrieved 0 dirty pages
+2025-09-13 19:09:43,493 - buffer_pool - DEBUG - _log_with_context:97 - Strategy retrieved 0 dirty pages
+2025-09-13 19:10:13,498 - buffer_pool - DEBUG - _log_with_context:97 - Strategy retrieved 0 dirty pages
+2025-09-13 19:10:43,506 - buffer_pool - DEBUG - _log_with_context:97 - Strategy retrieved 0 dirty pages
+2025-09-13 19:11:13,516 - buffer_pool - DEBUG - _log_with_context:97 - Strategy retrieved 0 dirty pages
+2025-09-13 19:11:43,528 - buffer_pool - DEBUG - _log_with_context:97 - Strategy retrieved 0 dirty pages
+2025-09-13 19:12:13,539 - buffer_pool - DEBUG - _log_with_context:97 - Strategy retrieved 0 dirty pages
+2025-09-13 19:12:43,550 - buffer_pool - DEBUG - _log_with_context:97 - Strategy retrieved 0 dirty pages
+2025-09-13 19:13:13,555 - buffer_pool - DEBUG - _log_with_context:97 - Strategy retrieved 0 dirty pages
+2025-09-13 19:13:43,566 - buffer_pool - DEBUG - _log_with_context:97 - Strategy retrieved 0 dirty pages
+2025-09-13 19:14:13,578 - buffer_pool - DEBUG - _log_with_context:97 - Strategy retrieved 0 dirty pages
+2025-09-13 19:14:43,582 - buffer_pool - DEBUG - _log_with_context:97 - Strategy retrieved 0 dirty pages
+2025-09-13 19:15:13,590 - buffer_pool - DEBUG - _log_with_context:97 - Strategy retrieved 0 dirty pages
+2025-09-13 19:15:31,235 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized with strategy mode | Context: strategy_type=AdaptiveStrategy
+2025-09-13 19:15:31,235 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized | Context: capacity=100 | max_size=1000 | min_size=5
+2025-09-13 19:15:31,238 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized with strategy mode | Context: strategy_type=AdaptiveStrategy
+2025-09-13 19:15:31,238 - buffer_pool - INFO - _log_with_context:97 - BufferPool initialized | Context: capacity=100 | max_size=1000 | min_size=5
+2025-09-13 19:16:01,243 - buffer_pool - DEBUG - _log_with_context:97 - Strategy retrieved 0 dirty pages
+2025-09-13 19:16:31,263 - buffer_pool - DEBUG - _log_with_context:97 - Strategy retrieved 0 dirty pages
+2025-09-13 19:17:01,269 - buffer_pool - DEBUG - _log_with_context:97 - Strategy retrieved 0 dirty pages
+2025-09-13 19:17:31,272 - buffer_pool - DEBUG - _log_with_context:97 - Strategy retrieved 0 dirty pages
+2025-09-13 19:18:01,285 - buffer_pool - DEBUG - _log_with_context:97 - Strategy retrieved 0 dirty pages

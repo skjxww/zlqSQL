@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
+from datetime import time
 from typing import List, Any, Dict, Optional, Iterator, Tuple
-from sql_compiler.parser.ast_nodes import Expression
+from sql_compiler.parser.ast_nodes import *
 
 
 class Operator(ABC):
@@ -1442,3 +1443,201 @@ class SortOp(Operator):
         sorted_results = sorted(child_results, key=sort_key)
         for row in sorted_results:
             yield row
+
+
+
+class TransactionOp(Operator):
+    """事务操作基类"""
+
+    def __init__(self):
+        super().__init__([])  # 事务操作通常没有子节点
+        self.execution_time: Optional[float] = None
+
+
+class BeginTransactionOp(TransactionOp):
+    """BEGIN TRANSACTION 操作符"""
+
+    def __init__(self, isolation_level: Optional[IsolationLevel] = None,
+                 transaction_mode: Optional[TransactionMode] = None):
+        super().__init__()
+        self.isolation_level = isolation_level
+        self.transaction_mode = transaction_mode
+
+    def to_dict(self) -> dict:
+        return {
+            "type": "BeginTransactionOp",
+            "isolation_level": self.isolation_level.value if self.isolation_level else None,
+            "transaction_mode": self.transaction_mode.value if self.transaction_mode else None
+        }
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        """执行开始事务操作"""
+        start_time = time.time()
+
+        try:
+            yield {
+                "operation": "begin_transaction",
+                "isolation_level": self.isolation_level.value if self.isolation_level else "READ_COMMITTED",
+                "transaction_mode": self.transaction_mode.value if self.transaction_mode else "READ_WRITE",
+                "status": "ready_for_execution",
+                "message": "事务开始操作已准备就绪，等待执行引擎调用存储层接口"
+            }
+
+        finally:
+            self.execution_time = time.time() - start_time
+
+
+class CommitTransactionOp(TransactionOp):
+    """COMMIT TRANSACTION 操作符"""
+
+    def __init__(self, work: bool = False):
+        super().__init__()
+        self.work = work
+
+    def to_dict(self) -> dict:
+        return {
+            "type": "CommitTransactionOp",
+            "work": self.work
+        }
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        """执行提交事务操作"""
+        start_time = time.time()
+
+        try:
+            yield {
+                "operation": "commit_transaction",
+                "work": self.work,
+                "status": "ready_for_execution",
+                "message": "事务提交操作已准备就绪，等待执行引擎调用存储层接口"
+            }
+
+        finally:
+            self.execution_time = time.time() - start_time
+
+
+class RollbackTransactionOp(TransactionOp):
+    """ROLLBACK TRANSACTION 操作符"""
+
+    def __init__(self, work: bool = False, to_savepoint: Optional[str] = None):
+        super().__init__()
+        self.work = work
+        self.to_savepoint = to_savepoint
+
+    def to_dict(self) -> dict:
+        return {
+            "type": "RollbackTransactionOp",
+            "work": self.work,
+            "to_savepoint": self.to_savepoint
+        }
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        """执行回滚事务操作"""
+        start_time = time.time()
+
+        try:
+            yield {
+                "operation": "rollback_transaction",
+                "work": self.work,
+                "to_savepoint": self.to_savepoint,
+                "status": "ready_for_execution",
+                "message": "事务回滚操作已准备就绪，等待执行引擎调用存储层接口"
+            }
+
+        finally:
+            self.execution_time = time.time() - start_time
+
+
+class SavepointOp(TransactionOp):
+    """SAVEPOINT 操作符"""
+
+    def __init__(self, savepoint_name: str):
+        super().__init__()
+        self.savepoint_name = savepoint_name
+
+    def to_dict(self) -> dict:
+        return {
+            "type": "SavepointOp",
+            "savepoint_name": self.savepoint_name
+        }
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        """执行保存点操作"""
+        start_time = time.time()
+
+        try:
+            yield {
+                "operation": "create_savepoint",
+                "savepoint_name": self.savepoint_name,
+                "status": "ready_for_execution",
+                "message": f"保存点 {self.savepoint_name} 创建操作已准备就绪"
+            }
+
+        finally:
+            self.execution_time = time.time() - start_time
+
+
+class ReleaseSavepointOp(TransactionOp):
+    """RELEASE SAVEPOINT 操作符"""
+
+    def __init__(self, savepoint_name: str):
+        super().__init__()
+        self.savepoint_name = savepoint_name
+
+    def to_dict(self) -> dict:
+        return {
+            "type": "ReleaseSavepointOp",
+            "savepoint_name": self.savepoint_name
+        }
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        """执行释放保存点操作"""
+        start_time = time.time()
+
+        try:
+            yield {
+                "operation": "release_savepoint",
+                "savepoint_name": self.savepoint_name,
+                "status": "ready_for_execution",
+                "message": f"保存点 {self.savepoint_name} 释放操作已准备就绪"
+            }
+
+        finally:
+            self.execution_time = time.time() - start_time
+
+
+class TransactionAwareOp(Operator):
+    """支持事务的操作符基类"""
+
+    def __init__(self, children: List[Operator]):
+        super().__init__(children)
+        self.transaction_id: Optional[str] = None
+        self.requires_transaction: bool = True  # 是否需要在事务中执行
+
+    def set_transaction_context(self, transaction_id: Optional[str]):
+        """设置事务上下文"""
+        self.transaction_id = transaction_id
+        # 递归设置子操作符的事务上下文
+        for child in self.children:
+            if isinstance(child, TransactionAwareOp):
+                child.set_transaction_context(transaction_id)
+
+
+class SeqScanOp(TransactionAwareOp):
+    """顺序扫描操作符 - 支持事务"""
+
+    def __init__(self, table_name: str):
+        super().__init__([])
+        self.table_name = table_name
+        self.requires_transaction = False  # 读操作可以在事务外执行
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        """执行顺序扫描"""
+        # 传递事务ID给存储层
+        yield {
+            "operation": "seq_scan",
+            "table": self.table_name,
+            "transaction_id": self.transaction_id,
+            "status": "ready_for_execution",
+            "message": f"顺序扫描表 {self.table_name}，事务ID: {self.transaction_id or 'None'}"
+        }

@@ -53,7 +53,19 @@ class SyntaxAnalyzer:
         """解析语句"""
         current_token = self._current_token()
 
-        if self._match(TokenType.CREATE):
+        if self._match(TokenType.BEGIN):
+            return self._parse_begin_transaction()
+        elif self._match(TokenType.START):
+            return self._parse_start_transaction()
+        elif self._match(TokenType.COMMIT):
+            return self._parse_commit()
+        elif self._match(TokenType.ROLLBACK):
+            return self._parse_rollback()
+        elif self._match(TokenType.SAVEPOINT):
+            return self._parse_savepoint()
+        elif self._match(TokenType.RELEASE):
+            return self._parse_release_savepoint()
+        elif self._match(TokenType.CREATE):
             if self._check(TokenType.INDEX):
                 return self._parse_create_index()
             elif self._check(TokenType.TABLE):
@@ -76,6 +88,149 @@ class SyntaxAnalyzer:
             raise SyntaxErr(f"无效的语句开头: '{current_token.lexeme}'",
                             current_token.line, current_token.column,
                             "CREATE, INSERT, SELECT, UPDATE, DELETE")
+
+    def _parse_begin_transaction(self) -> BeginTransactionStmt:
+        """
+        解析 BEGIN TRANSACTION 语句
+        BEGIN [TRANSACTION] [ISOLATION LEVEL level] [READ WRITE | READ ONLY]
+        """
+        # 可选的 TRANSACTION 关键字
+        self._match(TokenType.TRANSACTION)
+
+        isolation_level = None
+        transaction_mode = None
+
+        # 解析 ISOLATION LEVEL
+        if self._match(TokenType.ISOLATION):
+            self._expect(TokenType.LEVEL)
+            isolation_level = self._parse_isolation_level()
+
+        # 解析事务模式
+        if self._match(TokenType.READ):
+            if self._match(TokenType.WRITE):
+                transaction_mode = TransactionMode.READ_WRITE
+            elif self._match(TokenType.ONLY):
+                transaction_mode = TransactionMode.READ_ONLY
+            else:
+                raise SyntaxError("期望 WRITE 或 ONLY")
+
+        self._expect_semicolon()
+
+        return BeginTransactionStmt(
+            isolation_level=isolation_level,
+            transaction_mode=transaction_mode
+        )
+
+    def _parse_start_transaction(self) -> BeginTransactionStmt:
+        """
+        解析 START TRANSACTION 语句
+        START TRANSACTION [ISOLATION LEVEL level] [READ WRITE | READ ONLY]
+        """
+        self._expect(TokenType.TRANSACTION)
+
+        isolation_level = None
+        transaction_mode = None
+
+        # 解析选项（与BEGIN相同）
+        if self._match(TokenType.ISOLATION):
+            self._expect(TokenType.LEVEL)
+            isolation_level = self._parse_isolation_level()
+
+        if self._match(TokenType.READ):
+            if self._match(TokenType.WRITE):
+                transaction_mode = TransactionMode.READ_WRITE
+            elif self._match(TokenType.ONLY):
+                transaction_mode = TransactionMode.READ_ONLY
+            else:
+                raise SyntaxError("期望 WRITE 或 ONLY")
+
+        self._expect_semicolon()
+
+        return BeginTransactionStmt(
+            isolation_level=isolation_level,
+            transaction_mode=transaction_mode
+        )
+
+    def _parse_isolation_level(self) -> IsolationLevel:
+        """解析隔离级别"""
+        if self._match(TokenType.READ):
+            if self._match(TokenType.UNCOMMITTED):
+                return IsolationLevel.READ_UNCOMMITTED
+            elif self._match(TokenType.COMMITTED):
+                return IsolationLevel.READ_COMMITTED
+            else:
+                raise SyntaxError("期望 UNCOMMITTED 或 COMMITTED")
+        elif self._match(TokenType.REPEATABLE):
+            self._expect(TokenType.READ)
+            return IsolationLevel.REPEATABLE_READ
+        elif self._match(TokenType.SERIALIZABLE):
+            return IsolationLevel.SERIALIZABLE
+        else:
+            raise SyntaxError("无效的隔离级别")
+
+    def _parse_commit(self) -> CommitStmt:
+        """
+        解析 COMMIT 语句
+        COMMIT [WORK]
+        """
+        work = self._match(TokenType.WORK)
+        self._expect_semicolon()
+
+        return CommitStmt(work=work)
+
+    def _parse_rollback(self) -> RollbackStmt:
+        """
+        解析 ROLLBACK 语句
+        ROLLBACK [WORK] [TO [SAVEPOINT] savepoint_name]
+        """
+        work = self._match(TokenType.WORK)
+        to_savepoint = None
+
+        if self._match(TokenType.TO):
+            # 可选的 SAVEPOINT 关键字
+            self._match(TokenType.SAVEPOINT)
+
+            if not self._check(TokenType.IDENTIFIER):
+                raise SyntaxError("期望保存点名称")
+
+            to_savepoint = self._advance().lexeme
+
+        self._expect_semicolon()
+
+        return RollbackStmt(work=work, to_savepoint=to_savepoint)
+
+    def _parse_savepoint(self) -> SavepointStmt:
+        """
+        解析 SAVEPOINT 语句
+        SAVEPOINT savepoint_name
+        """
+        if not self._check(TokenType.IDENTIFIER):
+            raise SyntaxError("期望保存点名称")
+
+        savepoint_name = self._advance().lexeme
+        self._expect_semicolon()
+
+        return SavepointStmt(savepoint_name=savepoint_name)
+
+    def _parse_release_savepoint(self) -> ReleaseSavepointStmt:
+        """
+        解析 RELEASE SAVEPOINT 语句
+        RELEASE SAVEPOINT savepoint_name
+        """
+        self._expect(TokenType.SAVEPOINT)
+
+        if not self._check(TokenType.IDENTIFIER):
+            raise SyntaxError("期望保存点名称")
+
+        savepoint_name = self._advance().lexeme
+        self._expect_semicolon()
+
+        return ReleaseSavepointStmt(savepoint_name=savepoint_name)
+
+    def _expect_semicolon(self):
+        """期望分号（可选）"""
+        self._match(TokenType.SEMICOLON)
+
 
     def _parse_create_index(self) -> CreateIndexStmt:
         """解析CREATE INDEX语句"""

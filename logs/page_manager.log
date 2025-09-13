@@ -31,3 +31,75 @@
 2025-09-11 15:26:14,293 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=0
 2025-09-11 15:27:34,264 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
 2025-09-11 15:27:34,264 - page_manager - INFO - _log_with_context:97 - PageManager cleanup completed
+2025-09-13 18:45:13,456 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-13 18:45:13,457 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=1 | allocated_count=0 | free_count=0
+2025-09-13 18:45:13,457 - page_manager - INFO - _log_with_context:97 - No tablespace manager, using default file mode
+2025-09-13 18:45:13,457 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=0 | tablespace_support=False
+2025-09-13 18:45:13,462 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-13 18:45:13,462 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=1 | allocated_count=0 | free_count=0
+2025-09-13 18:45:13,463 - page_manager - INFO - _log_with_context:97 - Created tablespace file | Context: tablespace=default | file_path=data\default_tablespace.db
+2025-09-13 18:45:13,463 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=0 | tablespace_support=True
+2025-09-13 18:52:52,640 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-13 18:52:52,640 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=1 | allocated_count=0 | free_count=0
+2025-09-13 18:52:52,641 - page_manager - INFO - _log_with_context:97 - No tablespace manager, using default file mode
+2025-09-13 18:52:52,641 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=0 | tablespace_support=False
+2025-09-13 18:52:52,644 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-13 18:52:52,644 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=1 | allocated_count=0 | free_count=0
+2025-09-13 18:52:52,644 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=default | file_path=data\default_tablespace.db
+2025-09-13 18:52:52,645 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=0 | tablespace_support=True
+2025-09-13 18:54:42,099 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-13 18:54:42,102 - page_manager - INFO - _log_with_context:97 - PageManager cleanup completed
+2025-09-13 18:58:45,975 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-13 18:58:45,976 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=1 | allocated_count=0 | free_count=0
+2025-09-13 18:58:45,976 - page_manager - INFO - _log_with_context:97 - No tablespace manager, using default file mode
+2025-09-13 18:58:45,976 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=0 | tablespace_support=False
+2025-09-13 18:58:45,979 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-13 18:58:45,979 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=1 | allocated_count=0 | free_count=0
+2025-09-13 18:58:45,980 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=default | file_path=data\default_tablespace.db
+2025-09-13 18:58:45,980 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=0 | tablespace_support=True
+2025-09-13 19:02:30,822 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-13 19:02:30,823 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=1 | allocated_count=0 | free_count=0
+2025-09-13 19:02:30,823 - page_manager - INFO - _log_with_context:97 - No tablespace manager, using default file mode
+2025-09-13 19:02:30,823 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=0 | tablespace_support=False
+2025-09-13 19:02:30,826 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-13 19:02:30,827 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=1 | allocated_count=0 | free_count=0
+2025-09-13 19:02:30,827 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=default | file_path=data\default_tablespace.db
+2025-09-13 19:02:30,827 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=0 | tablespace_support=True
+2025-09-13 19:02:34,751 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-13 19:02:34,751 - page_manager - INFO - _log_with_context:97 - PageManager cleanup completed
+2025-09-13 19:02:42,161 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-13 19:02:42,161 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=1 | allocated_count=0 | free_count=0
+2025-09-13 19:02:42,162 - page_manager - INFO - _log_with_context:97 - No tablespace manager, using default file mode
+2025-09-13 19:02:42,162 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=0 | tablespace_support=False
+2025-09-13 19:02:42,165 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-13 19:02:42,166 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=1 | allocated_count=0 | free_count=0
+2025-09-13 19:02:42,166 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=default | file_path=data\default_tablespace.db
+2025-09-13 19:02:42,166 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=0 | tablespace_support=True
+2025-09-13 19:02:47,559 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-13 19:02:47,559 - page_manager - INFO - _log_with_context:97 - PageManager cleanup completed
+2025-09-13 19:03:16,062 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-13 19:03:16,063 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=1 | allocated_count=0 | free_count=0
+2025-09-13 19:03:16,063 - page_manager - INFO - _log_with_context:97 - No tablespace manager, using default file mode
+2025-09-13 19:03:16,063 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=0 | tablespace_support=False
+2025-09-13 19:03:16,066 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-13 19:03:16,067 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=1 | allocated_count=0 | free_count=0
+2025-09-13 19:03:16,067 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=default | file_path=data\default_tablespace.db
+2025-09-13 19:03:16,067 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=0 | tablespace_support=True
+2025-09-13 19:03:31,036 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-13 19:03:31,037 - page_manager - INFO - _log_with_context:97 - PageManager cleanup completed
+2025-09-13 19:03:43,377 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-13 19:03:43,377 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=1 | allocated_count=0 | free_count=0
+2025-09-13 19:03:43,377 - page_manager - INFO - _log_with_context:97 - No tablespace manager, using default file mode
+2025-09-13 19:03:43,378 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=0 | tablespace_support=False
+2025-09-13 19:03:43,380 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-13 19:03:43,380 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=1 | allocated_count=0 | free_count=0
+2025-09-13 19:03:43,380 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=default | file_path=data\default_tablespace.db
+2025-09-13 19:03:43,380 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=0 | tablespace_support=True
+2025-09-13 19:15:31,232 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-13 19:15:31,233 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=1 | allocated_count=0 | free_count=0
+2025-09-13 19:15:31,233 - page_manager - INFO - _log_with_context:97 - No tablespace manager, using default file mode
+2025-09-13 19:15:31,233 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=0 | tablespace_support=False
+2025-09-13 19:15:31,237 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-13 19:15:31,237 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=1 | allocated_count=0 | free_count=0
+2025-09-13 19:15:31,238 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=default | file_path=data\default_tablespace.db
+2025-09-13 19:15:31,238 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=0 | tablespace_support=True

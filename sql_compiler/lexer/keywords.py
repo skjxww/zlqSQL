@@ -59,6 +59,25 @@ KEYWORDS = {
     'DROP': TokenType.DROP,
     'SHOW': TokenType.SHOW,
     'INDEXES': TokenType.INDEXES,
+
+    # 事务相关新关键字
+    'BEGIN': TokenType.BEGIN,
+    'COMMIT': TokenType.COMMIT,
+    'ROLLBACK': TokenType.ROLLBACK,
+    'START': TokenType.START,
+    'TRANSACTION': TokenType.TRANSACTION,
+    'SAVEPOINT': TokenType.SAVEPOINT,
+    'RELEASE': TokenType.RELEASE,
+    'WORK': TokenType.WORK,
+    'READ': TokenType.READ,
+    'WRITE': TokenType.WRITE,
+    'ONLY': TokenType.ONLY,
+    'ISOLATION': TokenType.ISOLATION,
+    'LEVEL': TokenType.LEVEL,
+    'UNCOMMITTED': TokenType.UNCOMMITTED,
+    'COMMITTED': TokenType.COMMITTED,
+    'REPEATABLE': TokenType.REPEATABLE,
+    'SERIALIZABLE': TokenType.SERIALIZABLE,
 }
 
 # 符号映射表 - 更新
