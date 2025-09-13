@@ -173,7 +173,7 @@ class PlanGenerator:
             raise ValueError(f"表不存在: {stmt.table_name}")
 
         # 创建插入操作符
-        insert_op = InsertOp(stmt.table_name, stmt.values)
+        insert_op = InsertOp(stmt.table_name,stmt.columns, stmt.values)
 
         # 设置事务上下文（如果语句包含事务信息）
         if hasattr(stmt, 'transaction_id'):
@@ -450,20 +450,20 @@ class PlanGenerator:
 
     def _generate_update_plan(self, stmt: UpdateStmt) -> UpdateOp:
         """生成更新计划 - 支持事务"""
-        if not self.silent_mode:
-            print(f"   🔄 生成UPDATE计划: {stmt.table_name}")
-            if hasattr(stmt, 'transaction_id') and stmt.transaction_id:
-                print(f"     事务ID: {stmt.transaction_id}")
 
-        # 验证表是否存在
-        if not self.catalog_manager.table_exists(stmt.table_name):
-            raise ValueError(f"表不存在: {stmt.table_name}")
+        # 先扫描表
+        scan_plan = SeqScanOp(stmt.table_name)
 
+        # 如果有WHERE条件，添加过滤
+        if stmt.where_clause:
+            scan_plan = FilterOp(stmt.where_clause, [scan_plan])
+
+        scan_plan = SeqScanOp(stmt.table_name)
         # 创建更新操作符
         update_op = UpdateOp(
             stmt.table_name,
-            stmt.set_clauses,
-            stmt.where_condition
+            stmt.assignments,
+            [scan_plan]
         )
 
         # 设置事务上下文
@@ -474,17 +474,15 @@ class PlanGenerator:
 
     def _generate_delete_plan(self, stmt: DeleteStmt) -> DeleteOp:
         """生成删除计划 - 支持事务"""
-        if not self.silent_mode:
-            print(f"   ❌ 生成DELETE计划: {stmt.table_name}")
-            if hasattr(stmt, 'transaction_id') and stmt.transaction_id:
-                print(f"     事务ID: {stmt.transaction_id}")
+        # 先扫描表
+        scan_plan = SeqScanOp(stmt.table_name)
 
-        # 验证表是否存在
-        if not self.catalog_manager.table_exists(stmt.table_name):
-            raise ValueError(f"表不存在: {stmt.table_name}")
+        # 如果有WHERE条件，添加过滤
+        if stmt.where_clause:
+            scan_plan = FilterOp(stmt.where_clause, [scan_plan])
 
         # 创建删除操作符
-        delete_op = DeleteOp(stmt.table_name, stmt.where_condition)
+        delete_op = DeleteOp(stmt.table_name, [scan_plan])
 
         # 设置事务上下文
         if hasattr(stmt, 'transaction_id'):

@@ -265,14 +265,34 @@ class IdentifierExpr(Expression):
 class LiteralExpr(Expression):
     """字面量表达式"""
 
-    def __init__(self, value: Any):
+    def __init__(self, value: Any, data_type: Optional[str] = None):
         self.value = value
+        self.data_type = data_type or self._infer_type(value)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
             "type": "LiteralExpr",
-            "value": self.value
+            "value": self.value,
+            "data_type": self.data_type
         }
+
+    def _infer_type(self, value: Any) -> str:
+        """推断数据类型"""
+        if isinstance(value, int):
+            return "INT"
+        elif isinstance(value, float):
+            return "FLOAT"
+        elif isinstance(value, str):
+            return "STRING"
+        elif isinstance(value, bool):
+            return "BOOLEAN"
+        else:
+            return "UNKNOWN"
+
+    def __str__(self) -> str:
+        if isinstance(self.value, str):
+            return f"'{self.value}'"
+        return str(self.value)
 
 
 class FunctionExpr(Expression):
