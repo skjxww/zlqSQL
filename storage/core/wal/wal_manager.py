@@ -454,3 +454,4 @@ class WALManager:
     def __exit__(self, exc_type, exc_val, exc_tb):
         """上下文管理器退出"""
         self.shutdown()
+
