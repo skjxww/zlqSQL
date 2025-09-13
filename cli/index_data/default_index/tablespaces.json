@@ -1,0 +1,11 @@
+{
+  "default": {
+    "name": "default",
+    "file_path": "index_data/default_index\\default_tablespace.db",
+    "size_mb": 100,
+    "used_mb": 0,
+    "created_time": 1757762289.3548443,
+    "is_default": true,
+    "status": "active"
+  }
+}

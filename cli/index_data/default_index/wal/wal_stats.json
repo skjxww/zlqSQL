@@ -1,0 +1,43 @@
+{
+  "timestamp": 1757763076.508234,
+  "uptime": 75.5327513217926,
+  "metrics": {
+    "total_writes": 3,
+    "total_bytes_written": 0,
+    "average_write_latency": 0.0,
+    "max_write_latency": 0.0,
+    "total_syncs": 0,
+    "average_sync_latency": 0.0,
+    "checkpoint_count": 0,
+    "average_checkpoint_duration": 0.0,
+    "recovery_count": 1,
+    "recovery_duration_ms": 3.1173229217529297,
+    "pages_recovered": 1,
+    "transactions_rolled_back": 0,
+    "current_file_count": 0,
+    "total_file_size_mb": 0.0,
+    "file_rotation_count": 0,
+    "write_errors": 0,
+    "sync_errors": 0,
+    "corruption_detected": 0,
+    "writes_per_second": 489.8934008175978,
+    "mb_per_second": 0.0
+  },
+  "health": {
+    "status": "healthy",
+    "issues": [],
+    "uptime_seconds": 75.5327513217926,
+    "last_checkpoint_ago": 75.5327513217926,
+    "metrics_summary": {
+      "total_writes": 3,
+      "total_mb_written": 0.0,
+      "average_write_latency_ms": 0.0,
+      "max_write_latency_ms": 0.0,
+      "writes_per_second": 489.89,
+      "mb_per_second": 0.0,
+      "checkpoint_count": 0,
+      "error_count": 0,
+      "corruption_count": 0
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "next_page_id": 2,
+  "free_pages": [],
+  "allocated_pages": [
+    1
+  ],
+  "page_usage": {
+    "1": {
+      "allocated_time": 1757682009.6166754,
+      "access_count": 1,
+      "last_access": 1757682010.597776,
+      "tablespace": "default"
+    }
+  },
+  "page_tablespaces": {
+    "1": "default"
+  },
+  "last_modification": 1757682010.6018293,
+  "version": "1.0",
+  "total_allocated": 1,
+  "total_free": 0
+}
