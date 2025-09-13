@@ -16,6 +16,7 @@ from ..utils.exceptions import (
     handle_storage_exceptions
 )
 from ..utils.logger import get_logger, PerformanceTimer, performance_monitor
+from .transaction_manager import TransactionManager, IsolationLevel, TransactionException
 
 
 class StorageManager:
@@ -92,6 +93,13 @@ class StorageManager:
             self._flush_timer = None
             if auto_flush_interval > 0:
                 self._start_auto_flush()
+
+            # 事务管理器（在WAL之后初始化）
+            self.transaction_manager = TransactionManager(self, wal_enabled=enable_wal)
+            self.logger.info("Transaction support enabled")
+
+            # 当前默认事务（用于非事务操作的兼容性）
+            self._default_txn_id = None
 
             # WAL集成（在所有其他组件初始化之后）
             self.wal_enabled = enable_wal
@@ -604,6 +612,11 @@ class StorageManager:
 
         self.logger.info("Starting StorageManager shutdown")
 
+        # 回滚所有活跃事务
+        if hasattr(self, 'transaction_manager'):
+            self.logger.info("Aborting all active transactions...")
+            self.transaction_manager.abort_all_transactions()
+
         # 关闭WAL
         if self.wal_enabled and self.wal_manager:
             self.wal_manager.shutdown()
@@ -753,6 +766,161 @@ class StorageManager:
                 page2 = storage.allocate_page()  # 自动使用区分配
         """
         return TableContext(self, table_name)
+
+    def begin_transaction(self, isolation_level: str = "READ_COMMITTED") -> int:
+        """
+        开始一个新事务
+
+        Args:
+            isolation_level: 隔离级别 ("READ_UNCOMMITTED", "READ_COMMITTED",
+                           "REPEATABLE_READ", "SERIALIZABLE")
+
+        Returns:
+            int: 事务ID
+        """
+        # 转换隔离级别字符串到枚举
+        level_map = {
+            "READ_UNCOMMITTED": IsolationLevel.READ_UNCOMMITTED,
+            "READ_COMMITTED": IsolationLevel.READ_COMMITTED,
+            "REPEATABLE_READ": IsolationLevel.REPEATABLE_READ,
+            "SERIALIZABLE": IsolationLevel.SERIALIZABLE
+        }
+        isolation = level_map.get(isolation_level.upper(), IsolationLevel.READ_COMMITTED)
+
+        txn_id = self.transaction_manager.begin_transaction(isolation)
+        self.logger.info(f"Started transaction {txn_id} with isolation {isolation_level}")
+        return txn_id
+
+    def commit_transaction(self, txn_id: int):
+        """
+        提交事务
+
+        Args:
+            txn_id: 事务ID
+        """
+        self.transaction_manager.commit(txn_id)
+        self.logger.info(f"Committed transaction {txn_id}")
+
+    def rollback_transaction(self, txn_id: int):
+        """
+        回滚事务
+
+        Args:
+            txn_id: 事务ID
+        """
+        self.transaction_manager.rollback(txn_id)
+        self.logger.info(f"Rolled back transaction {txn_id}")
+
+    def read_page_transactional(self, page_id: int, txn_id: int = None) -> bytes:
+        """
+        事务性读取页
+
+        Args:
+            page_id: 页号
+            txn_id: 事务ID（可选）
+
+        Returns:
+            bytes: 页数据
+        """
+        if txn_id is None:
+            # 非事务读取，使用原有逻辑
+            return self.read_page(page_id)
+
+        # 暂时跳过锁机制
+        # self.transaction_manager.prepare_read(txn_id, page_id)
+
+        # 记录读操作
+        txn = self.transaction_manager.get_transaction(txn_id)
+        if txn:
+            txn.add_read_record(page_id)
+
+        # 检查是否有事务可见的版本
+        visible_data = self.transaction_manager.get_visible_data(txn_id, page_id)
+        if visible_data is not None:
+            self.logger.debug(f"Transaction {txn_id} reading versioned data for page {page_id}")
+            return visible_data
+
+        # 读取物理存储的版本
+        return self.read_page(page_id)
+
+    def write_page_transactional(self, page_id: int, data: bytes, txn_id: int = None):
+        """
+        事务性写入页
+
+        Args:
+            page_id: 页号
+            data: 页数据
+            txn_id: 事务ID（可选）
+        """
+        if txn_id is None:
+            # 非事务写入，使用原有逻辑
+            self.write_page(page_id, data)
+            return
+
+        # 暂时跳过锁机制，直接记录修改
+        # self.transaction_manager.prepare_write(txn_id, page_id)
+
+        # 获取事务对象，手动记录修改
+        txn = self.transaction_manager.get_transaction(txn_id)
+        if txn:
+            # 如果是第一次修改这个页，保存原始数据
+            if page_id not in txn.modified_pages:
+                original_data = self.read_page(page_id)
+                txn.add_undo_record(page_id, original_data)
+
+        # 执行写入
+        self.write_page(page_id, data)
+
+        # 记录redo信息
+        self.transaction_manager.record_write(txn_id, page_id, data)
+
+        self.logger.debug(f"Transaction {txn_id} wrote page {page_id}")
+
+    def allocate_page_transactional(self, tablespace_name: str = None,
+                                    table_name: str = None, txn_id: int = None) -> int:
+        """
+        事务性分配页
+
+        Args:
+            tablespace_name: 表空间名称
+            table_name: 表名
+            txn_id: 事务ID
+
+        Returns:
+            int: 新分配的页号
+        """
+        page_id = self.allocate_page(tablespace_name, table_name)
+
+        if txn_id is not None:
+            # 记录到事务的修改集合
+            txn = self.transaction_manager.get_transaction(txn_id)
+            if txn:
+                txn.modified_pages.add(page_id)
+
+        return page_id
+
+    def get_active_transactions(self) -> List[int]:
+        """获取所有活跃事务ID列表"""
+        return self.transaction_manager.get_active_transactions()
+
+    def get_transaction_info(self, txn_id: int = None) -> dict:
+        """
+        获取事务信息
+
+        Args:
+            txn_id: 事务ID，如果为None则返回所有事务统计
+
+        Returns:
+            dict: 事务信息
+        """
+        if txn_id is not None:
+            txn = self.transaction_manager.get_transaction(txn_id)
+            if txn:
+                return txn.to_dict()
+            else:
+                return {"error": f"Transaction {txn_id} not found"}
+        else:
+            return self.transaction_manager.get_statistics()
 
 
 class TableContext:

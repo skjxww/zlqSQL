@@ -241,3 +241,7 @@ class ExceptionReporter:
             logger.error(ExceptionReporter.format_exception(exception))
         else:
             print(f"ERROR: {exception}")
+
+class TransactionException(StorageException):
+    """事务相关异常"""
+    pass
