@@ -13,6 +13,7 @@ import os
 from ..utils.exceptions import StorageException, TransactionException
 from ..utils.logger import get_logger
 from ..utils.constants import PAGE_SIZE
+from ..core.lock_manager import LockType
 
 
 class TransactionState(enum.Enum):
@@ -104,10 +105,6 @@ class TransactionManager:
         self.next_txn_id = 1
         self.txn_counter_lock = threading.Lock()
 
-        # 全局锁表（简单的页级锁）
-        self.lock_table: Dict[int, Dict[str, Set[int]]] = defaultdict(lambda: {'S': set(), 'X': set()})
-        self.lock_table_lock = threading.Lock()
-
         # 事务历史（用于恢复和审计）
         self.txn_history: List[Dict] = []
         self.history_file = os.path.join(
@@ -168,9 +165,11 @@ class TransactionManager:
         if not txn or txn.state != TransactionState.ACTIVE:
             raise TransactionException(f"Transaction {txn_id} is not active")
 
-        # 获取写锁（简化版：不等待，直接失败）
-        if not self._acquire_lock(txn_id, page_id, 'X'):
-            raise TransactionException(f"Failed to acquire write lock on page {page_id}")
+        # 替换为：
+        if self.storage_manager.lock_manager:
+            from storage.core.lock_manager import LockType
+            if not self.storage_manager.lock_manager.acquire_lock(txn_id, page_id, LockType.EXCLUSIVE):
+                raise TransactionException(f"Failed to acquire write lock on page {page_id}")
 
         # 如果是第一次修改这个页，保存原始数据
         if page_id not in txn.modified_pages:
@@ -182,7 +181,8 @@ class TransactionManager:
                 self.logger.debug(f"Transaction {txn_id} saved undo record for page {page_id}")
             except Exception as e:
                 # 释放锁
-                self._release_lock(txn_id, page_id)
+                if self.storage_manager.lock_manager:
+                    self.storage_manager.lock_manager.release_transaction_locks(txn_id)
                 raise TransactionException(f"Failed to prepare write: {e}")
 
         return True
@@ -231,8 +231,10 @@ class TransactionManager:
             pass
         else:
             # 其他级别：需要读锁
-            if not self._acquire_lock(txn_id, page_id, 'S'):
-                raise TransactionException(f"Failed to acquire read lock on page {page_id}")
+            if self.storage_manager.lock_manager:
+                from storage.core.lock_manager import LockType
+                if not self.storage_manager.lock_manager.acquire_lock(txn_id, page_id, LockType.SHARED):
+                    raise TransactionException(f"Failed to acquire read lock on page {page_id}")
 
         txn.add_read_record(page_id)
         return True
@@ -269,7 +271,6 @@ class TransactionManager:
 
     def commit(self, txn_id: int):
         """提交事务"""
-        print(f"DEBUG: Starting commit for transaction {txn_id}")
 
         txn = self.get_transaction(txn_id)
         if not txn:
@@ -279,38 +280,29 @@ class TransactionManager:
             raise TransactionException(f"Transaction {txn_id} is not active")
 
         try:
-            print(f"DEBUG: Setting transaction {txn_id} to PREPARING")
             txn.state = TransactionState.PREPARING
-
-            print(f"DEBUG: Flushing modified pages: {txn.modified_pages}")
             # 将所有修改刷到磁盘
             for page_id in txn.modified_pages:
                 self.storage_manager.flush_page(page_id)
 
-            print(f"DEBUG: All pages flushed")
-
-            print(f"DEBUG: Marking transaction as COMMITTED")
             # 标记为已提交
             txn.state = TransactionState.COMMITTED
             txn.end_time = time.time()
 
-            # 暂时跳过锁释放，因为我们没有实际使用锁
-            # print(f"DEBUG: Releasing locks")
-            # self._release_all_locks(txn_id)
+            # 提交成功后释放锁（新增）
+            if hasattr(self.storage_manager, 'lock_manager') and self.storage_manager.lock_manager:
+                self.storage_manager.lock_manager.release_transaction_locks(txn_id)
+                self.logger.debug(f"Released all locks for committed transaction {txn_id}")
 
-            print(f"DEBUG: Adding to history")
             # 记录到历史
             self._add_to_history(txn)
 
-            print(f"DEBUG: Removing from active transactions")
             # 从活跃事务中移除
             del self.transactions[txn_id]
 
             self.logger.info(f"Transaction {txn_id} committed successfully")
-            print(f"DEBUG: Commit completed for transaction {txn_id}")
 
         except Exception as e:
-            print(f"DEBUG: Commit failed with error: {e}")
             import traceback
             traceback.print_exc()
             # 提交失败，执行回滚
@@ -355,7 +347,7 @@ class TransactionManager:
                         if t_id != txn_id
                     ]
 
-            # 改为：
+            # WAL处理
             if self.wal_enabled and hasattr(self.storage_manager, 'wal_manager'):
                 try:
                     if hasattr(txn, 'wal_txn_id') and txn.wal_txn_id is not None:
@@ -364,8 +356,11 @@ class TransactionManager:
                 except Exception as e:
                     self.logger.warning(f"WAL abort failed: {e}, continuing anyway")
 
-            # 释放所有锁
-            self._release_all_locks(txn_id)
+            # 释放所有锁 - 使用新的锁管理器
+            if hasattr(self.storage_manager, 'lock_manager') and self.storage_manager.lock_manager:
+                self.storage_manager.lock_manager.release_transaction_locks(txn_id)
+                self.logger.debug(f"Released all locks for rolled back transaction {txn_id}")
+
 
             # 记录到历史
             txn.end_time = time.time()
@@ -379,68 +374,6 @@ class TransactionManager:
         except Exception as e:
             self.logger.error(f"Error during rollback of transaction {txn_id}: {e}")
             raise TransactionException(f"Rollback failed: {e}")
-
-    def _acquire_lock(self, txn_id: int, page_id: int, lock_type: str) -> bool:
-        """
-        获取锁（简化版本，不支持锁升级）
-
-        Args:
-            txn_id: 事务ID
-            page_id: 页号
-            lock_type: 锁类型 ('S' or 'X')
-
-        Returns:
-            bool: 是否成功
-        """
-        with self.lock_table_lock:
-            page_locks = self.lock_table[page_id]
-
-            if lock_type == 'S':  # 读锁
-                # 检查是否有其他事务持有写锁
-                if page_locks['X'] and txn_id not in page_locks['X']:
-                    return False
-                # 添加读锁
-                page_locks['S'].add(txn_id)
-
-            elif lock_type == 'X':  # 写锁
-                # 检查是否有其他事务持有任何锁
-                other_readers = page_locks['S'] - {txn_id}
-                other_writers = page_locks['X'] - {txn_id}
-                if other_readers or other_writers:
-                    return False
-                # 添加写锁
-                page_locks['X'].add(txn_id)
-                # 如果有读锁，升级为写锁
-                page_locks['S'].discard(txn_id)
-
-            # 记录到事务对象
-            txn = self.get_transaction(txn_id)
-            if txn:
-                txn.held_locks[page_id] = lock_type
-
-            return True
-
-    def _release_lock(self, txn_id: int, page_id: int):
-        """释放指定页的锁"""
-        with self.lock_table_lock:
-            page_locks = self.lock_table[page_id]
-            page_locks['S'].discard(txn_id)
-            page_locks['X'].discard(txn_id)
-
-            # 如果页上没有任何锁，清理锁表
-            if not page_locks['S'] and not page_locks['X']:
-                del self.lock_table[page_id]
-
-    def _release_all_locks(self, txn_id: int):
-        """释放事务持有的所有锁"""
-        txn = self.get_transaction(txn_id)
-        if not txn:
-            return
-
-        with self.lock_table_lock:
-            for page_id in list(txn.held_locks.keys()):
-                self._release_lock(txn_id, page_id)
-            txn.held_locks.clear()
 
     def _add_to_history(self, txn: Transaction):
         """添加事务到历史记录"""
@@ -495,7 +428,7 @@ class TransactionManager:
             'next_txn_id': self.next_txn_id,
             'total_commits': sum(1 for h in self.txn_history if h['state'] == 'COMMITTED'),
             'total_rollbacks': sum(1 for h in self.txn_history if h['state'] == 'ABORTED'),
-            'lock_table_size': len(self.lock_table),
+            'lock_table_size': len(self.storage_manager.lock_manager.locks) if self.storage_manager.lock_manager else 0,
             'version_count': sum(len(v) for v in self.page_versions.values())
         }
 

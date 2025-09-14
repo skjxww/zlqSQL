@@ -17,6 +17,7 @@ from ..utils.exceptions import (
 )
 from ..utils.logger import get_logger, PerformanceTimer, performance_monitor
 from .transaction_manager import TransactionManager, IsolationLevel, TransactionException
+from storage.core.lock_manager import SimpleLockManager, LockType
 
 
 class StorageManager:
@@ -27,7 +28,8 @@ class StorageManager:
                  meta_file: str = META_FILE,
                  auto_flush_interval: int = FLUSH_INTERVAL_SECONDS,
                  enable_extent_management: bool = True,
-                 enable_wal: bool = True):
+                 enable_wal: bool = True,
+                 enable_concurrency: bool = True):
         """
         初始化存储管理器
 
@@ -100,6 +102,15 @@ class StorageManager:
 
             # 当前默认事务（用于非事务操作的兼容性）
             self._default_txn_id = None
+
+            # 并发控制（新增）
+            self.enable_concurrency = enable_concurrency
+            if enable_concurrency:
+                self.lock_manager = SimpleLockManager(timeout=5.0)
+                self.logger.info("Concurrency control enabled with lock manager")
+            else:
+                self.lock_manager = None
+                self.logger.info("Concurrency control disabled")
 
             # WAL集成（在所有其他组件初始化之后）
             self.wal_enabled = enable_wal
@@ -811,23 +822,19 @@ class StorageManager:
         self.transaction_manager.rollback(txn_id)
         self.logger.info(f"Rolled back transaction {txn_id}")
 
+    # 修改 read_page_transactional 方法
     def read_page_transactional(self, page_id: int, txn_id: int = None) -> bytes:
         """
-        事务性读取页
-
-        Args:
-            page_id: 页号
-            txn_id: 事务ID（可选）
-
-        Returns:
-            bytes: 页数据
+        事务性读取页 - 自动处理锁
         """
         if txn_id is None:
-            # 非事务读取，使用原有逻辑
             return self.read_page(page_id)
 
-        # 暂时跳过锁机制
-        # self.transaction_manager.prepare_read(txn_id, page_id)
+        # 自动获取共享锁（新增）
+        if self.lock_manager:
+            if not self.lock_manager.acquire_lock(txn_id, page_id, LockType.SHARED):
+                raise StorageException(f"Failed to acquire read lock on page {page_id} for transaction {txn_id}")
+            self.logger.debug(f"Acquired read lock on page {page_id} for transaction {txn_id}")
 
         # 记录读操作
         txn = self.transaction_manager.get_transaction(txn_id)
@@ -843,24 +850,22 @@ class StorageManager:
         # 读取物理存储的版本
         return self.read_page(page_id)
 
+    # 修改 write_page_transactional 方法
     def write_page_transactional(self, page_id: int, data: bytes, txn_id: int = None):
         """
-        事务性写入页
-
-        Args:
-            page_id: 页号
-            data: 页数据
-            txn_id: 事务ID（可选）
+        事务性写入页 - 自动处理锁
         """
         if txn_id is None:
-            # 非事务写入，使用原有逻辑
             self.write_page(page_id, data)
             return
 
-        # 暂时跳过锁机制，直接记录修改
-        # self.transaction_manager.prepare_write(txn_id, page_id)
+        # 自动获取排他锁（新增）
+        if self.lock_manager:
+            if not self.lock_manager.acquire_lock(txn_id, page_id, LockType.EXCLUSIVE):
+                raise StorageException(f"Failed to acquire write lock on page {page_id} for transaction {txn_id}")
+            self.logger.debug(f"Acquired write lock on page {page_id} for transaction {txn_id}")
 
-        # 获取事务对象，手动记录修改
+        # 获取事务对象
         txn = self.transaction_manager.get_transaction(txn_id)
         if txn:
             # 如果是第一次修改这个页，保存原始数据
@@ -875,6 +880,15 @@ class StorageManager:
         self.transaction_manager.record_write(txn_id, page_id, data)
 
         self.logger.debug(f"Transaction {txn_id} wrote page {page_id}")
+
+    def get_concurrency_status(self) -> Dict:
+        """获取并发控制状态信息"""
+        if not self.lock_manager:
+            return {"enabled": False}
+
+        stats = self.lock_manager.get_statistics()
+        stats["enabled"] = True
+        return stats
 
     def allocate_page_transactional(self, tablespace_name: str = None,
                                     table_name: str = None, txn_id: int = None) -> int:

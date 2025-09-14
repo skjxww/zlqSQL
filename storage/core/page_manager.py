@@ -148,6 +148,8 @@ class PageManager:
             if self.tablespace_manager is not None:
                 # 获取所有表空间的文件路径
                 self.tablespace_files = self.tablespace_manager.get_all_tablespace_files()
+                # 修改后：覆盖default表空间的路径
+                self.tablespace_files["default"] = str(self.data_file)
 
                 # 确保所有表空间文件存在
                 for tablespace_name, file_path in self.tablespace_files.items():
