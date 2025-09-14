@@ -10,7 +10,7 @@ from sql_compiler.codegen.plan_generator import PlanGenerator
 from storage.core.page_manager import PageManager
 from storage.core.buffer_pool import BufferPool
 from storage.core.storage_manager import StorageManager
-from catalog.catalog_manager import CatalogManager
+from sql_compiler.catalog.catalog_manager import CatalogManager
 from engine.storage_engine import StorageEngine
 from engine.execution_engine import ExecutionEngine
 from sql_compiler.diagnostics.error_analyzer import SmartSQLCorrector
@@ -64,6 +64,16 @@ class SimpleDBGUI:
                 storage_engine=self.storage_engine,
                 catalog_manager=self.catalog_manager
             )
+
+            # 🔧 修复：设置事务管理器
+            # 确保存储引擎有事务管理器，然后设置给执行引擎
+            if hasattr(self.storage_engine, 'transaction_manager'):
+                self.execution_engine.set_transaction_manager(self.storage_engine.transaction_manager)
+            else:
+                # 如果存储引擎没有事务管理器，创建一个新的
+                from storage.core.transaction_manager import TransactionManager
+                transaction_manager = TransactionManager(self.storage_manager)
+                self.execution_engine.set_transaction_manager(transaction_manager)
 
             # 初始化SQL编译器组件
             self.lexer = LexicalAnalyzer

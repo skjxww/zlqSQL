@@ -1,12 +1,14 @@
 # engine/execution_engine.py
 from typing import List, Dict, Any, Optional, Tuple
 from engine.storage_engine import StorageEngine
-from catalog.catalog_manager import CatalogManager
-from sql_compiler.codegen.operators import Operator, CreateTableOp, InsertOp, SeqScanOp, FilterOp, ProjectOp, UpdateOp, \
-    DeleteOp, OptimizedSeqScanOp, GroupByOp, OrderByOp, JoinOp, FilteredSeqScanOp, IndexScanOp, IndexOnlyScanOp, CreateIndexOp, DropIndexOp
+from sql_compiler.catalog.catalog_manager import CatalogManager
+from sql_compiler.codegen.operators import (Operator, CreateTableOp, InsertOp, SeqScanOp, FilterOp, ProjectOp, UpdateOp, \
+    DeleteOp, OptimizedSeqScanOp, GroupByOp, OrderByOp, JoinOp, FilteredSeqScanOp, IndexScanOp, IndexOnlyScanOp, CreateIndexOp,
+    DropIndexOp, BeginTransactionOp, CommitTransactionOp, RollbackTransactionOp)
 from sql_compiler.exceptions.compiler_errors import SemanticError
 from sql_compiler.semantic.symbol_table import SymbolTable
 from sql_compiler.semantic.type_checker import TypeChecker
+from storage.core.transaction_manager import TransactionManager, IsolationLevel  # 添加事务管理器导入
 
 
 class ExecutionEngine:
@@ -16,10 +18,137 @@ class ExecutionEngine:
         self.symbol_table = SymbolTable()
         self.type_checker = TypeChecker(self.symbol_table)
 
+        # 添加事务相关属性
+        self.transaction_manager = None
+        self.current_transaction_id = None
+        self.transaction_mode = None
+        self.isolation_level = IsolationLevel.READ_COMMITTED
+
+    def set_transaction_manager(self, transaction_manager: TransactionManager):
+        """设置事务管理器"""
+        self.transaction_manager = transaction_manager
+
+    def begin_transaction(self, isolation_level: IsolationLevel = IsolationLevel.READ_COMMITTED) -> int:
+        """开始一个新事务"""
+        if self.transaction_manager is None:
+            raise SemanticError("Transaction manager not initialized")
+
+        self.current_transaction_id = self.transaction_manager.begin_transaction(isolation_level)
+        self.isolation_level = isolation_level
+        return self.current_transaction_id
+
+    def commit_transaction(self) -> bool:
+        """提交当前事务"""
+        if self.current_transaction_id is None:
+            raise SemanticError("No active transaction to commit")
+
+        if self.transaction_manager is None:
+            raise SemanticError("Transaction manager not initialized")
+
+        try:
+            self.transaction_manager.commit(self.current_transaction_id)
+            self.current_transaction_id = None
+            return True
+        except Exception as e:
+            raise SemanticError(f"Failed to commit transaction: {str(e)}")
+
+    # execution_engine.py 中的修改
+
+    def rollback_transaction(self) -> bool:
+        """回滚当前事务"""
+        if self.current_transaction_id is None:
+            # 改为返回成功而不是抛出错误，因为ROLLBACK在没有事务时是允许的
+            print("WARNING: No active transaction to rollback - this is allowed in SQL")
+            return True
+
+        if self.transaction_manager is None:
+            raise SemanticError("Transaction manager not initialized")
+
+        try:
+            # 确保传递事务ID给存储引擎
+            success = self.storage_engine.rollback_transaction(self.current_transaction_id)
+            if success:
+                self.current_transaction_id = None
+            return success
+        except Exception as e:
+            # 添加详细错误日志
+            print(f"ERROR: Failed to rollback transaction {self.current_transaction_id}: {str(e)}")
+            # 尝试强制清理事务
+            try:
+                if self.transaction_manager:
+                    self.transaction_manager.force_cleanup_transaction(self.current_transaction_id)
+            except Exception as cleanup_error:
+                print(f"ERROR: Failed to cleanup transaction during rollback: {cleanup_error}")
+            self.current_transaction_id = None
+            raise SemanticError(f"Failed to rollback transaction: {str(e)}")
+
+    def get_transaction_status(self) -> Dict[str, Any]:
+        """获取当前事务状态"""
+        if self.current_transaction_id is None:
+            return {"status": "NO_ACTIVE_TRANSACTION"}
+
+        if self.transaction_manager is None:
+            return {"status": "TRANSACTION_MANAGER_NOT_INITIALIZED"}
+
+        txn = self.transaction_manager.get_transaction(self.current_transaction_id)
+        if txn:
+            return {
+                "status": "ACTIVE",
+                "transaction_id": self.current_transaction_id,
+                "isolation_level": txn.isolation_level.name,
+                "state": txn.state.name
+            }
+        else:
+            return {"status": "TRANSACTION_NOT_FOUND"}
+
     # 在 execute_plan 方法中添加这个分支
     def execute_plan(self, plan: Operator) -> Any:
         """执行查询计划 - 修复GroupBy执行"""
         try:
+            # 检查是否为事务操作
+            if hasattr(plan, 'operation_type'):
+                if plan.operation_type == 'BEGIN_TRANSACTION':
+                    isolation_level = getattr(plan, 'isolation_level', IsolationLevel.READ_COMMITTED)
+                    txn_id = self.begin_transaction(isolation_level)
+                    return f"Transaction {txn_id} started with isolation level {isolation_level.name}"
+
+                elif plan.operation_type == 'COMMIT_TRANSACTION':
+                    self.commit_transaction()
+                    return "Transaction committed successfully"
+
+                elif plan.operation_type == 'ROLLBACK_TRANSACTION':
+                    self.rollback_transaction()
+                    return "Transaction rolled back successfully"
+
+            # 检查当前是否有活跃事务
+            if self.current_transaction_id is None and self._requires_transaction(plan):
+                # 自动开始一个事务
+                self.begin_transaction()
+                print(f"Auto-started transaction {self.current_transaction_id} for operation")
+
+            # 添加对事务操作符的直接类型检查
+            if isinstance(plan, BeginTransactionOp):
+                isolation_level = getattr(plan, 'isolation_level', None)
+                if isolation_level is None:
+                    isolation_level = IsolationLevel.READ_COMMITTED
+                elif isinstance(isolation_level, str):
+                    # 将字符串转换为 IsolationLevel 枚举
+                    try:
+                        isolation_level = IsolationLevel[isolation_level.upper().replace(' ', '_')]
+                    except KeyError:
+                        isolation_level = IsolationLevel.READ_COMMITTED
+
+                txn_id = self.begin_transaction(isolation_level)
+                return f"Transaction {txn_id} started with isolation level {isolation_level.name}"
+
+            elif isinstance(plan, CommitTransactionOp):
+                self.commit_transaction()
+                return "Transaction committed successfully"
+
+            elif isinstance(plan, RollbackTransactionOp):
+                self.rollback_transaction()
+                return "Transaction rolled back successfully"
+
             if isinstance(plan, CreateTableOp):
                 return self.execute_create_table(plan.table_name, plan.columns)
             elif isinstance(plan, InsertOp):
@@ -64,7 +193,19 @@ class ExecutionEngine:
             else:
                 raise SemanticError(f"不支持的执行计划类型: {type(plan).__name__}")
         except Exception as e:
+            # 发生错误时自动回滚事务
+            if self.current_transaction_id is not None:
+                try:
+                    self.rollback_transaction()
+                    print(f"Auto-rolled back transaction due to error: {str(e)}")
+                except:
+                    pass  # 忽略回滚过程中的错误
             raise SemanticError(f"执行错误: {str(e)}")
+
+    def _requires_transaction(self, plan: Operator) -> bool:
+        """检查执行计划是否需要事务支持"""
+        # DML操作需要事务支持
+        return isinstance(plan, (InsertOp, UpdateOp, DeleteOp))
 
     # execution_engine.py 中的 execute_create_table 方法
     def execute_create_table(self, table_name: str, columns: List[tuple]) -> str:
@@ -173,8 +314,18 @@ class ExecutionEngine:
             print(f"DEBUG: Final values list for insertion: {values_list}")
             print(f"DEBUG: Column names: {column_names}")
 
-            # 传递值列表而不是字典
-            self.storage_engine.insert_row(table_name, values_list)
+            # 添加事务支持
+            if self.current_transaction_id is not None and self.transaction_manager is not None:
+                # 在事务中执行插入
+                success = self.storage_engine.insert_row_transactional(
+                    table_name, values_list, self.current_transaction_id
+                )
+                if not success:
+                    raise SemanticError("Failed to insert row in transaction")
+            else:
+                # 非事务插入
+                self.storage_engine.insert_row(table_name, values_list)
+
             return "1 row inserted"
         except Exception as e:
             raise SemanticError(f"插入行错误: {str(e)}")
@@ -301,8 +452,17 @@ class ExecutionEngine:
 
                 print(f"DEBUG: Update data: {update_data}")
 
-                # 实际更新存储引擎中的数据
-                self.storage_engine.update_row(table_name, row, update_data)
+                # 添加事务支持
+                if self.current_transaction_id is not None and self.transaction_manager is not None:
+                    # 在事务中执行更新
+                    success = self.storage_engine.update_row_transactional(
+                        table_name, row, update_data, self.current_transaction_id
+                    )
+                    if not success:
+                        raise SemanticError("Failed to update row in transaction")
+                else:
+                    # 非事务更新
+                    self.storage_engine.update_row(table_name, row, update_data)
                 updated_count += 1
 
             return f"{updated_count} rows updated"
@@ -318,7 +478,17 @@ class ExecutionEngine:
             # 执行删除操作
             deleted_count = 0
             for row in rows_to_delete:
-                self.storage_engine.delete_row(table_name, row)
+                # 添加事务支持
+                if self.current_transaction_id is not None and self.transaction_manager is not None:
+                    # 在事务中执行删除
+                    success = self.storage_engine.delete_row_transactional(
+                        table_name, row, self.current_transaction_id
+                    )
+                    if not success:
+                        raise SemanticError("Failed to delete row in transaction")
+                else:
+                    # 非事务删除
+                    self.storage_engine.delete_row(table_name, row)
                 deleted_count += 1
 
             return f"{deleted_count} rows deleted"
