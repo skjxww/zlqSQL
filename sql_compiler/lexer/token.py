@@ -95,6 +95,27 @@ class TokenType(Enum):
     SHOW = "SHOW"
     INDEXES = "INDEXES"
 
+    # 事务控制关键字
+    BEGIN = "BEGIN"
+    COMMIT = "COMMIT"
+    ROLLBACK = "ROLLBACK"
+    START = "START"
+    TRANSACTION = "TRANSACTION"
+    SAVEPOINT = "SAVEPOINT"
+    RELEASE = "RELEASE"
+    WORK = "WORK"
+
+    # 事务特性关键字
+    READ = "READ"
+    WRITE = "WRITE"
+    ONLY = "ONLY"
+    ISOLATION = "ISOLATION"
+    LEVEL = "LEVEL"
+    UNCOMMITTED = "UNCOMMITTED"
+    COMMITTED = "COMMITTED"
+    REPEATABLE = "REPEATABLE"
+    SERIALIZABLE = "SERIALIZABLE"
+
 
 class Token:
     def __init__(self, token_type: TokenType, lexeme: str, line: int, column: int, value: Any = None):

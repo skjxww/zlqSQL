@@ -1,7 +1,7 @@
 {
   "version": "1.0",
-  "created_time": 1757516194.8291368,
-  "table_count": 18,
+  "created_time": 1757778382.7896736,
+  "table_count": 19,
   "tables": [
     {
       "table_name": "customers",
@@ -9,6 +9,7 @@
         1
       ],
       "estimated_record_size": 93,
+      "tablespace_name": "default",
       "created_time": 1757430129.9192948,
       "last_modified": 1757430129.9192948,
       "total_page_allocations": 1,
@@ -21,6 +22,7 @@
         2
       ],
       "estimated_record_size": 159,
+      "tablespace_name": "default",
       "created_time": 1757435268.3578572,
       "last_modified": 1757435268.3578572,
       "total_page_allocations": 1,
@@ -33,6 +35,7 @@
         3
       ],
       "estimated_record_size": 61,
+      "tablespace_name": "default",
       "created_time": 1757435294.6308236,
       "last_modified": 1757435294.6308236,
       "total_page_allocations": 1,
@@ -45,6 +48,7 @@
         4
       ],
       "estimated_record_size": 61,
+      "tablespace_name": "default",
       "created_time": 1757436222.268786,
       "last_modified": 1757436222.268786,
       "total_page_allocations": 1,
@@ -57,6 +61,7 @@
         5
       ],
       "estimated_record_size": 35,
+      "tablespace_name": "default",
       "created_time": 1757437110.308425,
       "last_modified": 1757437110.308425,
       "total_page_allocations": 1,
@@ -69,6 +74,7 @@
         6
       ],
       "estimated_record_size": 61,
+      "tablespace_name": "default",
       "created_time": 1757437268.600058,
       "last_modified": 1757437268.600058,
       "total_page_allocations": 1,
@@ -81,6 +87,7 @@
         7
       ],
       "estimated_record_size": 93,
+      "tablespace_name": "default",
       "created_time": 1757438815.249537,
       "last_modified": 1757438815.249537,
       "total_page_allocations": 1,
@@ -93,6 +100,7 @@
         8
       ],
       "estimated_record_size": 61,
+      "tablespace_name": "default",
       "created_time": 1757470889.6675735,
       "last_modified": 1757470889.6675735,
       "total_page_allocations": 1,
@@ -105,6 +113,7 @@
         9
       ],
       "estimated_record_size": 61,
+      "tablespace_name": "default",
       "created_time": 1757471654.1774225,
       "last_modified": 1757484920.1208842,
       "total_page_allocations": 1,
@@ -117,6 +126,7 @@
         10
       ],
       "estimated_record_size": 93,
+      "tablespace_name": "default",
       "created_time": 1757484977.972076,
       "last_modified": 1757484977.972076,
       "total_page_allocations": 1,
@@ -129,6 +139,7 @@
         11
       ],
       "estimated_record_size": 35,
+      "tablespace_name": "default",
       "created_time": 1757489634.6678724,
       "last_modified": 1757489634.6678724,
       "total_page_allocations": 1,
@@ -141,6 +152,7 @@
         12
       ],
       "estimated_record_size": 93,
+      "tablespace_name": "default",
       "created_time": 1757491643.999633,
       "last_modified": 1757491643.999633,
       "total_page_allocations": 1,
@@ -153,6 +165,7 @@
         13
       ],
       "estimated_record_size": 93,
+      "tablespace_name": "default",
       "created_time": 1757493057.5263855,
       "last_modified": 1757493057.5263855,
       "total_page_allocations": 1,
@@ -165,6 +178,7 @@
         14
       ],
       "estimated_record_size": 61,
+      "tablespace_name": "default",
       "created_time": 1757493065.938682,
       "last_modified": 1757493065.938682,
       "total_page_allocations": 1,
@@ -177,6 +191,7 @@
         15
       ],
       "estimated_record_size": 13,
+      "tablespace_name": "default",
       "created_time": 1757493076.6513085,
       "last_modified": 1757493076.6513085,
       "total_page_allocations": 1,
@@ -189,6 +204,7 @@
         16
       ],
       "estimated_record_size": 93,
+      "tablespace_name": "default",
       "created_time": 1757516158.8347256,
       "last_modified": 1757516158.8347256,
       "total_page_allocations": 1,
@@ -201,6 +217,7 @@
         17
       ],
       "estimated_record_size": 35,
+      "tablespace_name": "default",
       "created_time": 1757516176.741655,
       "last_modified": 1757516176.741655,
       "total_page_allocations": 1,
@@ -213,8 +230,22 @@
         18
       ],
       "estimated_record_size": 93,
+      "tablespace_name": "default",
       "created_time": 1757516194.8281317,
       "last_modified": 1757516194.8281317,
+      "total_page_allocations": 1,
+      "total_page_reads": 0,
+      "total_page_writes": 0
+    },
+    {
+      "table_name": "students10",
+      "pages": [
+        20
+      ],
+      "estimated_record_size": 113,
+      "tablespace_name": "user_data",
+      "created_time": 1757778382.7896736,
+      "last_modified": 1757778382.7896736,
       "total_page_allocations": 1,
       "total_page_reads": 0,
       "total_page_writes": 0

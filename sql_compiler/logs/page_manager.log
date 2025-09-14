@@ -1,0 +1,160 @@
+2025-09-12 21:00:09,592 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=index_data\test_index_0 | meta_dir=index_data\test_index_0
+2025-09-12 21:00:09,592 - page_manager - INFO - _log_with_context:97 - Metadata file not found, using default configuration
+2025-09-12 21:00:09,593 - page_manager - INFO - _log_with_context:97 - Created new data file | Context: file_path=index_data\test_index_0\database.db
+2025-09-12 21:00:09,594 - page_manager - INFO - _log_with_context:97 - Created tablespace file | Context: tablespace=default | file_path=index_data\test_index_0\default_tablespace.db
+2025-09-12 21:00:09,594 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=index_data\test_index_0\database.db | meta_file=index_data\test_index_0\metadata.json | allocated_pages=0 | tablespace_support=True
+2025-09-12 21:00:09,600 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 1 in tablespace 'default'
+2025-09-12 21:00:09,601 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-12 21:00:09,601 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | tablespace=default | total_allocated=1
+2025-09-12 21:00:09,614 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=index_data\test_index_1 | meta_dir=index_data\test_index_1
+2025-09-12 21:00:09,614 - page_manager - INFO - _log_with_context:97 - Metadata file not found, using default configuration
+2025-09-12 21:00:09,614 - page_manager - INFO - _log_with_context:97 - Created new data file | Context: file_path=index_data\test_index_1\database.db
+2025-09-12 21:00:09,615 - page_manager - INFO - _log_with_context:97 - Created tablespace file | Context: tablespace=default | file_path=index_data\test_index_1\default_tablespace.db
+2025-09-12 21:00:09,615 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=index_data\test_index_1\database.db | meta_file=index_data\test_index_1\metadata.json | allocated_pages=0 | tablespace_support=True
+2025-09-12 21:00:09,616 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 1 in tablespace 'default'
+2025-09-12 21:00:09,618 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-12 21:00:09,618 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | tablespace=default | total_allocated=1
+2025-09-12 21:00:09,631 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=index_data\test_index_2 | meta_dir=index_data\test_index_2
+2025-09-12 21:00:09,631 - page_manager - INFO - _log_with_context:97 - Metadata file not found, using default configuration
+2025-09-12 21:00:09,632 - page_manager - INFO - _log_with_context:97 - Created new data file | Context: file_path=index_data\test_index_2\database.db
+2025-09-12 21:00:09,633 - page_manager - INFO - _log_with_context:97 - Created tablespace file | Context: tablespace=default | file_path=index_data\test_index_2\default_tablespace.db
+2025-09-12 21:00:09,633 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=index_data\test_index_2\database.db | meta_file=index_data\test_index_2\metadata.json | allocated_pages=0 | tablespace_support=True
+2025-09-12 21:00:09,634 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 1 in tablespace 'default'
+2025-09-12 21:00:09,635 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-12 21:00:09,635 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | tablespace=default | total_allocated=1
+2025-09-12 21:00:09,649 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=index_data\performance_test | meta_dir=index_data\performance_test
+2025-09-12 21:00:09,649 - page_manager - INFO - _log_with_context:97 - Metadata file not found, using default configuration
+2025-09-12 21:00:09,651 - page_manager - INFO - _log_with_context:97 - Created new data file | Context: file_path=index_data\performance_test\database.db
+2025-09-12 21:00:09,652 - page_manager - INFO - _log_with_context:97 - Created tablespace file | Context: tablespace=default | file_path=index_data\performance_test\default_tablespace.db
+2025-09-12 21:00:09,652 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=index_data\performance_test\database.db | meta_file=index_data\performance_test\metadata.json | allocated_pages=0 | tablespace_support=True
+2025-09-12 21:00:09,653 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 1 in tablespace 'default'
+2025-09-12 21:00:09,653 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-12 21:00:09,653 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=1 | tablespace=default | total_allocated=1
+2025-09-12 21:00:09,701 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 2 in tablespace 'default'
+2025-09-12 21:00:09,703 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-12 21:00:09,703 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=2 | tablespace=default | total_allocated=2
+2025-09-12 21:00:09,732 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 3 in tablespace 'default'
+2025-09-12 21:00:09,733 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-12 21:00:09,733 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=3 | tablespace=default | total_allocated=3
+2025-09-12 21:00:09,763 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 4 in tablespace 'default'
+2025-09-12 21:00:09,764 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-12 21:00:09,764 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=4 | tablespace=default | total_allocated=4
+2025-09-12 21:00:09,796 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 5 in tablespace 'default'
+2025-09-12 21:00:09,797 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-12 21:00:09,797 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=5 | tablespace=default | total_allocated=5
+2025-09-12 21:00:09,826 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 6 in tablespace 'default'
+2025-09-12 21:00:09,828 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-12 21:00:09,828 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=6 | tablespace=default | total_allocated=6
+2025-09-12 21:00:09,871 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 7 in tablespace 'default'
+2025-09-12 21:00:09,872 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-12 21:00:09,872 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=7 | tablespace=default | total_allocated=7
+2025-09-12 21:00:09,909 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 8 in tablespace 'default'
+2025-09-12 21:00:09,911 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-12 21:00:09,911 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=8 | tablespace=default | total_allocated=8
+2025-09-12 21:00:09,952 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 9 in tablespace 'default'
+2025-09-12 21:00:09,953 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-12 21:00:09,953 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=9 | tablespace=default | total_allocated=9
+2025-09-12 21:00:09,982 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 10 in tablespace 'default'
+2025-09-12 21:00:09,983 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-12 21:00:09,983 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=10 | tablespace=default | total_allocated=10
+2025-09-12 21:00:10,025 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 11 in tablespace 'default'
+2025-09-12 21:00:10,026 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-12 21:00:10,026 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=11 | tablespace=default | total_allocated=11
+2025-09-12 21:00:10,060 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 12 in tablespace 'default'
+2025-09-12 21:00:10,061 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-12 21:00:10,062 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=12 | tablespace=default | total_allocated=12
+2025-09-12 21:00:10,134 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 13 in tablespace 'default'
+2025-09-12 21:00:10,135 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-12 21:00:10,135 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=13 | tablespace=default | total_allocated=13
+2025-09-12 21:00:10,171 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 14 in tablespace 'default'
+2025-09-12 21:00:10,172 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-12 21:00:10,172 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=14 | tablespace=default | total_allocated=14
+2025-09-12 21:00:10,204 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 15 in tablespace 'default'
+2025-09-12 21:00:10,205 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-12 21:00:10,205 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=15 | tablespace=default | total_allocated=15
+2025-09-12 21:00:10,242 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 16 in tablespace 'default'
+2025-09-12 21:00:10,243 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-12 21:00:10,243 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=16 | tablespace=default | total_allocated=16
+2025-09-12 21:00:10,271 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 17 in tablespace 'default'
+2025-09-12 21:00:10,272 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-12 21:00:10,273 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=17 | tablespace=default | total_allocated=17
+2025-09-12 21:00:10,297 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 18 in tablespace 'default'
+2025-09-12 21:00:10,298 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-12 21:00:10,299 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=18 | tablespace=default | total_allocated=18
+2025-09-12 21:00:10,322 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 19 in tablespace 'default'
+2025-09-12 21:00:10,323 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-12 21:00:10,323 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=19 | tablespace=default | total_allocated=19
+2025-09-12 21:00:10,570 - page_manager - DEBUG - _log_with_context:97 - Writing page 1 to tablespace 'default', file: index_data/performance_test\default_tablespace.db
+2025-09-12 21:00:10,570 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data/performance_test\default_tablespace.db | target_size=4096
+2025-09-12 21:00:10,571 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=1 | tablespace=default | data_length=4096 | file_offset=0
+2025-09-12 21:00:10,572 - page_manager - DEBUG - _log_with_context:97 - Writing page 2 to tablespace 'default', file: index_data/performance_test\default_tablespace.db
+2025-09-12 21:00:10,572 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data/performance_test\default_tablespace.db | target_size=8192
+2025-09-12 21:00:10,573 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=2 | tablespace=default | data_length=4096 | file_offset=4096
+2025-09-12 21:00:10,573 - page_manager - DEBUG - _log_with_context:97 - Writing page 3 to tablespace 'default', file: index_data/performance_test\default_tablespace.db
+2025-09-12 21:00:10,573 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data/performance_test\default_tablespace.db | target_size=12288
+2025-09-12 21:00:10,574 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=3 | tablespace=default | data_length=4096 | file_offset=8192
+2025-09-12 21:00:10,574 - page_manager - DEBUG - _log_with_context:97 - Writing page 4 to tablespace 'default', file: index_data/performance_test\default_tablespace.db
+2025-09-12 21:00:10,574 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data/performance_test\default_tablespace.db | target_size=16384
+2025-09-12 21:00:10,575 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=4 | tablespace=default | data_length=4096 | file_offset=12288
+2025-09-12 21:00:10,575 - page_manager - DEBUG - _log_with_context:97 - Writing page 5 to tablespace 'default', file: index_data/performance_test\default_tablespace.db
+2025-09-12 21:00:10,576 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data/performance_test\default_tablespace.db | target_size=20480
+2025-09-12 21:00:10,576 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=5 | tablespace=default | data_length=4096 | file_offset=16384
+2025-09-12 21:00:10,576 - page_manager - DEBUG - _log_with_context:97 - Writing page 6 to tablespace 'default', file: index_data/performance_test\default_tablespace.db
+2025-09-12 21:00:10,577 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data/performance_test\default_tablespace.db | target_size=24576
+2025-09-12 21:00:10,577 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=6 | tablespace=default | data_length=4096 | file_offset=20480
+2025-09-12 21:00:10,578 - page_manager - DEBUG - _log_with_context:97 - Writing page 7 to tablespace 'default', file: index_data/performance_test\default_tablespace.db
+2025-09-12 21:00:10,578 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data/performance_test\default_tablespace.db | target_size=28672
+2025-09-12 21:00:10,578 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=7 | tablespace=default | data_length=4096 | file_offset=24576
+2025-09-12 21:00:10,578 - page_manager - DEBUG - _log_with_context:97 - Writing page 8 to tablespace 'default', file: index_data/performance_test\default_tablespace.db
+2025-09-12 21:00:10,579 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data/performance_test\default_tablespace.db | target_size=32768
+2025-09-12 21:00:10,580 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=8 | tablespace=default | data_length=4096 | file_offset=28672
+2025-09-12 21:00:10,580 - page_manager - DEBUG - _log_with_context:97 - Writing page 9 to tablespace 'default', file: index_data/performance_test\default_tablespace.db
+2025-09-12 21:00:10,580 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data/performance_test\default_tablespace.db | target_size=36864
+2025-09-12 21:00:10,580 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=9 | tablespace=default | data_length=4096 | file_offset=32768
+2025-09-12 21:00:10,580 - page_manager - DEBUG - _log_with_context:97 - Writing page 10 to tablespace 'default', file: index_data/performance_test\default_tablespace.db
+2025-09-12 21:00:10,582 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data/performance_test\default_tablespace.db | target_size=40960
+2025-09-12 21:00:10,582 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=10 | tablespace=default | data_length=4096 | file_offset=36864
+2025-09-12 21:00:10,582 - page_manager - DEBUG - _log_with_context:97 - Writing page 11 to tablespace 'default', file: index_data/performance_test\default_tablespace.db
+2025-09-12 21:00:10,583 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data/performance_test\default_tablespace.db | target_size=45056
+2025-09-12 21:00:10,584 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=11 | tablespace=default | data_length=4096 | file_offset=40960
+2025-09-12 21:00:10,584 - page_manager - DEBUG - _log_with_context:97 - Writing page 12 to tablespace 'default', file: index_data/performance_test\default_tablespace.db
+2025-09-12 21:00:10,584 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data/performance_test\default_tablespace.db | target_size=49152
+2025-09-12 21:00:10,585 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=12 | tablespace=default | data_length=4096 | file_offset=45056
+2025-09-12 21:00:10,585 - page_manager - DEBUG - _log_with_context:97 - Writing page 13 to tablespace 'default', file: index_data/performance_test\default_tablespace.db
+2025-09-12 21:00:10,585 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data/performance_test\default_tablespace.db | target_size=53248
+2025-09-12 21:00:10,586 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=13 | tablespace=default | data_length=4096 | file_offset=49152
+2025-09-12 21:00:10,586 - page_manager - DEBUG - _log_with_context:97 - Writing page 14 to tablespace 'default', file: index_data/performance_test\default_tablespace.db
+2025-09-12 21:00:10,586 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data/performance_test\default_tablespace.db | target_size=57344
+2025-09-12 21:00:10,587 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=14 | tablespace=default | data_length=4096 | file_offset=53248
+2025-09-12 21:00:10,587 - page_manager - DEBUG - _log_with_context:97 - Writing page 15 to tablespace 'default', file: index_data/performance_test\default_tablespace.db
+2025-09-12 21:00:10,588 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data/performance_test\default_tablespace.db | target_size=61440
+2025-09-12 21:00:10,588 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=15 | tablespace=default | data_length=4096 | file_offset=57344
+2025-09-12 21:00:10,589 - page_manager - DEBUG - _log_with_context:97 - Writing page 16 to tablespace 'default', file: index_data/performance_test\default_tablespace.db
+2025-09-12 21:00:10,589 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data/performance_test\default_tablespace.db | target_size=65536
+2025-09-12 21:00:10,590 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=16 | tablespace=default | data_length=4096 | file_offset=61440
+2025-09-12 21:00:10,590 - page_manager - DEBUG - _log_with_context:97 - Writing page 17 to tablespace 'default', file: index_data/performance_test\default_tablespace.db
+2025-09-12 21:00:10,590 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data/performance_test\default_tablespace.db | target_size=69632
+2025-09-12 21:00:10,591 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=17 | tablespace=default | data_length=4096 | file_offset=65536
+2025-09-12 21:00:10,591 - page_manager - DEBUG - _log_with_context:97 - Writing page 18 to tablespace 'default', file: index_data/performance_test\default_tablespace.db
+2025-09-12 21:00:10,591 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data/performance_test\default_tablespace.db | target_size=73728
+2025-09-12 21:00:10,592 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=18 | tablespace=default | data_length=4096 | file_offset=69632
+2025-09-12 21:00:10,592 - page_manager - DEBUG - _log_with_context:97 - Writing page 19 to tablespace 'default', file: index_data/performance_test\default_tablespace.db
+2025-09-12 21:00:10,593 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data/performance_test\default_tablespace.db | target_size=77824
+2025-09-12 21:00:10,594 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=19 | tablespace=default | data_length=4096 | file_offset=73728
+2025-09-12 21:00:10,594 - page_manager - DEBUG - _log_with_context:97 - Writing page 1 to tablespace 'default', file: index_data/test_index_0\default_tablespace.db
+2025-09-12 21:00:10,594 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data/test_index_0\default_tablespace.db | target_size=4096
+2025-09-12 21:00:10,595 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=1 | tablespace=default | data_length=4096 | file_offset=0
+2025-09-12 21:00:10,596 - page_manager - DEBUG - _log_with_context:97 - Writing page 1 to tablespace 'default', file: index_data/test_index_1\default_tablespace.db
+2025-09-12 21:00:10,596 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data/test_index_1\default_tablespace.db | target_size=4096
+2025-09-12 21:00:10,597 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=1 | tablespace=default | data_length=4096 | file_offset=0
+2025-09-12 21:00:10,597 - page_manager - DEBUG - _log_with_context:97 - Writing page 1 to tablespace 'default', file: index_data/test_index_2\default_tablespace.db
+2025-09-12 21:00:10,597 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data/test_index_2\default_tablespace.db | target_size=4096
+2025-09-12 21:00:10,598 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=1 | tablespace=default | data_length=4096 | file_offset=0
+2025-09-12 21:00:10,600 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-12 21:00:10,600 - page_manager - INFO - _log_with_context:97 - PageManager cleanup completed
+2025-09-12 21:00:10,602 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-12 21:00:10,602 - page_manager - INFO - _log_with_context:97 - PageManager cleanup completed
+2025-09-12 21:00:10,603 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-12 21:00:10,603 - page_manager - INFO - _log_with_context:97 - PageManager cleanup completed
+2025-09-12 21:00:10,605 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-12 21:00:10,605 - page_manager - INFO - _log_with_context:97 - PageManager cleanup completed

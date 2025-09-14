@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional, Any, Dict
-
+from enum import Enum
+from typing import Optional, List
 
 class ASTNode(ABC):
     """AST节点基类"""
@@ -17,6 +18,13 @@ class Statement(ASTNode):
     """语句基类"""
     pass
 
+class TransactionAwareStmt(Statement):
+    """支持事务的语句基类"""
+
+    def __init__(self):
+        super().__init__()
+        self.transaction_id: Optional[str] = None  # 执行时由引擎设置
+        self.in_transaction: bool = False
 
 class CreateTableStmt(Statement):
     """CREATE TABLE语句"""
@@ -36,7 +44,7 @@ class CreateTableStmt(Statement):
         }
 
 
-class InsertStmt(Statement):
+class InsertStmt(TransactionAwareStmt):
     """INSERT语句"""
 
     def __init__(self, table_name: str, columns: Optional[List[str]], values: List['Expression']):
@@ -53,7 +61,7 @@ class InsertStmt(Statement):
         }
 
 
-class SelectStmt(Statement):
+class SelectStmt(TransactionAwareStmt):
     """SELECT语句"""
 
     def __init__(self, columns: List[str], from_clause: 'FromClause',
@@ -74,6 +82,8 @@ class SelectStmt(Statement):
             "columns": self.columns,
             "from_clause": self.from_clause.to_dict() if self.from_clause else None,
             "where_clause": self.where_clause.to_dict() if self.where_clause else None,
+            "transaction_id": self.transaction_id,
+            "in_transaction": self.in_transaction
         }
 
         if self.group_by:
@@ -89,7 +99,7 @@ class SelectStmt(Statement):
         return result
 
 
-class UpdateStmt(Statement):
+class UpdateStmt(TransactionAwareStmt):
     """UPDATE语句"""
 
     def __init__(self, table_name: str, assignments: List[tuple],
@@ -110,7 +120,7 @@ class UpdateStmt(Statement):
         }
 
 
-class DeleteStmt(Statement):
+class DeleteStmt(TransactionAwareStmt):
     """DELETE语句"""
 
     def __init__(self, table_name: str, where_clause: Optional['Expression'] = None):
@@ -255,14 +265,34 @@ class IdentifierExpr(Expression):
 class LiteralExpr(Expression):
     """字面量表达式"""
 
-    def __init__(self, value: Any):
+    def __init__(self, value: Any, data_type: Optional[str] = None):
         self.value = value
+        self.data_type = data_type or self._infer_type(value)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
             "type": "LiteralExpr",
-            "value": self.value
+            "value": self.value,
+            "data_type": self.data_type
         }
+
+    def _infer_type(self, value: Any) -> str:
+        """推断数据类型"""
+        if isinstance(value, int):
+            return "INT"
+        elif isinstance(value, float):
+            return "FLOAT"
+        elif isinstance(value, str):
+            return "STRING"
+        elif isinstance(value, bool):
+            return "BOOLEAN"
+        else:
+            return "UNKNOWN"
+
+    def __str__(self) -> str:
+        if isinstance(self.value, str):
+            return f"'{self.value}'"
+        return str(self.value)
 
 
 class FunctionExpr(Expression):
@@ -372,3 +402,136 @@ class OrderByExpr(ASTNode):
             "column_ref": self.column_ref.to_dict(),
             "direction": self.direction
         }
+
+class IsolationLevel(Enum):
+    """隔离级别"""
+    READ_UNCOMMITTED = "READ UNCOMMITTED"
+    READ_COMMITTED = "READ COMMITTED"
+    REPEATABLE_READ = "REPEATABLE READ"
+    SERIALIZABLE = "SERIALIZABLE"
+
+
+class TransactionMode(Enum):
+    """事务模式"""
+    READ_WRITE = "READ WRITE"
+    READ_ONLY = "READ ONLY"
+
+
+# 事务控制语句基类
+class TransactionStmt(Statement):
+    """事务控制语句基类"""
+    pass
+
+
+class BeginTransactionStmt(TransactionStmt):
+    """BEGIN TRANSACTION语句"""
+
+    def __init__(self, isolation_level: Optional[IsolationLevel] = None,
+                 transaction_mode: Optional[TransactionMode] = None):
+        """
+        BEGIN [TRANSACTION]
+        [ISOLATION LEVEL isolation_level]
+        [READ WRITE | READ ONLY]
+        """
+        self.isolation_level = isolation_level
+        self.transaction_mode = transaction_mode
+
+    def to_dict(self) -> dict:
+        return {
+            "type": "BeginTransactionStmt",
+            "isolation_level": self.isolation_level.value if self.isolation_level else None,
+            "transaction_mode": self.transaction_mode.value if self.transaction_mode else None
+        }
+
+    def __str__(self) -> str:
+        parts = ["BEGIN TRANSACTION"]
+        if self.isolation_level:
+            parts.append(f"ISOLATION LEVEL {self.isolation_level.value}")
+        if self.transaction_mode:
+            parts.append(self.transaction_mode.value)
+        return " ".join(parts)
+
+
+class CommitStmt(TransactionStmt):
+    """COMMIT语句"""
+
+    def __init__(self, work: bool = False):
+        """
+        COMMIT [WORK]
+        """
+        self.work = work
+
+    def to_dict(self) -> dict:
+        return {
+            "type": "CommitStmt",
+            "work": self.work
+        }
+
+    def __str__(self) -> str:
+        return "COMMIT" + (" WORK" if self.work else "")
+
+
+class RollbackStmt(TransactionStmt):
+    """ROLLBACK语句"""
+
+    def __init__(self, work: bool = False, to_savepoint: Optional[str] = None):
+        """
+        ROLLBACK [WORK] [TO [SAVEPOINT] savepoint_name]
+        """
+        self.work = work
+        self.to_savepoint = to_savepoint
+
+    def to_dict(self) -> dict:
+        return {
+            "type": "RollbackStmt",
+            "work": self.work,
+            "to_savepoint": self.to_savepoint
+        }
+
+    def __str__(self) -> str:
+        result = "ROLLBACK"
+        if self.work:
+            result += " WORK"
+        if self.to_savepoint:
+            result += f" TO SAVEPOINT {self.to_savepoint}"
+        return result
+
+
+class SavepointStmt(TransactionStmt):
+    """SAVEPOINT语句"""
+
+    def __init__(self, savepoint_name: str):
+        """
+        SAVEPOINT savepoint_name
+        """
+        self.savepoint_name = savepoint_name
+
+    def to_dict(self) -> dict:
+        return {
+            "type": "SavepointStmt",
+            "savepoint_name": self.savepoint_name
+        }
+
+    def __str__(self) -> str:
+        return f"SAVEPOINT {self.savepoint_name}"
+
+
+class ReleaseSavepointStmt(TransactionStmt):
+    """RELEASE SAVEPOINT语句"""
+
+    def __init__(self, savepoint_name: str):
+        """
+        RELEASE SAVEPOINT savepoint_name
+        """
+        self.savepoint_name = savepoint_name
+
+    def to_dict(self) -> dict:
+        return {
+            "type": "ReleaseSavepointStmt",
+            "savepoint_name": self.savepoint_name
+        }
+
+    def __str__(self) -> str:
+        return f"RELEASE SAVEPOINT {self.savepoint_name}"
+
+

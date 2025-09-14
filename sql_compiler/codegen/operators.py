@@ -1,6 +1,23 @@
 from abc import ABC, abstractmethod
+from datetime import time
+from typing import List, Any, Dict, Optional, Iterator, Tuple
+from sql_compiler.parser.ast_nodes import *
 from typing import List, Any, Dict, Optional, Iterator, Tuple
 from sql_compiler.parser.ast_nodes import Expression
+import time
+
+
+# 添加事务相关的枚举和类
+class IsolationLevel:
+    READ_UNCOMMITTED = "READ UNCOMMITTED"
+    READ_COMMITTED = "READ COMMITTED"
+    REPEATABLE_READ = "REPEATABLE READ"
+    SERIALIZABLE = "SERIALIZABLE"
+
+
+class TransactionMode:
+    READ_WRITE = "READ WRITE"
+    READ_ONLY = "READ ONLY"
 
 
 class Operator(ABC):
@@ -19,6 +36,123 @@ class Operator(ABC):
         """执行操作"""
         pass
 
+class BeginTransactionOp(Operator):
+    """BEGIN TRANSACTION 操作符"""
+
+    def __init__(self, isolation_level: Optional[str] = None,
+                 transaction_mode: Optional[str] = None):
+        super().__init__()
+        self.isolation_level = isolation_level
+        self.transaction_mode = transaction_mode
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": "BeginTransactionOp",
+            "isolation_level": self.isolation_level,
+            "transaction_mode": self.transaction_mode
+        }
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        """执行开始事务操作"""
+        yield {
+            "operation": "begin_transaction",
+            "isolation_level": self.isolation_level or "READ_COMMITTED",
+            "transaction_mode": self.transaction_mode or "READ_WRITE",
+            "status": "ready_for_execution",
+            "message": "事务开始操作已准备就绪"
+        }
+
+
+class CommitTransactionOp(Operator):
+    """COMMIT TRANSACTION 操作符"""
+
+    def __init__(self, work: bool = False):
+        super().__init__()
+        self.work = work
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": "CommitTransactionOp",
+            "work": self.work
+        }
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        """执行提交事务操作"""
+        yield {
+            "operation": "commit_transaction",
+            "work": self.work,
+            "status": "ready_for_execution",
+            "message": "事务提交操作已准备就绪"
+        }
+
+
+class RollbackTransactionOp(Operator):
+    """ROLLBACK TRANSACTION 操作符"""
+
+    def __init__(self, work: bool = False, to_savepoint: Optional[str] = None):
+        super().__init__()
+        self.work = work
+        self.to_savepoint = to_savepoint
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": "RollbackTransactionOp",
+            "work": self.work,
+            "to_savepoint": self.to_savepoint
+        }
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        """执行回滚事务操作"""
+        yield {
+            "operation": "rollback_transaction",
+            "work": self.work,
+            "to_savepoint": self.to_savepoint,
+            "status": "ready_for_execution",
+            "message": "事务回滚操作已准备就绪"
+        }
+
+
+class SavepointOp(Operator):
+    """SAVEPOINT 操作符"""
+
+    def __init__(self, savepoint_name: str):
+        super().__init__()
+        self.savepoint_name = savepoint_name
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": "SavepointOp",
+            "savepoint_name": self.savepoint_name
+        }
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        """执行保存点操作"""
+        yield {
+            "operation": "create_savepoint",
+            "savepoint_name": self.savepoint_name,
+            "status": "ready_for_execution"
+        }
+
+
+class ReleaseSavepointOp(Operator):
+    """RELEASE SAVEPOINT 操作符"""
+
+    def __init__(self, savepoint_name: str):
+        super().__init__()
+        self.savepoint_name = savepoint_name
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": "ReleaseSavepointOp",
+            "savepoint_name": self.savepoint_name
+        }
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        yield {
+            "operation": "release_savepoint",
+            "savepoint_name": self.savepoint_name,
+            "status": "ready_for_execution"
+        }
 
 # ==================== DDL操作符 ====================
 
@@ -44,102 +178,7 @@ class CreateTableOp(Operator):
         # 实际的表创建逻辑会在存储层实现
         yield {"operation": "create_table", "table": self.table_name, "status": "success"}
 
-
-# ==================== DML操作符 ====================
-
-class InsertOp(Operator):
-    """INSERT操作符"""
-
-    def __init__(self, table_name: str, columns: Optional[List[str]], values: List[Expression]):
-        super().__init__()
-        self.table_name = table_name
-        self.columns = columns
-        self.values = values
-
-    def to_dict(self) -> Dict[str, Any]:
-        return {
-            "type": "InsertOp",
-            "table_name": self.table_name,
-            "columns": self.columns,
-            "values": [v.to_dict() for v in self.values]
-        }
-
-    def execute(self) -> Iterator[Dict[str, Any]]:
-        yield {"operation": "insert", "table": self.table_name, "rows_affected": 1}
-
-
-class UpdateOp(Operator):
-    """UPDATE操作符"""
-
-    def __init__(self, table_name: str, assignments: List[tuple], children: List[Operator]):
-        super().__init__(children)
-        self.table_name = table_name
-        self.assignments = assignments  # [(column, expression), ...]
-
-    def to_dict(self) -> Dict[str, Any]:
-        return {
-            "type": "UpdateOp",
-            "table_name": self.table_name,
-            "assignments": [
-                {"column": col, "expression": expr.to_dict()}
-                for col, expr in self.assignments
-            ],
-            "children": [child.to_dict() for child in self.children]
-        }
-
-    def execute(self) -> Iterator[Dict[str, Any]]:
-        # 从子操作符获取要更新的行
-        rows_affected = 0
-        for child in self.children:
-            for row in child.execute():
-                # 应用赋值操作
-                rows_affected += 1
-
-        yield {"operation": "update", "table": self.table_name, "rows_affected": rows_affected}
-
-
-class DeleteOp(Operator):
-    """DELETE操作符"""
-
-    def __init__(self, table_name: str, children: List[Operator]):
-        super().__init__(children)
-        self.table_name = table_name
-
-    def to_dict(self) -> Dict[str, Any]:
-        return {
-            "type": "DeleteOp",
-            "table_name": self.table_name,
-            "children": [child.to_dict() for child in self.children]
-        }
-
-    def execute(self) -> Iterator[Dict[str, Any]]:
-        rows_affected = 0
-        for child in self.children:
-            for row in child.execute():
-                rows_affected += 1
-
-        yield {"operation": "delete", "table": self.table_name, "rows_affected": rows_affected}
-
-
 # ==================== 查询操作符 ====================
-
-class SeqScanOp(Operator):
-    """顺序扫描操作符"""
-
-    def __init__(self, table_name: str):
-        super().__init__()
-        self.table_name = table_name
-
-    def to_dict(self) -> Dict[str, Any]:
-        return {
-            "type": "SeqScanOp",
-            "table_name": self.table_name
-        }
-
-    def execute(self) -> Iterator[Dict[str, Any]]:
-        # 模拟从表中扫描数据
-        yield {"table": self.table_name, "operation": "scan"}
-
 
 class FilterOp(Operator):
     """过滤操作符"""
@@ -430,33 +469,6 @@ class SubqueryOp(Operator):
         # 执行子查询
         for row in self.select_plan.execute():
             yield row
-
-
-# ==================== 优化操作符 ====================
-
-class OptimizedSeqScanOp(Operator):
-    """优化的表扫描操作符（支持列投影）"""
-
-    def __init__(self, table_name: str, selected_columns: Optional[List[str]] = None):
-        super().__init__([])
-        self.table_name = table_name
-        self.selected_columns = selected_columns or ["*"]
-
-    def to_dict(self) -> Dict[str, Any]:
-        return {
-            "type": "OptimizedSeqScanOp",
-            "table_name": self.table_name,
-            "selected_columns": self.selected_columns,
-            "optimization": "projection_pushdown"
-        }
-
-    def execute(self) -> Iterator[Dict[str, Any]]:
-        yield {
-            "table": self.table_name,
-            "operation": "optimized_scan",
-            "columns": self.selected_columns
-        }
-
 
 class FilteredSeqScanOp(Operator):
     """带过滤条件的表扫描操作符"""
@@ -1060,32 +1072,6 @@ class WindowFunctionOp(Operator):
                 yield result_row
 
 
-# ==================== 并行操作符 ====================
-
-class ParallelSeqScanOp(SeqScanOp):
-    """并行顺序扫描操作符"""
-
-    def __init__(self, table_name: str, worker_count: int = 4):
-        super().__init__(table_name)
-        self.worker_count = worker_count
-
-    def to_dict(self) -> Dict[str, Any]:
-        result = super().to_dict()
-        result["type"] = "ParallelSeqScanOp"
-        result["worker_count"] = self.worker_count
-        result["parallelism"] = True
-        return result
-
-    def execute(self) -> Iterator[Dict[str, Any]]:
-        # 模拟并行扫描
-        for worker_id in range(self.worker_count):
-            yield {
-                "table": self.table_name,
-                "operation": "parallel_scan",
-                "worker_id": worker_id,
-                "total_workers": self.worker_count
-            }
-
 
 class GatherOp(Operator):
     """收集并行结果操作符"""
@@ -1106,47 +1092,6 @@ class GatherOp(Operator):
             for row in child.execute():
                 yield row
 
-
-# 在operators.py文件末尾添加
-
-class AliasAwareSeqScanOp(SeqScanOp):
-    """支持别名的顺序扫描操作符"""
-
-    def __init__(self, table_name: str, table_alias: Optional[str] = None):
-        super().__init__(table_name)
-        self.table_alias = table_alias
-        self.real_table_name = table_name
-
-    def get_effective_name(self) -> str:
-        """获取有效的表名（优先使用别名）"""
-        return self.table_alias if self.table_alias else self.real_table_name
-
-    def to_dict(self) -> Dict[str, Any]:
-        result = {
-            "type": "SeqScanOp",
-            "table_name": self.real_table_name
-        }
-
-        if self.table_alias:
-            result["table_alias"] = self.table_alias
-            result["display_name"] = self.table_alias
-        else:
-            result["display_name"] = self.real_table_name
-
-        return result
-
-    def execute(self) -> Iterator[Dict[str, Any]]:
-        yield {
-            "table": self.real_table_name,
-            "alias": self.table_alias,
-            "operation": "scan",
-            "display_name": self.get_effective_name()
-        }
-
-    def __repr__(self):
-        if self.table_alias:
-            return f"SeqScanOp({self.real_table_name} AS {self.table_alias})"
-        return f"SeqScanOp({self.real_table_name})"
 
 
 class AliasAwareJoinOp(JoinOp):
@@ -1442,3 +1387,503 @@ class SortOp(Operator):
         sorted_results = sorted(child_results, key=sort_key)
         for row in sorted_results:
             yield row
+
+
+
+class TransactionOp(Operator):
+    """事务操作基类"""
+
+    def __init__(self):
+        super().__init__([])  # 事务操作通常没有子节点
+        self.execution_time: Optional[float] = None
+
+
+class BeginTransactionOp(TransactionOp):
+    """BEGIN TRANSACTION 操作符"""
+
+    def __init__(self, isolation_level: Optional[IsolationLevel] = None,
+                 transaction_mode: Optional[TransactionMode] = None):
+        super().__init__()
+        self.isolation_level = isolation_level
+        self.transaction_mode = transaction_mode
+
+    def to_dict(self) -> dict:
+        return {
+            "type": "BeginTransactionOp",
+            "isolation_level": self.isolation_level.value if self.isolation_level else None,
+            "transaction_mode": self.transaction_mode.value if self.transaction_mode else None
+        }
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        """执行开始事务操作"""
+        start_time = time.time()
+
+        try:
+            yield {
+                "operation": "begin_transaction",
+                "isolation_level": self.isolation_level.value if self.isolation_level else "READ_COMMITTED",
+                "transaction_mode": self.transaction_mode.value if self.transaction_mode else "READ_WRITE",
+                "status": "ready_for_execution",
+                "message": "事务开始操作已准备就绪，等待执行引擎调用存储层接口"
+            }
+
+        finally:
+            self.execution_time = time.time() - start_time
+
+
+class CommitTransactionOp(TransactionOp):
+    """COMMIT TRANSACTION 操作符"""
+
+    def __init__(self, work: bool = False):
+        super().__init__()
+        self.work = work
+
+    def to_dict(self) -> dict:
+        return {
+            "type": "CommitTransactionOp",
+            "work": self.work
+        }
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        """执行提交事务操作"""
+        start_time = time.time()
+
+        try:
+            yield {
+                "operation": "commit_transaction",
+                "work": self.work,
+                "status": "ready_for_execution",
+                "message": "事务提交操作已准备就绪，等待执行引擎调用存储层接口"
+            }
+
+        finally:
+            self.execution_time = time.time() - start_time
+
+
+class RollbackTransactionOp(TransactionOp):
+    """ROLLBACK TRANSACTION 操作符"""
+
+    def __init__(self, work: bool = False, to_savepoint: Optional[str] = None):
+        super().__init__()
+        self.work = work
+        self.to_savepoint = to_savepoint
+
+    def to_dict(self) -> dict:
+        return {
+            "type": "RollbackTransactionOp",
+            "work": self.work,
+            "to_savepoint": self.to_savepoint
+        }
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        """执行回滚事务操作"""
+        start_time = time.time()
+
+        try:
+            yield {
+                "operation": "rollback_transaction",
+                "work": self.work,
+                "to_savepoint": self.to_savepoint,
+                "status": "ready_for_execution",
+                "message": "事务回滚操作已准备就绪，等待执行引擎调用存储层接口"
+            }
+
+        finally:
+            self.execution_time = time.time() - start_time
+
+
+class SavepointOp(TransactionOp):
+    """SAVEPOINT 操作符"""
+
+    def __init__(self, savepoint_name: str):
+        super().__init__()
+        self.savepoint_name = savepoint_name
+
+    def to_dict(self) -> dict:
+        return {
+            "type": "SavepointOp",
+            "savepoint_name": self.savepoint_name
+        }
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        """执行保存点操作"""
+        start_time = time.time()
+
+        try:
+            yield {
+                "operation": "create_savepoint",
+                "savepoint_name": self.savepoint_name,
+                "status": "ready_for_execution",
+                "message": f"保存点 {self.savepoint_name} 创建操作已准备就绪"
+            }
+
+        finally:
+            self.execution_time = time.time() - start_time
+
+
+class ReleaseSavepointOp(TransactionOp):
+    """RELEASE SAVEPOINT 操作符"""
+
+    def __init__(self, savepoint_name: str):
+        super().__init__()
+        self.savepoint_name = savepoint_name
+
+    def to_dict(self) -> dict:
+        return {
+            "type": "ReleaseSavepointOp",
+            "savepoint_name": self.savepoint_name
+        }
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        """执行释放保存点操作"""
+        start_time = time.time()
+
+        try:
+            yield {
+                "operation": "release_savepoint",
+                "savepoint_name": self.savepoint_name,
+                "status": "ready_for_execution",
+                "message": f"保存点 {self.savepoint_name} 释放操作已准备就绪"
+            }
+
+        finally:
+            self.execution_time = time.time() - start_time
+
+
+class TransactionAwareOp(Operator):
+    """支持事务的操作符基类"""
+
+    def __init__(self, children: List[Operator]):
+        super().__init__(children)
+        self.transaction_id: Optional[str] = None
+        self.requires_transaction: bool = True  # 是否需要在事务中执行
+
+    def set_transaction_context(self, transaction_id: Optional[str]):
+        """设置事务上下文"""
+        self.transaction_id = transaction_id
+        # 递归设置子操作符的事务上下文
+        for child in self.children:
+            if isinstance(child, TransactionAwareOp):
+                child.set_transaction_context(transaction_id)
+
+
+class SeqScanOp(TransactionAwareOp):
+    """顺序扫描操作符 - 支持事务（合并版）"""
+
+    def __init__(self, table_name: str):
+        super().__init__([])
+        self.table_name = table_name
+        self.requires_transaction = False  # 读操作可以在事务外执行
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": "SeqScanOp",
+            "table_name": self.table_name,
+            "transaction_id": self.transaction_id,
+            "requires_transaction": self.requires_transaction
+        }
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        """执行顺序扫描 - 支持事务"""
+        yield {
+            "operation": "seq_scan",
+            "table": self.table_name,
+            "transaction_id": self.transaction_id,
+            "status": "ready_for_execution",
+            "message": f"顺序扫描表 {self.table_name}，事务ID: {self.transaction_id or 'None'}"
+        }
+
+
+class InsertOp(Operator):
+    """INSERT操作符 - 支持事务"""
+
+    def __init__(self, table_name: str, columns: Optional[List[str]], values: List[Expression]):
+        super().__init__()
+        self.table_name = table_name
+        self.columns = columns  # 保持原有的columns属性
+        self.values = values
+
+        # 添加事务支持属性
+        self.transaction_id: Optional[str] = None
+        self.requires_transaction: bool = True
+
+    def set_transaction_context(self, transaction_id: Optional[str]):
+        """设置事务上下文"""
+        self.transaction_id = transaction_id
+
+    def to_dict(self) -> Dict[str, Any]:
+        # 处理values中的表达式对象，防止JSON序列化错误
+        serializable_values = []
+        for value in self.values:
+            if hasattr(value, 'to_dict'):
+                serializable_values.append(value.to_dict())
+            elif hasattr(value, 'value'):  # LiteralExpr对象
+                serializable_values.append(value.value)
+            else:
+                serializable_values.append(str(value))
+
+        return {
+            "type": "InsertOp",
+            "table_name": self.table_name,
+            "columns": self.columns,  # 保持原有结构
+            "values": serializable_values,  # 使用处理后的values
+            "transaction_id": self.transaction_id,
+            "requires_transaction": self.requires_transaction
+        }
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        # 提取实际值用于执行
+        actual_values = []
+        for value in self.values:
+            if hasattr(value, 'value'):
+                actual_values.append(value.value)
+            else:
+                actual_values.append(value)
+
+        yield {
+            "operation": "insert",
+            "table": self.table_name,
+            "columns": self.columns,
+            "values": actual_values,
+            "transaction_id": self.transaction_id,
+            "requires_transaction": self.requires_transaction,
+            "rows_affected": 1
+        }
+
+
+class UpdateOp(Operator):
+    """UPDATE操作符 - 支持事务"""
+
+    def __init__(self, table_name: str, assignments: List[tuple], children: List[Operator]):
+        super().__init__(children)
+        self.table_name = table_name
+        self.assignments = assignments  # 保持原有结构 [(column, expression), ...]
+
+        # 添加事务支持
+        self.transaction_id: Optional[str] = None
+        self.requires_transaction: bool = True
+
+    def set_transaction_context(self, transaction_id: Optional[str]):
+        """设置事务上下文"""
+        self.transaction_id = transaction_id
+
+    def to_dict(self) -> Dict[str, Any]:
+        # 处理assignments中的表达式
+        serializable_assignments = []
+        for col, expr in self.assignments:
+            if hasattr(expr, 'to_dict'):
+                serializable_assignments.append({"column": col, "expression": expr.to_dict()})
+            elif hasattr(expr, 'value'):
+                serializable_assignments.append({"column": col, "expression": expr.value})
+            else:
+                serializable_assignments.append({"column": col, "expression": str(expr)})
+
+        return {
+            "type": "UpdateOp",
+            "table_name": self.table_name,
+            "assignments": serializable_assignments,
+            "transaction_id": self.transaction_id,
+            "requires_transaction": self.requires_transaction,
+            "children": [child.to_dict() for child in self.children]
+        }
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        # 从子操作符获取要更新的行
+        rows_affected = 0
+        for child in self.children:
+            for row in child.execute():
+                rows_affected += 1
+
+        # 处理实际的赋值
+        actual_assignments = []
+        for col, expr in self.assignments:
+            if hasattr(expr, 'value'):
+                actual_assignments.append((col, expr.value))
+            else:
+                actual_assignments.append((col, expr))
+
+        yield {
+            "operation": "update",
+            "table": self.table_name,
+            "assignments": actual_assignments,
+            "transaction_id": self.transaction_id,
+            "requires_transaction": self.requires_transaction,
+            "rows_affected": rows_affected
+        }
+
+
+class DeleteOp(Operator):
+    """DELETE操作符 - 支持事务"""
+
+    def __init__(self, table_name: str, children: List[Operator]):
+        super().__init__(children)
+        self.table_name = table_name
+
+        # 添加事务支持
+        self.transaction_id: Optional[str] = None
+        self.requires_transaction: bool = True
+
+    def set_transaction_context(self, transaction_id: Optional[str]):
+        """设置事务上下文"""
+        self.transaction_id = transaction_id
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": "DeleteOp",
+            "table_name": self.table_name,
+            "transaction_id": self.transaction_id,
+            "requires_transaction": self.requires_transaction,
+            "children": [child.to_dict() for child in self.children]
+        }
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        rows_affected = 0
+        for child in self.children:
+            for row in child.execute():
+                rows_affected += 1
+
+        yield {
+            "operation": "delete",
+            "table": self.table_name,
+            "transaction_id": self.transaction_id,
+            "requires_transaction": self.requires_transaction,
+            "rows_affected": rows_affected
+        }
+
+class OptimizedSeqScanOp(TransactionAwareOp):
+    """优化的表扫描操作符（支持列投影和事务）"""
+
+    def __init__(self, table_name: str, selected_columns: Optional[List[str]] = None):
+        super().__init__([])
+        self.table_name = table_name
+        self.selected_columns = selected_columns or ["*"]
+        self.requires_transaction = False  # 读操作可以在事务外执行
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": "OptimizedSeqScanOp",
+            "table_name": self.table_name,
+            "selected_columns": self.selected_columns,
+            "transaction_id": self.transaction_id,
+            "requires_transaction": self.requires_transaction,
+            "optimization": "projection_pushdown"
+        }
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        """执行优化扫描"""
+        yield {
+            "operation": "optimized_seq_scan",
+            "table": self.table_name,
+            "selected_columns": self.selected_columns,
+            "transaction_id": self.transaction_id,
+            "optimization": "projection_pushdown",
+            "status": "ready_for_execution"
+        }
+
+
+class ParallelSeqScanOp(TransactionAwareOp):
+    """并行顺序扫描操作符 - 支持事务"""
+
+    def __init__(self, table_name: str, worker_count: int = 4):
+        super().__init__([])
+        self.table_name = table_name
+        self.worker_count = worker_count
+        self.requires_transaction = False  # 读操作可以在事务外执行
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": "ParallelSeqScanOp",
+            "table_name": self.table_name,
+            "worker_count": self.worker_count,
+            "transaction_id": self.transaction_id,
+            "requires_transaction": self.requires_transaction,
+            "parallelism": True
+        }
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        """执行并行扫描"""
+        # 模拟并行扫描
+        for worker_id in range(self.worker_count):
+            yield {
+                "table": self.table_name,
+                "operation": "parallel_scan",
+                "worker_id": worker_id,
+                "worker_count": self.worker_count,
+                "transaction_id": self.transaction_id,
+                "status": "ready_for_execution"
+            }
+
+class AliasAwareSeqScanOp(SeqScanOp):
+    """支持别名的顺序扫描操作符"""
+
+    def __init__(self, table_name: str, table_alias: Optional[str] = None):
+        super().__init__(table_name)
+        self.table_alias = table_alias
+        self.real_table_name = table_name
+
+    def get_effective_name(self) -> str:
+        """获取有效的表名（优先使用别名）"""
+        return self.table_alias if self.table_alias else self.real_table_name
+
+    def to_dict(self) -> Dict[str, Any]:
+        result = {
+            "type": "SeqScanOp",
+            "table_name": self.real_table_name
+        }
+
+        if self.table_alias:
+            result["table_alias"] = self.table_alias
+            result["display_name"] = self.table_alias
+        else:
+            result["display_name"] = self.real_table_name
+
+        return result
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        yield {
+            "table": self.real_table_name,
+            "alias": self.table_alias,
+            "operation": "scan",
+            "display_name": self.get_effective_name()
+        }
+
+    def __repr__(self):
+        if self.table_alias:
+            return f"SeqScanOp({self.real_table_name} AS {self.table_alias})"
+        return f"SeqScanOp({self.real_table_name})"
+
+
+def set_transaction_context_for_plan(plan: Operator, transaction_id: Optional[str]):
+    """为执行计划树设置事务上下文"""
+    # 为当前节点设置事务上下文
+    if hasattr(plan, 'set_transaction_context'):
+        plan.set_transaction_context(transaction_id)
+
+    # 递归处理子节点
+    for child in plan.children:
+        set_transaction_context_for_plan(child, transaction_id)
+
+
+def requires_transaction(plan: Operator) -> bool:
+    """判断执行计划是否需要事务支持"""
+    # 检查当前节点
+    if hasattr(plan, 'requires_transaction') and plan.requires_transaction:
+        return True
+
+    # 检查子节点
+    for child in plan.children:
+        if requires_transaction(child):
+            return True
+
+    return False
+
+
+def is_transaction_statement(plan: Operator) -> bool:
+    """判断是否为事务控制语句"""
+    return isinstance(plan, (
+        BeginTransactionOp,
+        CommitTransactionOp,
+        RollbackTransactionOp,
+        SavepointOp,
+        ReleaseSavepointOp
+    ))

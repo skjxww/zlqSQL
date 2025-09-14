@@ -661,13 +661,13 @@ class SimpleDBGUI:
                 end_time = datetime.now()
                 execution_time = (end_time - start_time).total_seconds()
 
-                # 成功时也分析SQL以提供改进建议
+                # 执行成功时，只获取明确的优化建议，不进行语法推测
                 improvement_analysis = self.sql_corrector.analyze_and_suggest(sql)
 
                 self.root.after(0, self._update_result_ui, result, sql, execution_time, improvement_analysis)
 
             except Exception as e:
-                # 发生错误时进行智能分析
+                # 发生错误时进行完整的智能分析（包括语法推测）
                 error_analysis = self.sql_corrector.analyze_and_suggest(sql, e)
                 self.root.after(0, self._update_error_ui_with_analysis, e, error_analysis)
 

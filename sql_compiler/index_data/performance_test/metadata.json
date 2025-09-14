@@ -1,0 +1,166 @@
+{
+  "next_page_id": 20,
+  "free_pages": [],
+  "allocated_pages": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+  ],
+  "page_usage": {
+    "1": {
+      "allocated_time": 1757682009.653131,
+      "access_count": 1,
+      "last_access": 1757682010.571091,
+      "tablespace": "default"
+    },
+    "2": {
+      "allocated_time": 1757682009.7016912,
+      "access_count": 1,
+      "last_access": 1757682010.5731275,
+      "tablespace": "default"
+    },
+    "3": {
+      "allocated_time": 1757682009.7326293,
+      "access_count": 1,
+      "last_access": 1757682010.5741925,
+      "tablespace": "default"
+    },
+    "4": {
+      "allocated_time": 1757682009.763777,
+      "access_count": 1,
+      "last_access": 1757682010.5752478,
+      "tablespace": "default"
+    },
+    "5": {
+      "allocated_time": 1757682009.7962694,
+      "access_count": 1,
+      "last_access": 1757682010.5762637,
+      "tablespace": "default"
+    },
+    "6": {
+      "allocated_time": 1757682009.826986,
+      "access_count": 1,
+      "last_access": 1757682010.577248,
+      "tablespace": "default"
+    },
+    "7": {
+      "allocated_time": 1757682009.8713717,
+      "access_count": 1,
+      "last_access": 1757682010.578858,
+      "tablespace": "default"
+    },
+    "8": {
+      "allocated_time": 1757682009.909295,
+      "access_count": 1,
+      "last_access": 1757682010.5809126,
+      "tablespace": "default"
+    },
+    "9": {
+      "allocated_time": 1757682009.95214,
+      "access_count": 1,
+      "last_access": 1757682010.5809126,
+      "tablespace": "default"
+    },
+    "10": {
+      "allocated_time": 1757682009.982728,
+      "access_count": 1,
+      "last_access": 1757682010.5825603,
+      "tablespace": "default"
+    },
+    "11": {
+      "allocated_time": 1757682010.025985,
+      "access_count": 1,
+      "last_access": 1757682010.5845678,
+      "tablespace": "default"
+    },
+    "12": {
+      "allocated_time": 1757682010.0609055,
+      "access_count": 1,
+      "last_access": 1757682010.5855672,
+      "tablespace": "default"
+    },
+    "13": {
+      "allocated_time": 1757682010.134348,
+      "access_count": 1,
+      "last_access": 1757682010.5866096,
+      "tablespace": "default"
+    },
+    "14": {
+      "allocated_time": 1757682010.1711037,
+      "access_count": 1,
+      "last_access": 1757682010.5876095,
+      "tablespace": "default"
+    },
+    "15": {
+      "allocated_time": 1757682010.2047331,
+      "access_count": 1,
+      "last_access": 1757682010.588613,
+      "tablespace": "default"
+    },
+    "16": {
+      "allocated_time": 1757682010.2424314,
+      "access_count": 1,
+      "last_access": 1757682010.59061,
+      "tablespace": "default"
+    },
+    "17": {
+      "allocated_time": 1757682010.2715044,
+      "access_count": 1,
+      "last_access": 1757682010.5916097,
+      "tablespace": "default"
+    },
+    "18": {
+      "allocated_time": 1757682010.2974467,
+      "access_count": 1,
+      "last_access": 1757682010.5926101,
+      "tablespace": "default"
+    },
+    "19": {
+      "allocated_time": 1757682010.3224072,
+      "access_count": 1,
+      "last_access": 1757682010.594677,
+      "tablespace": "default"
+    }
+  },
+  "page_tablespaces": {
+    "1": "default",
+    "2": "default",
+    "3": "default",
+    "4": "default",
+    "5": "default",
+    "6": "default",
+    "7": "default",
+    "8": "default",
+    "9": "default",
+    "10": "default",
+    "11": "default",
+    "12": "default",
+    "13": "default",
+    "14": "default",
+    "15": "default",
+    "16": "default",
+    "17": "default",
+    "18": "default",
+    "19": "default"
+  },
+  "last_modification": 1757682010.6045673,
+  "version": "1.0",
+  "total_allocated": 19,
+  "total_free": 0
+}

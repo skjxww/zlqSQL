@@ -386,6 +386,33 @@
       ],
       "created_at": "2025-09-13T01:08:33.774355",
       "row_count": 0
+    },
+    "students10": {
+      "name": "students10",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INT",
+          "constraints": null
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR(50)",
+          "constraints": null
+        },
+        {
+          "name": "age",
+          "type": "INT",
+          "constraints": null
+        },
+        {
+          "name": "major",
+          "type": "VARCHAR(50)",
+          "constraints": null
+        }
+      ],
+      "created_at": "2025-09-13T23:46:22.780772",
+      "row_count": 0
     }
   },
   "metadata": {
@@ -401,7 +428,7 @@
       ],
       "unique": false,
       "type": "BTREE",
-      "created_at": "2025-09-13T01:08:33.774355"
+      "created_at": "2025-09-13T23:46:22.780772"
     }
   }
 }

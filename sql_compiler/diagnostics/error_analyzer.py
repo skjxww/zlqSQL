@@ -45,7 +45,8 @@ class SQLErrorAnalyzer:
 
         # 根据错误类型进行分析
         if "syntax error" in error_str or "unexpected token" in error_str:
-            suggestions.extend(self._analyze_syntax_errors(sql, error))
+            # 在错误检查时启用语法推测
+            suggestions.extend(self._proactive_syntax_check(sql, is_error_check=True))
 
         if "table" in error_str and ("not found" in error_str or "doesn't exist" in error_str):
             suggestions.extend(self._analyze_table_errors(sql, error))
@@ -64,14 +65,11 @@ class SQLErrorAnalyzer:
         return suggestions[:5]
 
     def suggest_corrections(self, sql: str) -> List[ErrorSuggestion]:
-        """为SQL提供改进建议（即使没有错误）- 修复版本"""
+        """为SQL提供改进建议（即使没有错误）- 修复版本：只返回明确的优化建议"""
         suggestions = []
         sql_upper = sql.upper()
 
-        # 🔑 新增：主动进行语法检查
-        suggestions.extend(self._proactive_syntax_check(sql))
-
-        # 1. 性能建议
+        # 1. 性能建议 - 明确的优化
         if 'SELECT *' in sql_upper and 'WHERE' not in sql_upper:
             suggestions.append(ErrorSuggestion(
                 error_type="PERFORMANCE_TIP",
@@ -80,7 +78,7 @@ class SQLErrorAnalyzer:
                 confidence=0.4
             ))
 
-        # 2. 安全建议
+        # 2. 安全建议 - 明确的警告
         if any(dangerous in sql_upper for dangerous in ['DROP', 'DELETE FROM', 'TRUNCATE']):
             suggestions.append(ErrorSuggestion(
                 error_type="SAFETY_WARNING",
@@ -89,84 +87,100 @@ class SQLErrorAnalyzer:
                 confidence=0.8
             ))
 
+        # 3. 聚合函数与非聚合列混用 - 明确的建议
+        if 'GROUP BY' not in sql_upper:
+            has_aggregate = any(func in sql_upper for func in ['COUNT(', 'SUM(', 'AVG(', 'MAX(', 'MIN('])
+            select_match = re.search(r'SELECT\s+(.*?)\s+FROM', sql, re.IGNORECASE | re.DOTALL)
+            if has_aggregate and select_match:
+                columns_str = select_match.group(1)
+                if ',' in columns_str and any(
+                        func not in columns_str.upper() for func in ['COUNT(', 'SUM(', 'AVG(', 'MAX(', 'MIN(']):
+                    suggestions.append(ErrorSuggestion(
+                        error_type="AGGREGATE_WITHOUT_GROUP_BY",
+                        description="使用聚合函数时可能需要GROUP BY",
+                        suggestion="当SELECT中有聚合函数时，所有非聚合列都需要在GROUP BY中",
+                        confidence=0.6
+                    ))
+
         return suggestions
 
-    def _proactive_syntax_check(self, sql: str) -> List[ErrorSuggestion]:
+    def _proactive_syntax_check(self, sql: str, is_error_check: bool = False) -> List[ErrorSuggestion]:
         """主动进行语法检查（不需要错误即可检查）"""
         suggestions = []
         sql_upper = sql.upper()
 
-        # 1. 缺少分号检查
-        if not sql.strip().endswith(';'):
-            suggestions.append(ErrorSuggestion(
-                error_type="MISSING_SEMICOLON",
-                description="SQL语句缺少结尾分号",
-                suggestion="在SQL语句末尾添加分号 (;)",
-                corrected_sql=sql.strip() + ';',
-                confidence=0.9
-            ))
+        if is_error_check:
+            # 1. 缺少分号检查
+            if not sql.strip().endswith(';'):
+                suggestions.append(ErrorSuggestion(
+                    error_type="MISSING_SEMICOLON",
+                    description="SQL语句缺少结尾分号",
+                    suggestion="在SQL语句末尾添加分号 (;)",
+                    corrected_sql=sql.strip() + ';',
+                    confidence=0.9
+                ))
 
-        # 2. 括号不匹配检查
-        open_parens = sql.count('(')
-        close_parens = sql.count(')')
-        if open_parens != close_parens:
-            suggestions.append(ErrorSuggestion(
-                error_type="UNMATCHED_PARENTHESES",
-                description=f"括号不匹配：开括号{open_parens}个，闭括号{close_parens}个",
-                suggestion="检查并修正括号匹配",
-                confidence=0.8
-            ))
+            # 2. 括号不匹配检查
+            open_parens = sql.count('(')
+            close_parens = sql.count(')')
+            if open_parens != close_parens:
+                suggestions.append(ErrorSuggestion(
+                    error_type="UNMATCHED_PARENTHESES",
+                    description=f"括号不匹配：开括号{open_parens}个，闭括号{close_parens}个",
+                    suggestion="检查并修正括号匹配",
+                    confidence=0.8
+                ))
 
-        # 3. 常见关键字拼写错误检查 - 只在关键字位置检查
-        # 提取SQL中的关键字位置
-        keyword_positions = self._find_keyword_positions(sql_upper)
+            # 3. 常见关键字拼写错误检查 - 只在关键字位置检查
+            # 提取SQL中的关键字位置
+            keyword_positions = self._find_keyword_positions(sql_upper)
 
-        for position, word in keyword_positions:
-            if word not in self.sql_keywords and len(word) > 2:
-                matches = get_close_matches(word, self.sql_keywords, n=3, cutoff=0.6)
-                if matches:
-                    # 只替换关键字位置的单词，而不是所有出现的地方
-                    sql_list = list(sql_upper)
-                    sql_list[position:position + len(word)] = list(matches[0])
-                    corrected_sql = ''.join(sql_list).lower()
+            for position, word in keyword_positions:
+                if word not in self.sql_keywords and len(word) > 2:
+                    matches = get_close_matches(word, self.sql_keywords, n=3, cutoff=0.6)
+                    if matches:
+                        # 只替换关键字位置的单词，而不是所有出现的地方
+                        sql_list = list(sql_upper)
+                        sql_list[position:position + len(word)] = list(matches[0])
+                        corrected_sql = ''.join(sql_list).lower()
 
-                    suggestions.append(ErrorSuggestion(
-                        error_type="KEYWORD_TYPO",
-                        description=f"可能的关键字拼写错误：'{word}'",
-                        suggestion=f"你是否想写 '{matches[0]}'？其他可能：{', '.join(matches[1:])}",
-                        corrected_sql=corrected_sql,
-                        confidence=0.7
-                    ))
+                        suggestions.append(ErrorSuggestion(
+                            error_type="KEYWORD_TYPO",
+                            description=f"可能的关键字拼写错误：'{word}'",
+                            suggestion=f"你是否想写 '{matches[0]}'？其他可能：{', '.join(matches[1:])}",
+                            corrected_sql=corrected_sql,
+                            confidence=0.7
+                        ))
 
-        # 4. SELECT后缺少列名检查
-        if re.search(r'SELECT\s+FROM', sql_upper):
-            suggestions.append(ErrorSuggestion(
-                error_type="MISSING_COLUMNS",
-                description="SELECT和FROM之间缺少列名",
-                suggestion="在SELECT和FROM之间指定要查询的列，或使用 * 查询所有列",
-                corrected_sql=sql.upper().replace('SELECT FROM', 'SELECT * FROM').lower(),
-                confidence=0.8
-            ))
+            # 4. SELECT后缺少列名检查
+            if re.search(r'SELECT\s+FROM', sql_upper):
+                suggestions.append(ErrorSuggestion(
+                    error_type="MISSING_COLUMNS",
+                    description="SELECT和FROM之间缺少列名",
+                    suggestion="在SELECT和FROM之间指定要查询的列，或使用 * 查询所有列",
+                    corrected_sql=sql.upper().replace('SELECT FROM', 'SELECT * FROM').lower(),
+                    confidence=0.8
+                ))
 
-        # 5. 字符串值可能缺少引号
-        equals_pattern = r'=\s*([a-zA-Z]\w*)\b'
-        matches = re.findall(equals_pattern, sql)
-        if matches:
-            suggestions.append(ErrorSuggestion(
-                error_type="MISSING_QUOTES",
-                description="字符串值可能缺少引号",
-                suggestion="字符串值应该用单引号或双引号包围，例如：name = 'John'",
-                confidence=0.5
-            ))
+            # 5. 字符串值可能缺少引号
+            equals_pattern = r'=\s*([a-zA-Z]\w*)\b'
+            matches = re.findall(equals_pattern, sql)
+            if matches:
+                suggestions.append(ErrorSuggestion(
+                    error_type="MISSING_QUOTES",
+                    description="字符串值可能缺少引号",
+                    suggestion="字符串值应该用单引号或双引号包围，例如：name = 'John'",
+                    confidence=0.5
+                ))
 
-        # 6. JOIN缺少ON子句检查
-        if 'JOIN' in sql_upper and 'ON' not in sql_upper:
-            suggestions.append(ErrorSuggestion(
-                error_type="MISSING_JOIN_CONDITION",
-                description="JOIN语句缺少ON条件",
-                suggestion="JOIN语句需要指定连接条件，例如：LEFT JOIN table2 ON table1.id = table2.id",
-                confidence=0.7
-            ))
+            # 6. JOIN缺少ON子句检查
+            if 'JOIN' in sql_upper and 'ON' not in sql_upper:
+                suggestions.append(ErrorSuggestion(
+                    error_type="MISSING_JOIN_CONDITION",
+                    description="JOIN语句缺少ON条件",
+                    suggestion="JOIN语句需要指定连接条件，例如：LEFT JOIN table2 ON table1.id = table2.id",
+                    confidence=0.7
+                ))
 
         return suggestions
 
@@ -467,7 +481,7 @@ class SmartSQLCorrector:
         self.correction_history = []
 
     def analyze_and_suggest(self, sql: str, error: Exception = None) -> Dict[str, Any]:
-        """分析SQL并提供建议 - 修复版本"""
+        """分析SQL并提供建议 - 修复版本：执行成功时不显示推测性问题"""
         result = {
             'original_sql': sql,
             'has_error': error is not None,
@@ -493,37 +507,16 @@ class SmartSQLCorrector:
                 for s in corrected_options[:3]  # 最多3个选项
             ]
         else:
-            # 🔑 修复：没有错误时也进行完整的检查
+            # 执行成功时，只显示明确的优化建议，不显示语法推测
             improvements = self.analyzer.suggest_corrections(sql)
 
-            # 🔑 将语法问题也归类为改进建议
-            syntax_issues = [s for s in improvements if s.error_type in [
-                'MISSING_SEMICOLON', 'UNMATCHED_PARENTHESES', 'KEYWORD_TYPO',
-                'MISSING_COLUMNS', 'MISSING_QUOTES', 'MISSING_JOIN_CONDITION'
+            # 过滤掉语法推测类的问题，只保留明确的优化建议
+            optimization_tips = [s for s in improvements if s.error_type in [
+                'PERFORMANCE_TIP', 'SAFETY_WARNING', 'AGGREGATE_WITHOUT_GROUP_BY'
             ]]
 
-            other_improvements = [s for s in improvements if s.error_type not in [
-                'MISSING_SEMICOLON', 'UNMATCHED_PARENTHESES', 'KEYWORD_TYPO',
-                'MISSING_COLUMNS', 'MISSING_QUOTES', 'MISSING_JOIN_CONDITION'
-            ]]
-
-            # 如果有语法问题，放到suggestions中
-            if syntax_issues:
-                result['suggestions'] = [self._format_suggestion(s) for s in syntax_issues]
-
-                # 提供修正选项
-                corrected_options = [s for s in syntax_issues if s.corrected_sql]
-                result['corrected_sql_options'] = [
-                    {
-                        'sql': s.corrected_sql,
-                        'description': s.suggestion,
-                        'confidence': s.confidence
-                    }
-                    for s in corrected_options[:3]
-                ]
-
-            # 其他改进建议
-            result['improvement_tips'] = [self._format_suggestion(s) for s in other_improvements]
+            # 明确的性能和安全建议
+            result['improvement_tips'] = [self._format_suggestion(s) for s in optimization_tips]
 
         return result
 

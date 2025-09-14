@@ -26,3 +26,265 @@
 2025-09-11 15:27:34,262 - storage - INFO - _log_with_context:97 - Flushed all dirty pages | Context: pages_flushed=0 | flush_count=1
 2025-09-11 15:27:34,262 - storage - INFO - _log_with_context:97 - Performance: flush_all_pages:flush_all_pages completed in 0.0000s | Context: avg_time=0.0000s
 2025-09-11 15:27:34,264 - storage - INFO - _log_with_context:97 - StorageManager shutdown completed successfully | Context: pages_flushed=0 | total_operations=0 | total_flushes=1 | final_cache_hit_rate=0.0 | uptime_seconds=79.97
+2025-09-13 18:45:13,458 - storage - INFO - _log_with_context:97 - AdaptiveStrategy initialized with LRU as default
+2025-09-13 18:45:13,463 - storage - INFO - _log_with_context:97 - AdaptiveStrategy initialized with LRU as default
+2025-09-13 18:45:13,465 - storage - INFO - _log_with_context:97 - ExtentManager initialized (basic version)
+2025-09-13 18:45:13,465 - storage - INFO - _log_with_context:97 - ExtentManager enabled (experimental feature)
+2025-09-13 18:45:13,492 - storage - INFO - _log_with_context:97 - WAL Statistics initialized
+2025-09-13 18:45:13,492 - storage - INFO - _log_with_context:97 - Opened WAL file | Context: path=data\wal\wal_00000001.log | number=1 | size=0
+2025-09-13 18:45:13,492 - storage - INFO - _log_with_context:97 - WAL Writer initialized | Context: wal_dir=data\wal | sync_mode=FSYNC | batch_size=65536
+2025-09-13 18:45:13,493 - storage - INFO - _log_with_context:97 - No previous checkpoint found
+2025-09-13 18:45:13,493 - storage - INFO - _log_with_context:97 - Checkpoint Manager initialized | Context: checkpoint_interval=1000 | checkpoint_timeout=300 | auto_checkpoint=True
+2025-09-13 18:45:13,493 - storage - INFO - _log_with_context:97 - Checking for recovery...
+2025-09-13 18:45:13,493 - storage - INFO - _log_with_context:97 - No recovery needed
+2025-09-13 18:45:13,493 - storage - INFO - _log_with_context:97 - WAL Manager initialized | Context: wal_dir=data\wal | sync_mode=fsync | checkpoint_interval=1000 | compression=False
+2025-09-13 18:45:13,493 - storage - INFO - _log_with_context:97 - WAL enabled for enhanced durability
+2025-09-13 18:45:13,493 - storage - INFO - _log_with_context:97 - StorageManager initialized successfully | Context: buffer_size=100 | data_file=data\database.db | meta_file=data\metadata.json | auto_flush_interval=30
+2025-09-13 18:45:13,493 - storage - INFO - _log_with_context:97 - No existing table storage catalog found
+2025-09-13 18:45:13,493 - storage - INFO - _log_with_context:97 - TableStorage initialized with 0 tables
+2025-09-13 18:49:12,961 - storage - ERROR - _log_with_context:97 - Error getting all rows from table 'orders': [TABLE_NOT_FOUND] Table 'orders' not found (Details: table_name=orders)
+2025-09-13 18:49:34,959 - storage - ERROR - _log_with_context:97 - Error getting all rows from table 'orders': [TABLE_NOT_FOUND] Table 'orders' not found (Details: table_name=orders)
+2025-09-13 18:50:13,535 - storage - INFO - _log_with_context:97 - Creating checkpoint
+2025-09-13 18:50:13,542 - storage - INFO - _log_with_context:97 - Checkpoint created | Context: lsn=1 | dirty_pages=0 | active_transactions=0 | elapsed_ms=6
+2025-09-13 18:52:52,641 - storage - INFO - _log_with_context:97 - AdaptiveStrategy initialized with LRU as default
+2025-09-13 18:52:52,645 - storage - INFO - _log_with_context:97 - AdaptiveStrategy initialized with LRU as default
+2025-09-13 18:52:52,645 - storage - INFO - _log_with_context:97 - ExtentManager initialized (basic version)
+2025-09-13 18:52:52,645 - storage - INFO - _log_with_context:97 - ExtentManager enabled (experimental feature)
+2025-09-13 18:52:52,653 - storage - INFO - _log_with_context:97 - WAL Statistics initialized
+2025-09-13 18:52:52,653 - storage - INFO - _log_with_context:97 - Opened WAL file | Context: path=data\wal\wal_00000002.log | number=2 | size=0
+2025-09-13 18:52:52,653 - storage - INFO - _log_with_context:97 - WAL Writer initialized | Context: wal_dir=data\wal | sync_mode=FSYNC | batch_size=65536
+2025-09-13 18:52:52,654 - storage - INFO - _log_with_context:97 - Loaded last checkpoint | Context: lsn=1 | time=1757760613.5392058
+2025-09-13 18:52:52,654 - storage - INFO - _log_with_context:97 - Checkpoint Manager initialized | Context: checkpoint_interval=1000 | checkpoint_timeout=300 | auto_checkpoint=True
+2025-09-13 18:52:52,654 - storage - INFO - _log_with_context:97 - Checking for recovery...
+2025-09-13 18:52:52,654 - storage - INFO - _log_with_context:97 - Recovery needed, starting recovery process...
+2025-09-13 18:52:52,654 - storage - INFO - _log_with_context:97 - Starting recovery process
+2025-09-13 18:52:52,654 - storage - INFO - _log_with_context:97 - Phase 1: Analysis
+2025-09-13 18:52:52,655 - storage - INFO - _log_with_context:97 - Found checkpoint at LSN 1 | Context: dirty_pages=0 | active_transactions=0
+2025-09-13 18:52:52,655 - storage - INFO - _log_with_context:97 - WAL Reader initialized | Context: wal_dir=data\wal | file_count=2
+2025-09-13 18:52:52,656 - storage - INFO - _log_with_context:97 - Analysis phase completed | Context: redo_lsn=0 | dirty_pages=0 | active_transactions=0 | logs_analyzed=1
+2025-09-13 18:52:52,656 - storage - INFO - _log_with_context:97 - Phase 2: Redo
+2025-09-13 18:52:52,656 - storage - INFO - _log_with_context:97 - No operations to redo
+2025-09-13 18:52:52,656 - storage - INFO - _log_with_context:97 - Phase 3: Undo
+2025-09-13 18:52:52,656 - storage - INFO - _log_with_context:97 - No transactions to rollback
+2025-09-13 18:52:52,656 - storage - INFO - _log_with_context:97 - Recovery completed successfully | Context: pages_recovered=0 | transactions_rolled_back=0 | logs_processed=1 | elapsed_seconds=0.0
+2025-09-13 18:52:52,656 - storage - INFO - _log_with_context:97 - Recovery completed in 2.01ms | Context: pages=0 | transactions=0
+2025-09-13 18:52:52,656 - storage - INFO - _log_with_context:97 - Recovery completed successfully | Context: duration_ms=2.006053924560547 | recovery_time=0.0 | pages_recovered=0 | transactions_rolled_back=0 | logs_processed=1 | dirty_pages_found=0 | active_transactions_found=0 | redo_start_lsn=0
+2025-09-13 18:52:52,656 - storage - INFO - _log_with_context:97 - WAL Manager initialized | Context: wal_dir=data\wal | sync_mode=fsync | checkpoint_interval=1000 | compression=False
+2025-09-13 18:52:52,656 - storage - INFO - _log_with_context:97 - WAL enabled for enhanced durability
+2025-09-13 18:52:52,656 - storage - INFO - _log_with_context:97 - StorageManager initialized successfully | Context: buffer_size=100 | data_file=data\database.db | meta_file=data\metadata.json | auto_flush_interval=30
+2025-09-13 18:52:52,656 - storage - INFO - _log_with_context:97 - No existing table storage catalog found
+2025-09-13 18:52:52,656 - storage - INFO - _log_with_context:97 - TableStorage initialized with 0 tables
+2025-09-13 18:54:23,453 - storage - ERROR - _log_with_context:97 - Error creating index 'idx_customers_id' for table 'customers': [STORAGE_ERROR] Table 'customers' does not exist
+2025-09-13 18:54:42,087 - storage - INFO - _log_with_context:97 - Starting StorageManager shutdown
+2025-09-13 18:54:42,089 - storage - INFO - _log_with_context:97 - Shutting down WAL Manager...
+2025-09-13 18:54:42,089 - storage - INFO - _log_with_context:97 - Creating checkpoint
+2025-09-13 18:54:42,094 - storage - INFO - _log_with_context:97 - Checkpoint created | Context: lsn=1 | dirty_pages=0 | active_transactions=0 | elapsed_ms=5
+2025-09-13 18:54:42,094 - storage - INFO - _log_with_context:97 - Checkpoint Manager stopped | Context: total_checkpoints=1 | total_cleanups=0
+2025-09-13 18:54:42,094 - storage - INFO - _log_with_context:97 - WAL Writer closed | Context: total_records=2 | total_bytes=310 | total_syncs=3 | total_rotations=0
+2025-09-13 18:54:42,099 - storage - INFO - _log_with_context:97 - WAL Manager shutdown completed
+2025-09-13 18:54:42,099 - storage - INFO - _log_with_context:97 - Flushed all dirty pages | Context: pages_flushed=0 | flush_count=1
+2025-09-13 18:54:42,099 - storage - INFO - _log_with_context:97 - Performance: flush_all_pages:flush_all_pages completed in 0.0000s | Context: avg_time=0.0000s
+2025-09-13 18:54:42,102 - storage - INFO - _log_with_context:97 - StorageManager shutdown completed successfully | Context: pages_flushed=0 | total_operations=0 | total_flushes=1 | final_cache_hit_rate=0.0 | uptime_seconds=109.46
+2025-09-13 18:58:45,977 - storage - INFO - _log_with_context:97 - AdaptiveStrategy initialized with LRU as default
+2025-09-13 18:58:45,980 - storage - INFO - _log_with_context:97 - AdaptiveStrategy initialized with LRU as default
+2025-09-13 18:58:45,980 - storage - INFO - _log_with_context:97 - ExtentManager initialized (basic version)
+2025-09-13 18:58:45,981 - storage - INFO - _log_with_context:97 - ExtentManager enabled (experimental feature)
+2025-09-13 18:58:45,988 - storage - INFO - _log_with_context:97 - WAL Statistics initialized
+2025-09-13 18:58:45,989 - storage - INFO - _log_with_context:97 - Opened WAL file | Context: path=data\wal\wal_00000003.log | number=3 | size=0
+2025-09-13 18:58:45,989 - storage - INFO - _log_with_context:97 - WAL Writer initialized | Context: wal_dir=data\wal | sync_mode=FSYNC | batch_size=65536
+2025-09-13 18:58:45,990 - storage - INFO - _log_with_context:97 - Loaded last checkpoint | Context: lsn=1 | time=1757760882.090623
+2025-09-13 18:58:45,990 - storage - INFO - _log_with_context:97 - Checkpoint Manager initialized | Context: checkpoint_interval=1000 | checkpoint_timeout=300 | auto_checkpoint=True
+2025-09-13 18:58:45,990 - storage - INFO - _log_with_context:97 - Checking for recovery...
+2025-09-13 18:58:45,990 - storage - INFO - _log_with_context:97 - Recovery needed, starting recovery process...
+2025-09-13 18:58:45,990 - storage - INFO - _log_with_context:97 - Starting recovery process
+2025-09-13 18:58:45,991 - storage - INFO - _log_with_context:97 - Phase 1: Analysis
+2025-09-13 18:58:45,991 - storage - INFO - _log_with_context:97 - Found checkpoint at LSN 1 | Context: dirty_pages=0 | active_transactions=0
+2025-09-13 18:58:45,992 - storage - INFO - _log_with_context:97 - WAL Reader initialized | Context: wal_dir=data\wal | file_count=3
+2025-09-13 18:58:45,992 - storage - INFO - _log_with_context:97 - Analysis phase completed | Context: redo_lsn=0 | dirty_pages=0 | active_transactions=0 | logs_analyzed=2
+2025-09-13 18:58:45,993 - storage - INFO - _log_with_context:97 - Phase 2: Redo
+2025-09-13 18:58:45,993 - storage - INFO - _log_with_context:97 - No operations to redo
+2025-09-13 18:58:45,993 - storage - INFO - _log_with_context:97 - Phase 3: Undo
+2025-09-13 18:58:45,993 - storage - INFO - _log_with_context:97 - No transactions to rollback
+2025-09-13 18:58:45,993 - storage - INFO - _log_with_context:97 - Recovery completed successfully | Context: pages_recovered=0 | transactions_rolled_back=0 | logs_processed=2 | elapsed_seconds=0.0
+2025-09-13 18:58:45,993 - storage - INFO - _log_with_context:97 - Recovery completed in 3.00ms | Context: pages=0 | transactions=0
+2025-09-13 18:58:45,993 - storage - INFO - _log_with_context:97 - Recovery completed successfully | Context: duration_ms=3.0012130737304688 | recovery_time=0.0 | pages_recovered=0 | transactions_rolled_back=0 | logs_processed=2 | dirty_pages_found=0 | active_transactions_found=0 | redo_start_lsn=0
+2025-09-13 18:58:45,993 - storage - INFO - _log_with_context:97 - WAL Manager initialized | Context: wal_dir=data\wal | sync_mode=fsync | checkpoint_interval=1000 | compression=False
+2025-09-13 18:58:45,993 - storage - INFO - _log_with_context:97 - WAL enabled for enhanced durability
+2025-09-13 18:58:45,993 - storage - INFO - _log_with_context:97 - StorageManager initialized successfully | Context: buffer_size=100 | data_file=data\database.db | meta_file=data\metadata.json | auto_flush_interval=30
+2025-09-13 18:58:45,993 - storage - INFO - _log_with_context:97 - No existing table storage catalog found
+2025-09-13 18:58:45,993 - storage - INFO - _log_with_context:97 - TableStorage initialized with 0 tables
+2025-09-13 19:02:30,823 - storage - INFO - _log_with_context:97 - AdaptiveStrategy initialized with LRU as default
+2025-09-13 19:02:30,828 - storage - INFO - _log_with_context:97 - AdaptiveStrategy initialized with LRU as default
+2025-09-13 19:02:30,828 - storage - INFO - _log_with_context:97 - ExtentManager initialized (basic version)
+2025-09-13 19:02:30,829 - storage - INFO - _log_with_context:97 - ExtentManager enabled (experimental feature)
+2025-09-13 19:02:30,839 - storage - INFO - _log_with_context:97 - WAL Statistics initialized
+2025-09-13 19:02:30,840 - storage - INFO - _log_with_context:97 - Opened WAL file | Context: path=data\wal\wal_00000004.log | number=4 | size=0
+2025-09-13 19:02:30,841 - storage - INFO - _log_with_context:97 - WAL Writer initialized | Context: wal_dir=data\wal | sync_mode=FSYNC | batch_size=65536
+2025-09-13 19:02:30,841 - storage - INFO - _log_with_context:97 - Loaded last checkpoint | Context: lsn=1 | time=1757760882.090623
+2025-09-13 19:02:30,842 - storage - INFO - _log_with_context:97 - Checkpoint Manager initialized | Context: checkpoint_interval=1000 | checkpoint_timeout=300 | auto_checkpoint=True
+2025-09-13 19:02:30,842 - storage - INFO - _log_with_context:97 - Checking for recovery...
+2025-09-13 19:02:30,842 - storage - INFO - _log_with_context:97 - Recovery needed, starting recovery process...
+2025-09-13 19:02:30,842 - storage - INFO - _log_with_context:97 - Starting recovery process
+2025-09-13 19:02:30,842 - storage - INFO - _log_with_context:97 - Phase 1: Analysis
+2025-09-13 19:02:30,843 - storage - INFO - _log_with_context:97 - Found checkpoint at LSN 1 | Context: dirty_pages=0 | active_transactions=0
+2025-09-13 19:02:30,843 - storage - INFO - _log_with_context:97 - WAL Reader initialized | Context: wal_dir=data\wal | file_count=4
+2025-09-13 19:02:30,844 - storage - INFO - _log_with_context:97 - Analysis phase completed | Context: redo_lsn=0 | dirty_pages=0 | active_transactions=0 | logs_analyzed=2
+2025-09-13 19:02:30,844 - storage - INFO - _log_with_context:97 - Phase 2: Redo
+2025-09-13 19:02:30,844 - storage - INFO - _log_with_context:97 - No operations to redo
+2025-09-13 19:02:30,844 - storage - INFO - _log_with_context:97 - Phase 3: Undo
+2025-09-13 19:02:30,844 - storage - INFO - _log_with_context:97 - No transactions to rollback
+2025-09-13 19:02:30,844 - storage - INFO - _log_with_context:97 - Recovery completed successfully | Context: pages_recovered=0 | transactions_rolled_back=0 | logs_processed=2 | elapsed_seconds=0.0
+2025-09-13 19:02:30,844 - storage - INFO - _log_with_context:97 - Recovery completed in 2.00ms | Context: pages=0 | transactions=0
+2025-09-13 19:02:30,844 - storage - INFO - _log_with_context:97 - Recovery completed successfully | Context: duration_ms=2.000570297241211 | recovery_time=0.0 | pages_recovered=0 | transactions_rolled_back=0 | logs_processed=2 | dirty_pages_found=0 | active_transactions_found=0 | redo_start_lsn=0
+2025-09-13 19:02:30,844 - storage - INFO - _log_with_context:97 - WAL Manager initialized | Context: wal_dir=data\wal | sync_mode=fsync | checkpoint_interval=1000 | compression=False
+2025-09-13 19:02:30,844 - storage - INFO - _log_with_context:97 - WAL enabled for enhanced durability
+2025-09-13 19:02:30,844 - storage - INFO - _log_with_context:97 - StorageManager initialized successfully | Context: buffer_size=100 | data_file=data\database.db | meta_file=data\metadata.json | auto_flush_interval=30
+2025-09-13 19:02:30,844 - storage - INFO - _log_with_context:97 - No existing table storage catalog found
+2025-09-13 19:02:30,845 - storage - INFO - _log_with_context:97 - TableStorage initialized with 0 tables
+2025-09-13 19:02:34,736 - storage - INFO - _log_with_context:97 - Starting StorageManager shutdown
+2025-09-13 19:02:34,737 - storage - INFO - _log_with_context:97 - Shutting down WAL Manager...
+2025-09-13 19:02:34,737 - storage - INFO - _log_with_context:97 - Creating checkpoint
+2025-09-13 19:02:34,743 - storage - INFO - _log_with_context:97 - Checkpoint created | Context: lsn=1 | dirty_pages=0 | active_transactions=0 | elapsed_ms=6
+2025-09-13 19:02:34,743 - storage - INFO - _log_with_context:97 - Checkpoint Manager stopped | Context: total_checkpoints=1 | total_cleanups=0
+2025-09-13 19:02:34,745 - storage - INFO - _log_with_context:97 - WAL Writer closed | Context: total_records=2 | total_bytes=310 | total_syncs=3 | total_rotations=0
+2025-09-13 19:02:34,747 - storage - INFO - _log_with_context:97 - WAL Manager shutdown completed
+2025-09-13 19:02:34,748 - storage - INFO - _log_with_context:97 - Flushed all dirty pages | Context: pages_flushed=0 | flush_count=1
+2025-09-13 19:02:34,748 - storage - INFO - _log_with_context:97 - Performance: flush_all_pages:flush_all_pages completed in 0.0000s | Context: avg_time=0.0000s
+2025-09-13 19:02:34,751 - storage - INFO - _log_with_context:97 - StorageManager shutdown completed successfully | Context: pages_flushed=0 | total_operations=0 | total_flushes=1 | final_cache_hit_rate=0.0 | uptime_seconds=3.92
+2025-09-13 19:02:42,162 - storage - INFO - _log_with_context:97 - AdaptiveStrategy initialized with LRU as default
+2025-09-13 19:02:42,166 - storage - INFO - _log_with_context:97 - AdaptiveStrategy initialized with LRU as default
+2025-09-13 19:02:42,167 - storage - INFO - _log_with_context:97 - ExtentManager initialized (basic version)
+2025-09-13 19:02:42,167 - storage - INFO - _log_with_context:97 - ExtentManager enabled (experimental feature)
+2025-09-13 19:02:42,175 - storage - INFO - _log_with_context:97 - WAL Statistics initialized
+2025-09-13 19:02:42,177 - storage - INFO - _log_with_context:97 - Opened WAL file | Context: path=data\wal\wal_00000005.log | number=5 | size=0
+2025-09-13 19:02:42,177 - storage - INFO - _log_with_context:97 - WAL Writer initialized | Context: wal_dir=data\wal | sync_mode=FSYNC | batch_size=65536
+2025-09-13 19:02:42,177 - storage - INFO - _log_with_context:97 - Loaded last checkpoint | Context: lsn=1 | time=1757761354.739166
+2025-09-13 19:02:42,178 - storage - INFO - _log_with_context:97 - Checkpoint Manager initialized | Context: checkpoint_interval=1000 | checkpoint_timeout=300 | auto_checkpoint=True
+2025-09-13 19:02:42,178 - storage - INFO - _log_with_context:97 - Checking for recovery...
+2025-09-13 19:02:42,178 - storage - INFO - _log_with_context:97 - Recovery needed, starting recovery process...
+2025-09-13 19:02:42,178 - storage - INFO - _log_with_context:97 - Starting recovery process
+2025-09-13 19:02:42,178 - storage - INFO - _log_with_context:97 - Phase 1: Analysis
+2025-09-13 19:02:42,179 - storage - INFO - _log_with_context:97 - Found checkpoint at LSN 1 | Context: dirty_pages=0 | active_transactions=0
+2025-09-13 19:02:42,179 - storage - INFO - _log_with_context:97 - WAL Reader initialized | Context: wal_dir=data\wal | file_count=5
+2025-09-13 19:02:42,180 - storage - INFO - _log_with_context:97 - Analysis phase completed | Context: redo_lsn=0 | dirty_pages=0 | active_transactions=0 | logs_analyzed=3
+2025-09-13 19:02:42,180 - storage - INFO - _log_with_context:97 - Phase 2: Redo
+2025-09-13 19:02:42,180 - storage - INFO - _log_with_context:97 - No operations to redo
+2025-09-13 19:02:42,180 - storage - INFO - _log_with_context:97 - Phase 3: Undo
+2025-09-13 19:02:42,180 - storage - INFO - _log_with_context:97 - No transactions to rollback
+2025-09-13 19:02:42,180 - storage - INFO - _log_with_context:97 - Recovery completed successfully | Context: pages_recovered=0 | transactions_rolled_back=0 | logs_processed=3 | elapsed_seconds=0.0
+2025-09-13 19:02:42,180 - storage - INFO - _log_with_context:97 - Recovery completed in 1.99ms | Context: pages=0 | transactions=0
+2025-09-13 19:02:42,181 - storage - INFO - _log_with_context:97 - Recovery completed successfully | Context: duration_ms=1.9941329956054688 | recovery_time=0.0 | pages_recovered=0 | transactions_rolled_back=0 | logs_processed=3 | dirty_pages_found=0 | active_transactions_found=0 | redo_start_lsn=0
+2025-09-13 19:02:42,181 - storage - INFO - _log_with_context:97 - WAL Manager initialized | Context: wal_dir=data\wal | sync_mode=fsync | checkpoint_interval=1000 | compression=False
+2025-09-13 19:02:42,181 - storage - INFO - _log_with_context:97 - WAL enabled for enhanced durability
+2025-09-13 19:02:42,181 - storage - INFO - _log_with_context:97 - StorageManager initialized successfully | Context: buffer_size=100 | data_file=data\database.db | meta_file=data\metadata.json | auto_flush_interval=30
+2025-09-13 19:02:42,181 - storage - INFO - _log_with_context:97 - No existing table storage catalog found
+2025-09-13 19:02:42,181 - storage - INFO - _log_with_context:97 - TableStorage initialized with 0 tables
+2025-09-13 19:02:47,550 - storage - INFO - _log_with_context:97 - Starting StorageManager shutdown
+2025-09-13 19:02:47,550 - storage - INFO - _log_with_context:97 - Shutting down WAL Manager...
+2025-09-13 19:02:47,550 - storage - INFO - _log_with_context:97 - Creating checkpoint
+2025-09-13 19:02:47,555 - storage - INFO - _log_with_context:97 - Checkpoint created | Context: lsn=1 | dirty_pages=0 | active_transactions=0 | elapsed_ms=4
+2025-09-13 19:02:47,556 - storage - INFO - _log_with_context:97 - Checkpoint Manager stopped | Context: total_checkpoints=1 | total_cleanups=0
+2025-09-13 19:02:47,557 - storage - INFO - _log_with_context:97 - WAL Writer closed | Context: total_records=2 | total_bytes=310 | total_syncs=3 | total_rotations=0
+2025-09-13 19:02:47,558 - storage - INFO - _log_with_context:97 - WAL Manager shutdown completed
+2025-09-13 19:02:47,558 - storage - INFO - _log_with_context:97 - Flushed all dirty pages | Context: pages_flushed=0 | flush_count=1
+2025-09-13 19:02:47,558 - storage - INFO - _log_with_context:97 - Performance: flush_all_pages:flush_all_pages completed in 0.0000s | Context: avg_time=0.0000s
+2025-09-13 19:02:47,559 - storage - INFO - _log_with_context:97 - StorageManager shutdown completed successfully | Context: pages_flushed=0 | total_operations=0 | total_flushes=1 | final_cache_hit_rate=0.0 | uptime_seconds=5.39
+2025-09-13 19:03:16,063 - storage - INFO - _log_with_context:97 - AdaptiveStrategy initialized with LRU as default
+2025-09-13 19:03:16,067 - storage - INFO - _log_with_context:97 - AdaptiveStrategy initialized with LRU as default
+2025-09-13 19:03:16,068 - storage - INFO - _log_with_context:97 - ExtentManager initialized (basic version)
+2025-09-13 19:03:16,068 - storage - INFO - _log_with_context:97 - ExtentManager enabled (experimental feature)
+2025-09-13 19:03:16,078 - storage - INFO - _log_with_context:97 - WAL Statistics initialized
+2025-09-13 19:03:16,079 - storage - INFO - _log_with_context:97 - Opened WAL file | Context: path=data\wal\wal_00000006.log | number=6 | size=0
+2025-09-13 19:03:16,079 - storage - INFO - _log_with_context:97 - WAL Writer initialized | Context: wal_dir=data\wal | sync_mode=FSYNC | batch_size=65536
+2025-09-13 19:03:16,079 - storage - INFO - _log_with_context:97 - Loaded last checkpoint | Context: lsn=1 | time=1757761367.553131
+2025-09-13 19:03:16,080 - storage - INFO - _log_with_context:97 - Checkpoint Manager initialized | Context: checkpoint_interval=1000 | checkpoint_timeout=300 | auto_checkpoint=True
+2025-09-13 19:03:16,080 - storage - INFO - _log_with_context:97 - Checking for recovery...
+2025-09-13 19:03:16,080 - storage - INFO - _log_with_context:97 - Recovery needed, starting recovery process...
+2025-09-13 19:03:16,080 - storage - INFO - _log_with_context:97 - Starting recovery process
+2025-09-13 19:03:16,080 - storage - INFO - _log_with_context:97 - Phase 1: Analysis
+2025-09-13 19:03:16,080 - storage - INFO - _log_with_context:97 - Found checkpoint at LSN 1 | Context: dirty_pages=0 | active_transactions=0
+2025-09-13 19:03:16,080 - storage - INFO - _log_with_context:97 - WAL Reader initialized | Context: wal_dir=data\wal | file_count=6
+2025-09-13 19:03:16,082 - storage - INFO - _log_with_context:97 - Analysis phase completed | Context: redo_lsn=0 | dirty_pages=0 | active_transactions=0 | logs_analyzed=4
+2025-09-13 19:03:16,082 - storage - INFO - _log_with_context:97 - Phase 2: Redo
+2025-09-13 19:03:16,082 - storage - INFO - _log_with_context:97 - No operations to redo
+2025-09-13 19:03:16,082 - storage - INFO - _log_with_context:97 - Phase 3: Undo
+2025-09-13 19:03:16,082 - storage - INFO - _log_with_context:97 - No transactions to rollback
+2025-09-13 19:03:16,082 - storage - INFO - _log_with_context:97 - Recovery completed successfully | Context: pages_recovered=0 | transactions_rolled_back=0 | logs_processed=4 | elapsed_seconds=0.0
+2025-09-13 19:03:16,082 - storage - INFO - _log_with_context:97 - Recovery completed in 2.00ms | Context: pages=0 | transactions=0
+2025-09-13 19:03:16,082 - storage - INFO - _log_with_context:97 - Recovery completed successfully | Context: duration_ms=1.9993782043457031 | recovery_time=0.0 | pages_recovered=0 | transactions_rolled_back=0 | logs_processed=4 | dirty_pages_found=0 | active_transactions_found=0 | redo_start_lsn=0
+2025-09-13 19:03:16,082 - storage - INFO - _log_with_context:97 - WAL Manager initialized | Context: wal_dir=data\wal | sync_mode=fsync | checkpoint_interval=1000 | compression=False
+2025-09-13 19:03:16,082 - storage - INFO - _log_with_context:97 - WAL enabled for enhanced durability
+2025-09-13 19:03:16,082 - storage - INFO - _log_with_context:97 - StorageManager initialized successfully | Context: buffer_size=100 | data_file=data\database.db | meta_file=data\metadata.json | auto_flush_interval=30
+2025-09-13 19:03:16,083 - storage - INFO - _log_with_context:97 - No existing table storage catalog found
+2025-09-13 19:03:16,083 - storage - INFO - _log_with_context:97 - TableStorage initialized with 0 tables
+2025-09-13 19:03:25,147 - storage - ERROR - _log_with_context:97 - Error getting all rows from table 'customers': [TABLE_NOT_FOUND] Table 'customers' not found (Details: table_name=customers)
+2025-09-13 19:03:31,023 - storage - INFO - _log_with_context:97 - Starting StorageManager shutdown
+2025-09-13 19:03:31,023 - storage - INFO - _log_with_context:97 - Shutting down WAL Manager...
+2025-09-13 19:03:31,023 - storage - INFO - _log_with_context:97 - Creating checkpoint
+2025-09-13 19:03:31,031 - storage - INFO - _log_with_context:97 - Checkpoint created | Context: lsn=1 | dirty_pages=0 | active_transactions=0 | elapsed_ms=6
+2025-09-13 19:03:31,031 - storage - INFO - _log_with_context:97 - Checkpoint Manager stopped | Context: total_checkpoints=1 | total_cleanups=0
+2025-09-13 19:03:31,032 - storage - INFO - _log_with_context:97 - WAL Writer closed | Context: total_records=2 | total_bytes=311 | total_syncs=3 | total_rotations=0
+2025-09-13 19:03:31,034 - storage - INFO - _log_with_context:97 - WAL Manager shutdown completed
+2025-09-13 19:03:31,034 - storage - INFO - _log_with_context:97 - Flushed all dirty pages | Context: pages_flushed=0 | flush_count=1
+2025-09-13 19:03:31,035 - storage - INFO - _log_with_context:97 - Performance: flush_all_pages:flush_all_pages completed in 0.0010s | Context: avg_time=0.0010s
+2025-09-13 19:03:31,037 - storage - INFO - _log_with_context:97 - StorageManager shutdown completed successfully | Context: pages_flushed=0 | total_operations=0 | total_flushes=1 | final_cache_hit_rate=0.0 | uptime_seconds=14.97
+2025-09-13 19:03:43,378 - storage - INFO - _log_with_context:97 - AdaptiveStrategy initialized with LRU as default
+2025-09-13 19:03:43,380 - storage - INFO - _log_with_context:97 - AdaptiveStrategy initialized with LRU as default
+2025-09-13 19:03:43,382 - storage - INFO - _log_with_context:97 - ExtentManager initialized (basic version)
+2025-09-13 19:03:43,382 - storage - INFO - _log_with_context:97 - ExtentManager enabled (experimental feature)
+2025-09-13 19:03:43,390 - storage - INFO - _log_with_context:97 - WAL Statistics initialized
+2025-09-13 19:03:43,391 - storage - INFO - _log_with_context:97 - Opened WAL file | Context: path=data\wal\wal_00000007.log | number=7 | size=0
+2025-09-13 19:03:43,391 - storage - INFO - _log_with_context:97 - WAL Writer initialized | Context: wal_dir=data\wal | sync_mode=FSYNC | batch_size=65536
+2025-09-13 19:03:43,391 - storage - INFO - _log_with_context:97 - Loaded last checkpoint | Context: lsn=1 | time=1757761411.0265353
+2025-09-13 19:03:43,392 - storage - INFO - _log_with_context:97 - Checkpoint Manager initialized | Context: checkpoint_interval=1000 | checkpoint_timeout=300 | auto_checkpoint=True
+2025-09-13 19:03:43,392 - storage - INFO - _log_with_context:97 - Checking for recovery...
+2025-09-13 19:03:43,392 - storage - INFO - _log_with_context:97 - Recovery needed, starting recovery process...
+2025-09-13 19:03:43,392 - storage - INFO - _log_with_context:97 - Starting recovery process
+2025-09-13 19:03:43,392 - storage - INFO - _log_with_context:97 - Phase 1: Analysis
+2025-09-13 19:03:43,392 - storage - INFO - _log_with_context:97 - Found checkpoint at LSN 1 | Context: dirty_pages=0 | active_transactions=0
+2025-09-13 19:03:43,392 - storage - INFO - _log_with_context:97 - WAL Reader initialized | Context: wal_dir=data\wal | file_count=7
+2025-09-13 19:03:43,395 - storage - INFO - _log_with_context:97 - Analysis phase completed | Context: redo_lsn=0 | dirty_pages=0 | active_transactions=0 | logs_analyzed=5
+2025-09-13 19:03:43,395 - storage - INFO - _log_with_context:97 - Phase 2: Redo
+2025-09-13 19:03:43,395 - storage - INFO - _log_with_context:97 - No operations to redo
+2025-09-13 19:03:43,395 - storage - INFO - _log_with_context:97 - Phase 3: Undo
+2025-09-13 19:03:43,395 - storage - INFO - _log_with_context:97 - No transactions to rollback
+2025-09-13 19:03:43,395 - storage - INFO - _log_with_context:97 - Recovery completed successfully | Context: pages_recovered=0 | transactions_rolled_back=0 | logs_processed=5 | elapsed_seconds=0.0
+2025-09-13 19:03:43,395 - storage - INFO - _log_with_context:97 - Recovery completed in 2.18ms | Context: pages=0 | transactions=0
+2025-09-13 19:03:43,395 - storage - INFO - _log_with_context:97 - Recovery completed successfully | Context: duration_ms=2.177000045776367 | recovery_time=0.0 | pages_recovered=0 | transactions_rolled_back=0 | logs_processed=5 | dirty_pages_found=0 | active_transactions_found=0 | redo_start_lsn=0
+2025-09-13 19:03:43,395 - storage - INFO - _log_with_context:97 - WAL Manager initialized | Context: wal_dir=data\wal | sync_mode=fsync | checkpoint_interval=1000 | compression=False
+2025-09-13 19:03:43,395 - storage - INFO - _log_with_context:97 - WAL enabled for enhanced durability
+2025-09-13 19:03:43,395 - storage - INFO - _log_with_context:97 - StorageManager initialized successfully | Context: buffer_size=100 | data_file=data\database.db | meta_file=data\metadata.json | auto_flush_interval=30
+2025-09-13 19:03:43,396 - storage - INFO - _log_with_context:97 - No existing table storage catalog found
+2025-09-13 19:03:43,396 - storage - INFO - _log_with_context:97 - TableStorage initialized with 0 tables
+2025-09-13 19:08:43,429 - storage - INFO - _log_with_context:97 - Creating checkpoint
+2025-09-13 19:08:43,438 - storage - INFO - _log_with_context:97 - Checkpoint created | Context: lsn=1 | dirty_pages=0 | active_transactions=0 | elapsed_ms=9
+2025-09-13 19:13:43,489 - storage - INFO - _log_with_context:97 - Creating checkpoint
+2025-09-13 19:13:43,498 - storage - INFO - _log_with_context:97 - Checkpoint created | Context: lsn=3 | dirty_pages=0 | active_transactions=0 | elapsed_ms=8
+2025-09-13 19:15:31,235 - storage - INFO - _log_with_context:97 - AdaptiveStrategy initialized with LRU as default
+2025-09-13 19:15:31,238 - storage - INFO - _log_with_context:97 - AdaptiveStrategy initialized with LRU as default
+2025-09-13 19:15:31,238 - storage - INFO - _log_with_context:97 - ExtentManager initialized (basic version)
+2025-09-13 19:15:31,238 - storage - INFO - _log_with_context:97 - ExtentManager enabled (experimental feature)
+2025-09-13 19:15:31,246 - storage - INFO - _log_with_context:97 - WAL Statistics initialized
+2025-09-13 19:15:31,247 - storage - INFO - _log_with_context:97 - Opened WAL file | Context: path=data\wal\wal_00000008.log | number=8 | size=0
+2025-09-13 19:15:31,247 - storage - INFO - _log_with_context:97 - WAL Writer initialized | Context: wal_dir=data\wal | sync_mode=FSYNC | batch_size=65536
+2025-09-13 19:15:31,248 - storage - INFO - _log_with_context:97 - Loaded last checkpoint | Context: lsn=3 | time=1757762023.495636
+2025-09-13 19:15:31,248 - storage - INFO - _log_with_context:97 - Checkpoint Manager initialized | Context: checkpoint_interval=1000 | checkpoint_timeout=300 | auto_checkpoint=True
+2025-09-13 19:15:31,248 - storage - INFO - _log_with_context:97 - Checking for recovery...
+2025-09-13 19:15:31,248 - storage - INFO - _log_with_context:97 - Recovery needed, starting recovery process...
+2025-09-13 19:15:31,248 - storage - INFO - _log_with_context:97 - Starting recovery process
+2025-09-13 19:15:31,248 - storage - INFO - _log_with_context:97 - Phase 1: Analysis
+2025-09-13 19:15:31,249 - storage - INFO - _log_with_context:97 - Found checkpoint at LSN 3 | Context: dirty_pages=0 | active_transactions=0
+2025-09-13 19:15:31,249 - storage - INFO - _log_with_context:97 - WAL Reader initialized | Context: wal_dir=data\wal | file_count=8
+2025-09-13 19:15:31,251 - storage - INFO - _log_with_context:97 - Analysis phase completed | Context: redo_lsn=0 | dirty_pages=0 | active_transactions=0 | logs_analyzed=1
+2025-09-13 19:15:31,251 - storage - INFO - _log_with_context:97 - Phase 2: Redo
+2025-09-13 19:15:31,251 - storage - INFO - _log_with_context:97 - No operations to redo
+2025-09-13 19:15:31,251 - storage - INFO - _log_with_context:97 - Phase 3: Undo
+2025-09-13 19:15:31,252 - storage - INFO - _log_with_context:97 - No transactions to rollback
+2025-09-13 19:15:31,252 - storage - INFO - _log_with_context:97 - Recovery completed successfully | Context: pages_recovered=0 | transactions_rolled_back=0 | logs_processed=1 | elapsed_seconds=0.0
+2025-09-13 19:15:31,252 - storage - INFO - _log_with_context:97 - Recovery completed in 4.12ms | Context: pages=0 | transactions=0
+2025-09-13 19:15:31,252 - storage - INFO - _log_with_context:97 - Recovery completed successfully | Context: duration_ms=4.118442535400391 | recovery_time=0.0 | pages_recovered=0 | transactions_rolled_back=0 | logs_processed=1 | dirty_pages_found=0 | active_transactions_found=0 | redo_start_lsn=0
+2025-09-13 19:15:31,252 - storage - INFO - _log_with_context:97 - WAL Manager initialized | Context: wal_dir=data\wal | sync_mode=fsync | checkpoint_interval=1000 | compression=False
+2025-09-13 19:15:31,252 - storage - INFO - _log_with_context:97 - WAL enabled for enhanced durability
+2025-09-13 19:15:31,252 - storage - INFO - _log_with_context:97 - StorageManager initialized successfully | Context: buffer_size=100 | data_file=data\database.db | meta_file=data\metadata.json | auto_flush_interval=30
+2025-09-13 19:15:31,252 - storage - INFO - _log_with_context:97 - No existing table storage catalog found
+2025-09-13 19:15:31,252 - storage - INFO - _log_with_context:97 - TableStorage initialized with 0 tables

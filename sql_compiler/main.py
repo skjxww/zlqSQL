@@ -14,6 +14,10 @@ class SQLCompiler:
         self.test_mode = test_mode
         self.enable_diagnostics = enable_diagnostics
 
+        # 事务状态跟踪（编译器级别）
+        self.transaction_aware = True
+        self.current_transaction_batch = []  # 当前事务中的语句批次
+
         if not test_mode:
             print(f"系统目录已加载，当前表数: {len(self.catalog.get_all_tables())}")
 
@@ -270,6 +274,7 @@ class SQLCompiler:
         except Exception as e:
             print(f"读取文件错误: {e}")
             return None
+
 
 
 def main():
