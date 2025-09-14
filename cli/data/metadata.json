@@ -1,5 +1,5 @@
 {
-  "next_page_id": 20,
+  "next_page_id": 24,
   "free_pages": [],
   "allocated_pages": [
     1,
@@ -20,7 +20,11 @@
     16,
     17,
     18,
-    19
+    19,
+    20,
+    21,
+    22,
+    23
   ],
   "page_usage": {
     "1": {
@@ -45,8 +49,8 @@
     },
     "5": {
       "allocated_time": 1757437110.3064232,
-      "access_count": 1,
-      "last_access": 1757763019.1206293
+      "access_count": 2,
+      "last_access": 1757776034.3647857
     },
     "6": {
       "allocated_time": 1757437268.599051,
@@ -117,11 +121,40 @@
       "allocated_time": 1757580046.2388403,
       "access_count": 0,
       "last_access": null
+    },
+    "20": {
+      "allocated_time": 1757778382.7807724,
+      "access_count": 13,
+      "last_access": 1757837340.1691864,
+      "tablespace": "user_data"
+    },
+    "21": {
+      "allocated_time": 1757778382.7807724,
+      "access_count": 0,
+      "last_access": null,
+      "tablespace": "user_data"
+    },
+    "22": {
+      "allocated_time": 1757778382.7807724,
+      "access_count": 0,
+      "last_access": null,
+      "tablespace": "user_data"
+    },
+    "23": {
+      "allocated_time": 1757778382.787664,
+      "access_count": 0,
+      "last_access": null,
+      "tablespace": "user_data"
     }
   },
-  "page_tablespaces": {},
-  "last_modification": 1757763076.448196,
+  "page_tablespaces": {
+    "20": "user_data",
+    "21": "user_data",
+    "22": "user_data",
+    "23": "user_data"
+  },
+  "last_modification": 1757837346.0860107,
   "version": "1.0",
-  "total_allocated": 19,
+  "total_allocated": 23,
   "total_free": 0
 }

@@ -78,6 +78,19 @@ KEYWORDS = {
     'COMMITTED': TokenType.COMMITTED,
     'REPEATABLE': TokenType.REPEATABLE,
     'SERIALIZABLE': TokenType.SERIALIZABLE,
+
+    'VIEW': TokenType.VIEW,
+    'MATERIALIZED': TokenType.MATERIALIZED,
+    'REPLACE': TokenType.REPLACE,
+    'CASCADE': TokenType.CASCADE,
+    'OPTION': TokenType.OPTION,
+    'VIEWS': TokenType.VIEWS,
+    'LIKE': TokenType.LIKE,
+    'IF': TokenType.IF,
+    'EXISTS': TokenType.EXISTS,
+    'CHECK': TokenType.CHECK,
+    'WITH': TokenType.WITH,
+    'DESCRIBE': TokenType.DESCRIBE,
 }
 
 # 符号映射表 - 更新

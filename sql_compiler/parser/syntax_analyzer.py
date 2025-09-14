@@ -53,7 +53,15 @@ class SyntaxAnalyzer:
         """解析语句"""
         current_token = self._current_token()
 
-        if self._match(TokenType.BEGIN):
+        if self._match(TokenType.CREATE):
+            return self._parse_create_statement()
+        elif self._match(TokenType.DROP):
+            return self._parse_drop_statement()
+        elif self._match(TokenType.SHOW):
+            return self._parse_show_statement()
+        elif self._match(TokenType.DESCRIBE) or self._match(TokenType.DESC):
+            return self._parse_describe_statement()
+        elif self._match(TokenType.BEGIN):
             return self._parse_begin_transaction()
         elif self._match(TokenType.START):
             return self._parse_start_transaction()
@@ -65,17 +73,17 @@ class SyntaxAnalyzer:
             return self._parse_savepoint()
         elif self._match(TokenType.RELEASE):
             return self._parse_release_savepoint()
-        elif self._match(TokenType.CREATE):
-            if self._check(TokenType.INDEX):
-                return self._parse_create_index()
-            elif self._check(TokenType.TABLE):
-                return self._parse_create_table()
-        elif self._match(TokenType.DROP):
-            if self._check(TokenType.INDEX):
-                return self._parse_drop_index()
-        elif self._match(TokenType.SHOW):
-            if self._check(TokenType.INDEXES):
-                return self._parse_show_indexes()
+        # elif self._match(TokenType.CREATE):
+        #     if self._check(TokenType.INDEX):
+        #         return self._parse_create_index()
+        #     elif self._check(TokenType.TABLE):
+        #         return self._parse_create_table()
+        # elif self._match(TokenType.DROP):
+        #     if self._check(TokenType.INDEX):
+        #         return self._parse_drop_index()
+        # elif self._match(TokenType.SHOW):
+        #     if self._check(TokenType.INDEXES):
+        #         return self._parse_show_indexes()
         elif self._match(TokenType.INSERT):
             return self._parse_insert()
         elif self._match(TokenType.SELECT):
@@ -88,6 +96,210 @@ class SyntaxAnalyzer:
             raise SyntaxErr(f"无效的语句开头: '{current_token.lexeme}'",
                             current_token.line, current_token.column,
                             "CREATE, INSERT, SELECT, UPDATE, DELETE")
+
+    def _parse_create_statement(self) -> Statement:
+        """解析CREATE语句 - 修复版本"""
+        or_replace = False
+
+        # 检查OR REPLACE
+        if self._match(TokenType.OR):
+            # 这里需要检查REPLACE token
+            if self._check(TokenType.REPLACE):
+                self._advance()
+                or_replace = True
+            else:
+                raise SyntaxErr("期望 REPLACE",
+                                self._current_token().line,
+                                self._current_token().column, "REPLACE")
+
+        # 检查MATERIALIZED
+        materialized = self._match(TokenType.MATERIALIZED)
+
+        if self._match(TokenType.VIEW):
+            return self._parse_create_view(or_replace, materialized)
+        elif self._match(TokenType.TABLE):
+            return self._parse_create_table()
+        elif self._match(TokenType.INDEX) or self._match(TokenType.UNIQUE):
+            return self._parse_create_index()
+        else:
+            raise SyntaxErr("期望 VIEW, TABLE 或 INDEX",
+                            self._current_token().line,
+                            self._current_token().column, "CREATE对象类型")
+
+    def _parse_create_view(self, or_replace: bool, materialized: bool) -> CreateViewStmt:
+        """解析 CREATE VIEW 语句"""
+        # 解析视图名
+        if not self._check(TokenType.IDENTIFIER):
+            raise SyntaxErr("期望视图名称",
+                            self._current_token().line,
+                            self._current_token().column, "视图名")
+
+        view_name = self._advance().lexeme
+
+        # 可选的列列表
+        columns = None
+        if self._match(TokenType.LEFT_PAREN):
+            columns = []
+            if not self._check(TokenType.IDENTIFIER):
+                raise SyntaxErr("期望列名",
+                                self._current_token().line,
+                                self._current_token().column, "列名")
+            columns.append(self._advance().lexeme)
+
+            while self._match(TokenType.COMMA):
+                if not self._check(TokenType.IDENTIFIER):
+                    raise SyntaxErr("期望列名",
+                                    self._current_token().line,
+                                    self._current_token().column, "列名")
+                columns.append(self._advance().lexeme)
+
+            self._expect(TokenType.RIGHT_PAREN)
+
+        # 关键修复：必须消费AS token
+        self._expect(TokenType.AS)
+        self._expect(TokenType.SELECT)
+
+        # 解析SELECT语句
+        select_stmt = self._parse_select()
+
+        # 可选的 WITH CHECK OPTION
+        with_check_option = False
+        if self._match(TokenType.WITH):
+            self._expect(TokenType.CHECK)
+            self._expect(TokenType.OPTION)
+            with_check_option = True
+
+        return CreateViewStmt(
+            view_name=view_name,
+            select_stmt=select_stmt,
+            columns=columns,
+            or_replace=or_replace,
+            materialized=materialized,
+            with_check_option=with_check_option
+        )
+
+    def _parse_drop_statement(self) -> Statement:
+        """解析DROP语句 - 修复版本"""
+        materialized = self._match(TokenType.MATERIALIZED)
+
+        if self._match(TokenType.VIEW):
+            return self._parse_drop_view(materialized)
+        elif self._match(TokenType.TABLE):
+            return self._parse_drop_table()
+        elif self._match(TokenType.INDEX):
+            return self._parse_drop_index()
+        else:
+            raise SyntaxErr("期望 VIEW, TABLE 或 INDEX",
+                            self._current_token().line,
+                            self._current_token().column, "DROP对象类型")
+
+    def _parse_drop_view(self, materialized: bool) -> DropViewStmt:
+        """解析 DROP VIEW 语句"""
+        # 可选的IF EXISTS
+        if_exists = False
+        if self._match(TokenType.IF):
+            self._expect(TokenType.EXISTS)
+            if_exists = True
+
+        # 视图名列表
+        if not self._check(TokenType.IDENTIFIER):
+            raise SyntaxErr("期望视图名称",
+                            self._current_token().line,
+                            self._current_token().column, "视图名")
+
+        view_names = [self._advance().lexeme]
+
+        while self._match(TokenType.COMMA):
+            if not self._check(TokenType.IDENTIFIER):
+                raise SyntaxErr("期望视图名称",
+                                self._current_token().line,
+                                self._current_token().column, "视图名")
+            view_names.append(self._advance().lexeme)
+
+        # 可选的CASCADE
+        cascade = self._match(TokenType.CASCADE)
+
+        # self._expect_semicolon()
+
+
+        return DropViewStmt(
+            view_names=view_names,
+            if_exists=if_exists,
+            cascade=cascade,
+            materialized=materialized
+        )
+
+    def _parse_show_statement(self) -> Statement:
+        """解析SHOW语句 - 修复版本"""
+        if self._match(TokenType.VIEWS):
+            return self._parse_show_views()
+        elif self._match(TokenType.INDEXES):
+            return self._parse_show_indexes()
+        elif self._match(TokenType.TABLES):
+            return self._parse_show_tables()
+        else:
+            # 如果没有匹配到具体的对象类型，给出更好的错误提示
+            current = self._current_token()
+            raise SyntaxErr(f"期望 VIEWS, INDEXES 或 TABLES，但遇到 '{current.lexeme}'",
+                            current.line, current.column, "SHOW对象类型")
+
+    def _parse_show_views(self) -> ShowViewsStmt:
+        """解析 SHOW VIEWS 语句"""
+        database = None
+        pattern = None
+
+        # 可选的FROM database
+        if self._match(TokenType.FROM):
+            if not self._check(TokenType.IDENTIFIER):
+                raise SyntaxErr("期望数据库名",
+                                self._current_token().line,
+                                self._current_token().column, "数据库名")
+            database = self._advance().lexeme
+
+        # 可选的LIKE pattern
+        if self._match(TokenType.LIKE):
+            if not self._check(TokenType.STRING_LITERAL):  # 修复：改为STRING_LITERAL
+                raise SyntaxErr("期望模式字符串",
+                                self._current_token().line,
+                                self._current_token().column, "模式字符串")
+            pattern = self._advance().lexeme.strip("'\"")
+
+        # self._expect_semicolon()
+
+
+        return ShowViewsStmt(pattern=pattern, database=database)
+
+    def _parse_describe_statement(self) -> Statement:
+        """解析DESCRIBE语句 - 扩展支持视图"""
+        if self._match(TokenType.VIEW):
+            return self._parse_describe_view()
+        elif self._match(TokenType.TABLE):
+            return self._parse_describe_table()
+        else:
+            # 默认是表或视图
+            if not self._check(TokenType.IDENTIFIER):
+                raise SyntaxErr("期望表名或视图名",
+                                self._current_token().line,
+                                self._current_token().column, "表名或视图名")
+            table_or_view_name = self._advance().lexeme
+            # self._expect_semicolon()
+
+
+            # 这里可以返回一个通用的描述语句，后续在语义分析阶段确定是表还是视图
+            return DescribeViewStmt(table_or_view_name)
+
+    def _parse_describe_view(self) -> DescribeViewStmt:
+        """解析 DESCRIBE VIEW 语句"""
+        if not self._check(TokenType.IDENTIFIER):
+            raise SyntaxErr("期望视图名称",
+                            self._current_token().line,
+                            self._current_token().column, "视图名")
+
+        view_name = self._advance().lexeme
+        # self._expect_semicolon()
+
+
+        return DescribeViewStmt(view_name=view_name)
 
     def _parse_begin_transaction(self) -> BeginTransactionStmt:
         """
@@ -114,7 +326,8 @@ class SyntaxAnalyzer:
             else:
                 raise SyntaxError("期望 WRITE 或 ONLY")
 
-        self._expect_semicolon()
+        # self._expect_semicolon()
+
 
         return BeginTransactionStmt(
             isolation_level=isolation_level,
@@ -144,7 +357,8 @@ class SyntaxAnalyzer:
             else:
                 raise SyntaxError("期望 WRITE 或 ONLY")
 
-        self._expect_semicolon()
+        # self._expect_semicolon()
+
 
         return BeginTransactionStmt(
             isolation_level=isolation_level,
@@ -174,7 +388,8 @@ class SyntaxAnalyzer:
         COMMIT [WORK]
         """
         work = self._match(TokenType.WORK)
-        self._expect_semicolon()
+        # self._expect_semicolon()
+
 
         return CommitStmt(work=work)
 
@@ -195,7 +410,8 @@ class SyntaxAnalyzer:
 
             to_savepoint = self._advance().lexeme
 
-        self._expect_semicolon()
+        # self._expect_semicolon()
+
 
         return RollbackStmt(work=work, to_savepoint=to_savepoint)
 
@@ -208,7 +424,8 @@ class SyntaxAnalyzer:
             raise SyntaxError("期望保存点名称")
 
         savepoint_name = self._advance().lexeme
-        self._expect_semicolon()
+        # self._expect_semicolon()
+
 
         return SavepointStmt(savepoint_name=savepoint_name)
 
@@ -223,7 +440,8 @@ class SyntaxAnalyzer:
             raise SyntaxError("期望保存点名称")
 
         savepoint_name = self._advance().lexeme
-        self._expect_semicolon()
+        # self._expect_semicolon()
+
 
         return ReleaseSavepointStmt(savepoint_name=savepoint_name)
 
@@ -454,6 +672,8 @@ class SyntaxAnalyzer:
 
     def _parse_select_item(self) -> str:
         """解析选择项"""
+        base_item = None
+
         # 检查是否是聚合函数
         if self._check_aggregate_function():
             func_name = self._advance().lexeme
@@ -462,15 +682,22 @@ class SyntaxAnalyzer:
             if self._match(TokenType.ASTERISK):
                 # COUNT(*)
                 self._expect(TokenType.RIGHT_PAREN)
-                return f"{func_name}(*)"
+                base_item = f"{func_name}(*)"
             else:
                 # COUNT(column), SUM(column) 等
                 column = self._parse_column_reference()
                 self._expect(TokenType.RIGHT_PAREN)
-                return f"{func_name}({column})"
+                base_item = f"{func_name}({column})"
+        else:
+            # 普通列引用
+            base_item = self._parse_column_reference()
 
-        # 普通列引用
-        return self._parse_column_reference()
+        # 处理可选的别名
+        if self._match(TokenType.AS):
+            alias = self._expect(TokenType.IDENTIFIER).lexeme
+            return f"{base_item} AS {alias}"
+
+        return base_item
 
     def _parse_order_by_item(self) -> str:
         """解析ORDER BY项"""

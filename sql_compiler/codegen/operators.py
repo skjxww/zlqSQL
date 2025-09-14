@@ -36,33 +36,6 @@ class Operator(ABC):
         """执行操作"""
         pass
 
-class BeginTransactionOp(Operator):
-    """BEGIN TRANSACTION 操作符"""
-
-    def __init__(self, isolation_level: Optional[str] = None,
-                 transaction_mode: Optional[str] = None):
-        super().__init__()
-        self.isolation_level = isolation_level
-        self.transaction_mode = transaction_mode
-
-    def to_dict(self) -> Dict[str, Any]:
-        return {
-            "type": "BeginTransactionOp",
-            "isolation_level": self.isolation_level,
-            "transaction_mode": self.transaction_mode
-        }
-
-    def execute(self) -> Iterator[Dict[str, Any]]:
-        """执行开始事务操作"""
-        yield {
-            "operation": "begin_transaction",
-            "isolation_level": self.isolation_level or "READ_COMMITTED",
-            "transaction_mode": self.transaction_mode or "READ_WRITE",
-            "status": "ready_for_execution",
-            "message": "事务开始操作已准备就绪"
-        }
-
-
 class CommitTransactionOp(Operator):
     """COMMIT TRANSACTION 操作符"""
 
@@ -1240,35 +1213,6 @@ class IndexNestedLoopJoinOp(Operator):
                 "index_used": self.inner_index_scan.index_name
             }
 
-
-class IndexOnlyScanOp(Operator):
-    """仅索引扫描操作符（覆盖索引）"""
-
-    def __init__(self, table_name: str, index_name: str, scan_condition: Expression):
-        super().__init__([])
-        self.table_name = table_name
-        self.index_name = index_name
-        self.scan_condition = scan_condition
-
-    def to_dict(self) -> Dict[str, Any]:
-        return {
-            "type": "IndexOnlyScanOp",
-            "table_name": self.table_name,
-            "index_name": self.index_name,
-            "scan_condition": self.scan_condition.to_dict(),
-            "optimization": "covering_index"
-        }
-
-    def execute(self) -> Iterator[Dict[str, Any]]:
-        yield {
-            "table": self.table_name,
-            "operation": "index_only_scan",
-            "index": self.index_name,
-            "no_table_access": True
-        }
-
-
-# 在 operators.py 中添加缺失的操作符
 class DropIndexOp(Operator):
     """删除索引操作符"""
 
@@ -1887,3 +1831,143 @@ def is_transaction_statement(plan: Operator) -> bool:
         SavepointOp,
         ReleaseSavepointOp
     ))
+
+class CreateViewOp(Operator):
+    """CREATE VIEW 操作符"""
+
+    def __init__(self, view_name: str, select_plan: Operator,
+                 columns: Optional[List[str]] = None, or_replace: bool = False,
+                 materialized: bool = False, with_check_option: bool = False):
+        super().__init__([select_plan])
+        self.view_name = view_name
+        self.select_plan = select_plan
+        self.columns = columns
+        self.or_replace = or_replace
+        self.materialized = materialized
+        self.with_check_option = with_check_option
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": "CreateViewOp",
+            "view_name": self.view_name,
+            "columns": self.columns,
+            "or_replace": self.or_replace,
+            "materialized": self.materialized,
+            "with_check_option": self.with_check_option,
+            "select_plan": self.select_plan.to_dict()
+        }
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        """执行创建视图操作"""
+        yield {
+            "operation": "create_view",
+            "view_name": self.view_name,
+            "materialized": self.materialized,
+            "or_replace": self.or_replace,
+            "status": "success",
+            "message": f"视图 {self.view_name} 创建成功"
+        }
+
+
+class DropViewOp(Operator):
+    """DROP VIEW 操作符"""
+
+    def __init__(self, view_names: List[str], if_exists: bool = False,
+                 cascade: bool = False, materialized: bool = False):
+        super().__init__()
+        self.view_names = view_names
+        self.if_exists = if_exists
+        self.cascade = cascade
+        self.materialized = materialized
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": "DropViewOp",
+            "view_names": self.view_names,
+            "if_exists": self.if_exists,
+            "cascade": self.cascade,
+            "materialized": self.materialized
+        }
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        """执行删除视图操作"""
+        for view_name in self.view_names:
+            yield {
+                "operation": "drop_view",
+                "view_name": view_name,
+                "materialized": self.materialized,
+                "status": "success",
+                "message": f"视图 {view_name} 删除成功"
+            }
+
+
+class ShowViewsOp(Operator):
+    """SHOW VIEWS 操作符"""
+
+    def __init__(self, pattern: Optional[str] = None, database: Optional[str] = None):
+        super().__init__()
+        self.pattern = pattern
+        self.database = database
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": "ShowViewsOp",
+            "pattern": self.pattern,
+            "database": self.database
+        }
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        """执行显示视图操作"""
+        yield {
+            "operation": "show_views",
+            "pattern": self.pattern,
+            "database": self.database,
+            "status": "success",
+            "message": "显示视图列表"
+        }
+
+
+class DescribeViewOp(Operator):
+    """DESCRIBE VIEW 操作符"""
+
+    def __init__(self, view_name: str):
+        super().__init__()
+        self.view_name = view_name
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": "DescribeViewOp",
+            "view_name": self.view_name
+        }
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        """执行描述视图操作"""
+        yield {
+            "operation": "describe_view",
+            "view_name": self.view_name,
+            "status": "success",
+            "message": f"视图 {self.view_name} 描述信息"
+        }
+
+
+class ViewScanOp(Operator):
+    """视图扫描操作符 - 将视图查询转换为底层表查询"""
+
+    def __init__(self, view_name: str, underlying_plan: Operator):
+        super().__init__([underlying_plan])
+        self.view_name = view_name
+        self.underlying_plan = underlying_plan
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": "ViewScanOp",
+            "view_name": self.view_name,
+            "underlying_plan": self.underlying_plan.to_dict()
+        }
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        """执行视图扫描 - 实际执行底层查询"""
+        for result in self.underlying_plan.execute():
+            # 为结果添加视图信息
+            result["_view_source"] = self.view_name
+            yield result

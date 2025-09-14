@@ -75,6 +75,8 @@ class SelectStmt(TransactionAwareStmt):
         self.group_by = group_by
         self.having_clause = having_clause
         self.order_by = order_by
+        self.in_transaction = False
+        self.transaction_id = None
 
     def to_dict(self) -> Dict[str, Any]:
         result = {
@@ -535,3 +537,79 @@ class ReleaseSavepointStmt(TransactionStmt):
         return f"RELEASE SAVEPOINT {self.savepoint_name}"
 
 
+class ViewStmt(Statement):
+    """视图语句基类"""
+    pass
+
+
+class CreateViewStmt(ViewStmt):
+    """CREATE VIEW语句"""
+
+    def __init__(self, view_name: str, select_stmt: SelectStmt,
+                 columns: Optional[List[str]] = None, or_replace: bool = False,
+                 materialized: bool = False, with_check_option: bool = False):
+        self.view_name = view_name
+        self.select_stmt = select_stmt
+        self.columns = columns
+        self.or_replace = or_replace
+        self.materialized = materialized
+        self.with_check_option = with_check_option
+
+    def to_dict(self) -> dict:
+        return {
+            "type": "CreateViewStmt",
+            "view_name": self.view_name,
+            "select_stmt": self.select_stmt.to_dict(),
+            "columns": self.columns,
+            "or_replace": self.or_replace,
+            "materialized": self.materialized,
+            "with_check_option": self.with_check_option
+        }
+
+
+class DropViewStmt(ViewStmt):
+    """DROP VIEW语句"""
+
+    def __init__(self, view_names: List[str], if_exists: bool = False,
+                 cascade: bool = False, materialized: bool = False):
+        self.view_names = view_names
+        self.if_exists = if_exists
+        self.cascade = cascade
+        self.materialized = materialized
+
+    def to_dict(self) -> dict:
+        return {
+            "type": "DropViewStmt",
+            "view_names": self.view_names,
+            "if_exists": self.if_exists,
+            "cascade": self.cascade,
+            "materialized": self.materialized
+        }
+
+
+class ShowViewsStmt(ViewStmt):
+    """SHOW VIEWS语句"""
+
+    def __init__(self, pattern: Optional[str] = None, database: Optional[str] = None):
+        self.pattern = pattern
+        self.database = database
+
+    def to_dict(self) -> dict:
+        return {
+            "type": "ShowViewsStmt",
+            "pattern": self.pattern,
+            "database": self.database
+        }
+
+
+class DescribeViewStmt(ViewStmt):
+    """DESCRIBE VIEW语句"""
+
+    def __init__(self, view_name: str):
+        self.view_name = view_name
+
+    def to_dict(self) -> dict:
+        return {
+            "type": "DescribeViewStmt",
+            "view_name": self.view_name
+        }

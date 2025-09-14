@@ -19,7 +19,15 @@ class SemanticAnalyzer:
         self.current_aliases = {}
         self.alias_to_real = {}
 
-        if isinstance(stmt, BeginTransactionStmt):
+        if isinstance(stmt, CreateViewStmt):
+            self._analyze_create_view(stmt)
+        elif isinstance(stmt, DropViewStmt):
+            self._analyze_drop_view(stmt)
+        elif isinstance(stmt, ShowViewsStmt):
+            self._analyze_show_views(stmt)
+        elif isinstance(stmt, DescribeViewStmt):
+            self._analyze_describe_view(stmt)
+        elif isinstance(stmt, BeginTransactionStmt):
             self._analyze_begin_transaction(stmt)
         elif isinstance(stmt, CommitStmt):
             self._analyze_commit(stmt)
@@ -102,14 +110,13 @@ class SemanticAnalyzer:
         if not self.silent_mode:
             print(f"   ✅ RELEASE SAVEPOINT语义验证通过")
 
-    def _is_valid_identifier(self, name: str) -> bool:
-        """验证标识符是否有效"""
-        if not name:
+    def _is_valid_identifier(self, identifier: str) -> bool:
+        """检查标识符是否有效"""
+        if not identifier:
             return False
-
-        # 简单的标识符验证：字母或下划线开头，后跟字母、数字或下划线
-        import re
-        return bool(re.match(r'^[a-zA-Z_][a-zA-Z0-9_]*$', name))
+        if not (identifier[0].isalpha() or identifier[0] == '_'):
+            return False
+        return all(c.isalnum() or c == '_' for c in identifier)
 
     def _is_reserved_word(self, word: str) -> bool:
         """检查是否为保留字"""
@@ -575,7 +582,7 @@ class SemanticAnalyzer:
             pass
         elif isinstance(expr, IdentifierExpr):
             # 检查标识符引用是否有效
-            if not self._is_valid_identifier(expr, available_tables):
+            if not self._is_valid_identifier_expr(expr, available_tables):
                 if expr.table_name:
                     raise SemanticError(f"无效的列引用: {expr.table_name}.{expr.name}")
                 else:
@@ -740,8 +747,127 @@ class SemanticAnalyzer:
                     return True
             return False
 
-    def _is_valid_identifier(self, expr: IdentifierExpr, available_tables: Dict[str, List[str]]) -> bool:
-        """检查标识符是否有效"""
+    def _is_valid_data_type(self, data_type: str) -> bool:
+        """检查数据类型是否有效"""
+        base_types = ["INT", "VARCHAR", "CHAR"]
+
+        for base_type in base_types:
+            if data_type == base_type or data_type.startswith(f"{base_type}("):
+                return True
+
+        return False
+
+    def _analyze_create_view(self, stmt: CreateViewStmt):
+        """分析CREATE VIEW语句"""
+        # 验证视图名称
+        if not self._is_valid_identifier(stmt.view_name):
+            raise SemanticError(f"无效的视图名称: {stmt.view_name}")
+
+        # 检查视图是否已存在（如果不是OR REPLACE）
+        if not stmt.or_replace and self._view_exists(stmt.view_name):
+            raise SemanticError(f"视图已存在: {stmt.view_name}")
+
+        # 验证SELECT语句
+        self._analyze_select(stmt.select_stmt)
+
+        # 验证列名列表（如果提供）
+        if stmt.columns:
+            # 检查列名数量是否匹配SELECT的列数
+            select_columns = self._count_select_columns(stmt.select_stmt)
+            if len(stmt.columns) != select_columns:
+                raise SemanticError(
+                    f"视图列数 ({len(stmt.columns)}) 与SELECT列数 ({select_columns}) 不匹配"
+                )
+
+            # 检查列名是否重复
+            if len(stmt.columns) != len(set(stmt.columns)):
+                raise SemanticError("视图列名中存在重复")
+
+        # 物化视图的额外验证
+        if stmt.materialized:
+            self._validate_materialized_view(stmt)
+
+    def _analyze_drop_view(self, stmt: DropViewStmt):
+        """分析DROP VIEW语句"""
+        for view_name in stmt.view_names:
+            # 验证视图名称格式
+            if not self._is_valid_identifier(view_name):
+                raise SemanticError(f"无效的视图名称: {view_name}")
+
+            # 检查视图是否存在（如果不是IF EXISTS）
+            if not stmt.if_exists and not self._view_exists(view_name):
+                raise SemanticError(f"视图不存在: {view_name}")
+
+            # 检查依赖关系（如果不是CASCADE）
+            if not stmt.cascade:
+                dependencies = self._get_view_dependencies(view_name)
+                if dependencies:
+                    raise SemanticError(
+                        f"视图 {view_name} 存在依赖，请使用CASCADE删除: {dependencies}"
+                    )
+
+    def _analyze_show_views(self, stmt: ShowViewsStmt):
+        """分析SHOW VIEWS语句"""
+        # 验证数据库名（如果提供）
+        if stmt.database and not self._is_valid_identifier(stmt.database):
+            raise SemanticError(f"无效的数据库名: {stmt.database}")
+
+        # 验证模式字符串（如果提供）
+        if stmt.pattern:
+            try:
+                # 简单的模式验证
+                import re
+                re.compile(stmt.pattern.replace('%', '.*').replace('_', '.'))
+            except re.error:
+                raise SemanticError(f"无效的模式字符串: {stmt.pattern}")
+
+    def _analyze_describe_view(self, stmt: DescribeViewStmt):
+        """分析DESCRIBE VIEW语句"""
+        # 验证视图名称
+        if not self._is_valid_identifier(stmt.view_name):
+            raise SemanticError(f"无效的视图名称: {stmt.view_name}")
+
+        # 检查视图是否存在
+        if not self._view_exists(stmt.view_name):
+            raise SemanticError(f"视图不存在: {stmt.view_name}")
+
+    def _view_exists(self, view_name: str) -> bool:
+        """检查视图是否存在"""
+        if hasattr(self.catalog, 'view_exists'):
+            return self.catalog.view_exists(view_name)
+        return True  # 简化实现
+
+    def _count_select_columns(self, select_stmt: SelectStmt) -> int:
+        """计算SELECT语句的列数"""
+        if select_stmt.columns == ["*"]:
+            # 需要从FROM子句中的表获取列数
+            if hasattr(select_stmt.from_clause, 'table_name'):
+                table_name = select_stmt.from_clause.table_name
+                if self.catalog.table_exists(table_name):
+                    return len(self.catalog.get_table_columns(table_name))
+            return 1  # 简化处理
+        return len(select_stmt.columns)
+
+    def _validate_materialized_view(self, stmt: CreateViewStmt):
+        """验证物化视图的特殊要求"""
+        # 物化视图不能包含某些不确定性函数
+        non_deterministic_functions = ['NOW()', 'RAND()', 'UUID()']
+        select_text = str(stmt.select_stmt).upper()
+
+        for func in non_deterministic_functions:
+            if func in select_text:
+                raise SemanticError(
+                    f"物化视图不能包含非确定性函数: {func}"
+                )
+
+    def _get_view_dependencies(self, view_name: str) -> List[str]:
+        """获取视图的依赖关系"""
+        if hasattr(self.catalog, 'get_view_dependents'):
+            return self.catalog.get_view_dependents(view_name)
+        return []
+
+    def _is_valid_identifier_expr(self, expr: IdentifierExpr, available_tables: Dict[str, List[str]]) -> bool:
+        """检查标识符表达式是否有效"""
         if expr.table_name:
             # table.column 格式
             if expr.table_name not in available_tables:
@@ -753,13 +879,3 @@ class SemanticAnalyzer:
                 if expr.name in columns:
                     return True
             return False
-
-    def _is_valid_data_type(self, data_type: str) -> bool:
-        """检查数据类型是否有效"""
-        base_types = ["INT", "VARCHAR", "CHAR"]
-
-        for base_type in base_types:
-            if data_type == base_type or data_type.startswith(f"{base_type}("):
-                return True
-
-        return False

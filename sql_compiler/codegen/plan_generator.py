@@ -77,6 +77,14 @@ class PlanGenerator:
             return self._generate_drop_index_plan(stmt)
         elif isinstance(stmt, ShowIndexesStmt):
             return self._generate_show_indexes_plan(stmt)
+        elif isinstance(stmt, CreateViewStmt):
+            return self._generate_create_view_plan(stmt)
+        elif isinstance(stmt, DropViewStmt):
+            return self._generate_drop_view_plan(stmt)
+        elif isinstance(stmt, ShowViewsStmt):
+            return self._generate_show_views_plan(stmt)
+        elif isinstance(stmt, DescribeViewStmt):
+            return self._generate_describe_view_plan(stmt)
         else:
             raise SemanticError(f"不支持的语句类型: {type(stmt).__name__}")
 
@@ -222,32 +230,6 @@ class PlanGenerator:
             self._collect_aliases_from_from_clause(from_clause.left)
             self._collect_aliases_from_from_clause(from_clause.right)
 
-    def _generate_from_plan(self, from_clause: FromClause) -> Operator:
-        """生成FROM子句的执行计划 - 增强别名支持"""
-        if isinstance(from_clause, TableRef):
-            real_table_name = from_clause.table_name
-            table_alias = from_clause.alias
-
-            # 使用别名感知的扫描操作符
-            if table_alias:
-                return AliasAwareSeqScanOp(real_table_name, table_alias)
-            else:
-                return SeqScanOp(real_table_name)
-
-        elif isinstance(from_clause, JoinExpr):
-            left_plan = self._generate_from_plan(from_clause.left)
-            right_plan = self._generate_from_plan(from_clause.right)
-
-            # 使用别名感知的连接操作符
-            return AliasAwareJoinOp(
-                from_clause.join_type,
-                from_clause.on_condition,
-                [left_plan, right_plan]
-            )
-        else:
-            raise SemanticError(f"不支持的FROM子句类型: {type(from_clause).__name__}")
-
-
     def _generate_create_table_plan(self, stmt: CreateTableStmt) -> Operator:
         """生成CREATE TABLE执行计划"""
         return CreateTableOp(stmt.table_name, stmt.columns)
@@ -262,16 +244,17 @@ class PlanGenerator:
             self._set_transaction_context_for_plan(child, transaction_id)
 
     def _generate_select_plan(self, stmt: SelectStmt) -> Operator:
-        """生成查询计划 - 支持事务"""
+        """生成SELECT执行计划"""
         if not self.silent_mode:
-            print(f"   🔍 生成SELECT计划")
-            if hasattr(stmt, 'transaction_id') and stmt.transaction_id:
+            print(f"   📋 生成SELECT计划")
+            # 修复：检查属性是否存在
+            if hasattr(stmt, 'transaction_id'):
                 print(f"     事务ID: {stmt.transaction_id}")
 
         # 生成基本的查询计划
         plan = self._generate_basic_select_plan(stmt)
 
-        # 为计划树中的所有事务感知操作符设置事务上下文
+        # 修复：为计划树中的所有事务感知操作符设置事务上下文
         if hasattr(stmt, 'transaction_id'):
             self._set_transaction_context_for_plan(plan, stmt.transaction_id)
 
@@ -635,3 +618,117 @@ class PlanGenerator:
             'real_to_alias': self.real_to_alias.copy(),
             'total_aliases': len(self.table_aliases)
         }
+
+    def _generate_create_view_plan(self, stmt: CreateViewStmt) -> 'CreateViewOp':
+        """生成创建视图的执行计划"""
+        if not self.silent_mode:
+            print(f"   🏗️ 生成CREATE VIEW计划: {stmt.view_name}")
+            if stmt.materialized:
+                print(f"     类型: 物化视图")
+            if stmt.or_replace:
+                print(f"     模式: OR REPLACE")
+
+        # 生成SELECT语句的执行计划
+        select_plan = self._generate_basic_select_plan(stmt.select_stmt)
+
+        return CreateViewOp(
+            view_name=stmt.view_name,
+            select_plan=select_plan,
+            columns=stmt.columns,
+            or_replace=stmt.or_replace,
+            materialized=stmt.materialized,
+            with_check_option=stmt.with_check_option
+        )
+
+    def _generate_drop_view_plan(self, stmt: DropViewStmt) -> 'DropViewOp':
+        """生成删除视图的执行计划"""
+        if not self.silent_mode:
+            print(f"   🗑️ 生成DROP VIEW计划: {stmt.view_names}")
+            if stmt.materialized:
+                print(f"     类型: 物化视图")
+            if stmt.cascade:
+                print(f"     模式: CASCADE")
+
+        return DropViewOp(
+            view_names=stmt.view_names,
+            if_exists=stmt.if_exists,
+            cascade=stmt.cascade,
+            materialized=stmt.materialized
+        )
+
+    def _generate_show_views_plan(self, stmt: ShowViewsStmt) -> 'ShowViewsOp':
+        """生成显示视图的执行计划"""
+        if not self.silent_mode:
+            print(f"   📋 生成SHOW VIEWS计划")
+            if stmt.database:
+                print(f"     数据库: {stmt.database}")
+            if stmt.pattern:
+                print(f"     模式: {stmt.pattern}")
+
+        return ShowViewsOp(
+            pattern=stmt.pattern,
+            database=stmt.database
+        )
+
+    def _generate_describe_view_plan(self, stmt: DescribeViewStmt) -> 'DescribeViewOp':
+        """生成描述视图的执行计划"""
+        if not self.silent_mode:
+            print(f"   📝 生成DESCRIBE VIEW计划: {stmt.view_name}")
+
+        return DescribeViewOp(view_name=stmt.view_name)
+
+    def _generate_from_plan(self, from_clause) -> Operator:
+        """生成FROM子句的执行计划 - 支持视图"""
+        if isinstance(from_clause, TableRef):
+            real_table_name = from_clause.table_name
+            table_alias = getattr(from_clause, 'alias', None)
+
+            # 检查是否是视图
+            if self._is_view(real_table_name):
+                # 获取视图定义并展开
+                view_definition = self._get_view_definition(real_table_name)
+                underlying_plan = self._generate_basic_select_plan(view_definition)
+
+                return ViewScanOp(real_table_name, underlying_plan)
+            else:
+                # 普通表
+                if table_alias:
+                    return AliasAwareSeqScanOp(real_table_name, table_alias)
+                else:
+                    return SeqScanOp(real_table_name)
+
+        elif isinstance(from_clause, JoinExpr):
+            left_plan = self._generate_from_plan(from_clause.left)
+            right_plan = self._generate_from_plan(from_clause.right)
+
+            return AliasAwareJoinOp(
+                from_clause.join_type,
+                getattr(from_clause, 'on_condition', None),
+                [left_plan, right_plan]
+            )
+
+        else:
+            raise SemanticError(f"不支持的FROM子句类型: {type(from_clause).__name__}")
+
+    def _is_view(self, name: str) -> bool:
+        """检查是否是视图"""
+        if hasattr(self.catalog_manager, 'is_view'):
+            return self.catalog_manager.is_view(name)
+        return False
+
+    def _get_view_definition(self, view_name: str):
+        """获取视图定义"""
+        if hasattr(self.catalog_manager, 'get_view_definition'):
+            definition = self.catalog_manager.get_view_definition(view_name)
+            # 这里需要重新解析视图的SELECT语句
+            from sql_compiler.lexer.lexical_analyzer import LexicalAnalyzer
+            from sql_compiler.parser.syntax_analyzer import SyntaxAnalyzer
+
+            lexer = LexicalAnalyzer(definition)
+            tokens = lexer.tokenize()
+            parser = SyntaxAnalyzer(tokens)
+            return parser.parse()
+
+        # 简化实现
+        from sql_compiler.parser.ast_nodes import SelectStmt, TableRef
+        return SelectStmt(columns=["*"], from_clause=TableRef("dummy"))

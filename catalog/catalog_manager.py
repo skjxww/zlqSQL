@@ -4,15 +4,317 @@ from typing import Dict, List, Optional, Any
 from sql_compiler.btree.BPlusTreeIndex import BPlusTreeIndex
 
 
+class ViewInfo:
+    """视图信息"""
+
+    def __init__(self, view_name: str, definition: str, columns: List[str],
+                 is_materialized: bool = False, created_at: str = None,
+                 with_check_option: bool = False):
+        self.view_name = view_name
+        self.definition = definition
+        self.columns = columns
+        self.is_materialized = is_materialized
+        self.created_at = created_at or self._get_current_time()
+        self.with_check_option = with_check_option
+        self.dependencies = []
+
+    def _get_current_time(self) -> str:
+        import datetime
+        return datetime.datetime.now().isoformat()
+
 class CatalogManager:
     def __init__(self, catalog_file: str = "system_catalog.json"):
         self.catalog_file = catalog_file
         self.catalog_data = self._load_catalog()
         self.indexes = {}  # 索引信息: index_name -> index_info
         self.table_indexes = {}  # 表索引映射: table_name -> [index_names]
+        # 添加视图相关的属性
+        self.views = {}  # view_name -> ViewInfo
+        self.view_dependencies = {}  # view_name -> [dependent_objects]
+
+        # 在加载目录时也要加载视图信息
+        self._load_views_from_catalog()
 
         # 从持久化数据中恢复索引信息
         self._load_indexes_from_catalog()
+
+    def _load_views_from_catalog(self):
+        """从目录文件加载视图信息"""
+        if "views" in self.catalog_data:
+            for view_name, view_data in self.catalog_data["views"].items():
+                view_info = ViewInfo(
+                    view_name=view_name,
+                    definition=view_data["definition"],
+                    columns=view_data["columns"],
+                    is_materialized=view_data.get("is_materialized", False),
+                    created_at=view_data.get("created_at"),
+                    with_check_option=view_data.get("with_check_option", False)
+                )
+                view_info.dependencies = view_data.get("dependencies", [])
+                self.views[view_name] = view_info
+
+                # 重建依赖关系
+                for dep in view_info.dependencies:
+                    if dep not in self.view_dependencies:
+                        self.view_dependencies[dep] = []
+                    self.view_dependencies[dep].append(view_name)
+
+    def create_view(self, view_name: str, definition: str, columns: Optional[List[str]] = None,
+                    is_materialized: bool = False, or_replace: bool = False,
+                    with_check_option: bool = False) -> bool:
+        """创建视图"""
+        try:
+            # 检查视图是否已存在
+            if not or_replace and self.view_exists(view_name):
+                print(f"视图已存在: {view_name}")
+                return False
+
+            # 解析视图定义获取依赖
+            dependencies = self._parse_view_dependencies(definition)
+
+            # 验证依赖的表和视图是否存在
+            for dep in dependencies:
+                if not self.table_exists(dep) and not self.view_exists(dep):
+                    print(f"依赖的表或视图不存在: {dep}")
+                    return False
+
+            # 如果没有指定列名，从SELECT语句推断
+            if not columns:
+                columns = self._infer_view_columns(definition)
+
+            # 创建视图信息
+            view_info = ViewInfo(
+                view_name=view_name,
+                definition=definition,
+                columns=columns,
+                is_materialized=is_materialized,
+                with_check_option=with_check_option
+            )
+            view_info.dependencies = dependencies
+
+            # 存储视图信息
+            self.views[view_name] = view_info
+
+            # 更新依赖关系
+            for dep in dependencies:
+                if dep not in self.view_dependencies:
+                    self.view_dependencies[dep] = []
+                self.view_dependencies[dep].append(view_name)
+
+            # 保存到目录文件
+            self._save_view_to_catalog(view_info)
+
+            print(f"视图创建成功: {view_name}")
+            return True
+
+        except Exception as e:
+            print(f"视图创建失败: {e}")
+            return False
+
+    def drop_view(self, view_name: str, if_exists: bool = False, cascade: bool = False) -> bool:
+        """删除视图"""
+        try:
+            # 检查视图是否存在
+            if not self.view_exists(view_name):
+                if if_exists:
+                    print(f"视图不存在(忽略): {view_name}")
+                    return True
+                else:
+                    print(f"视图不存在: {view_name}")
+                    return False
+
+            # 检查依赖关系
+            dependents = self.get_view_dependents(view_name)
+            if dependents and not cascade:
+                print(f"视图 {view_name} 存在依赖，请使用CASCADE: {dependents}")
+                return False
+
+            # 如果CASCADE，递归删除依赖的视图
+            if cascade:
+                for dependent in dependents:
+                    self.drop_view(dependent, cascade=True)
+
+            # 删除视图
+            view_info = self.views[view_name]
+
+            # 更新依赖关系
+            for dep in view_info.dependencies:
+                if dep in self.view_dependencies:
+                    self.view_dependencies[dep].remove(view_name)
+                    if not self.view_dependencies[dep]:
+                        del self.view_dependencies[dep]
+
+            # 删除视图信息
+            del self.views[view_name]
+
+            # 从目录文件中删除
+            if "views" in self.catalog_data and view_name in self.catalog_data["views"]:
+                del self.catalog_data["views"][view_name]
+                self._save_catalog()
+
+            print(f"视图删除成功: {view_name}")
+            return True
+
+        except Exception as e:
+            print(f"视图删除失败: {e}")
+            return False
+
+    def view_exists(self, view_name: str) -> bool:
+        """检查视图是否存在"""
+        return view_name in self.views
+
+    def is_view(self, name: str) -> bool:
+        """检查是否是视图"""
+        return self.view_exists(name)
+
+    def get_view_info(self, view_name: str) -> Optional[ViewInfo]:
+        """获取视图信息"""
+        return self.views.get(view_name)
+
+    def get_view_definition(self, view_name: str) -> str:
+        """获取视图定义"""
+        if view_name in self.views:
+            return self.views[view_name].definition
+        raise ValueError(f"视图不存在: {view_name}")
+
+    def get_view_columns(self, view_name: str) -> List[str]:
+        """获取视图列名"""
+        if view_name in self.views:
+            return self.views[view_name].columns
+        raise ValueError(f"视图不存在: {view_name}")
+
+    def get_all_views(self) -> List[str]:
+        """获取所有视图名称"""
+        return list(self.views.keys())
+
+    def get_view_dependents(self, view_name: str) -> List[str]:
+        """获取依赖该视图的其他视图"""
+        return self.view_dependencies.get(view_name, [])
+
+    def list_views(self, pattern: Optional[str] = None) -> List[Dict[str, Any]]:
+        """列出视图（支持模式匹配）"""
+        views = []
+
+        for view_name, view_info in self.views.items():
+            # 模式匹配
+            if pattern:
+                import fnmatch
+                if not fnmatch.fnmatch(view_name, pattern):
+                    continue
+
+            views.append({
+                'name': view_name,
+                'type': 'MATERIALIZED VIEW' if view_info.is_materialized else 'VIEW',
+                'definition': view_info.definition,
+                'columns': view_info.columns,
+                'created_at': view_info.created_at,
+                'with_check_option': view_info.with_check_option
+            })
+
+        return views
+
+    def describe_view(self, view_name: str) -> Dict[str, Any]:
+        """描述视图结构"""
+        if not self.view_exists(view_name):
+            raise ValueError(f"视图不存在: {view_name}")
+
+        view_info = self.views[view_name]
+
+        # 构建列信息
+        columns_info = []
+        for i, col_name in enumerate(view_info.columns):
+            columns_info.append({
+                'column_name': col_name,
+                'ordinal_position': i + 1,
+                'data_type': 'VARCHAR',  # 简化实现
+                'is_nullable': 'YES'
+            })
+
+        return {
+            'view_name': view_name,
+            'view_type': 'MATERIALIZED VIEW' if view_info.is_materialized else 'VIEW',
+            'view_definition': view_info.definition,
+            'columns': columns_info,
+            'dependencies': view_info.dependencies,
+            'dependents': self.get_view_dependents(view_name),
+            'created_at': view_info.created_at,
+            'with_check_option': view_info.with_check_option
+        }
+
+    def _save_view_to_catalog(self, view_info: ViewInfo):
+        """保存视图信息到目录文件"""
+        if "views" not in self.catalog_data:
+            self.catalog_data["views"] = {}
+
+        self.catalog_data["views"][view_info.view_name] = {
+            "definition": view_info.definition,
+            "columns": view_info.columns,
+            "is_materialized": view_info.is_materialized,
+            "created_at": view_info.created_at,
+            "with_check_option": view_info.with_check_option,
+            "dependencies": view_info.dependencies
+        }
+
+        self._save_catalog()
+
+    def _parse_view_dependencies(self, definition: str) -> List[str]:
+        """解析视图定义中的依赖关系"""
+        dependencies = []
+
+        # 简化实现：使用正则表达式提取FROM和JOIN中的表名
+        import re
+
+        # 匹配FROM子句中的表名
+        from_pattern = r'\bFROM\s+([a-zA-Z_]\w*)'
+        from_matches = re.findall(from_pattern, definition, re.IGNORECASE)
+        dependencies.extend(from_matches)
+
+        # 匹配JOIN子句中的表名
+        join_pattern = r'\bJOIN\s+([a-zA-Z_]\w*)'
+        join_matches = re.findall(join_pattern, definition, re.IGNORECASE)
+        dependencies.extend(join_matches)
+
+        # 去重并返回
+        return list(set(dependencies))
+
+    def _infer_view_columns(self, definition: str) -> List[str]:
+        """从SELECT语句推断视图列名"""
+        # 简化实现：解析SELECT子句
+        import re
+
+        # 提取SELECT和FROM之间的列部分
+        select_match = re.search(r'\bSELECT\s+(.*?)\s+FROM', definition, re.IGNORECASE | re.DOTALL)
+        if not select_match:
+            return ['*']
+
+        columns_part = select_match.group(1).strip()
+
+        if columns_part == '*':
+            return ['*']
+
+        # 简单的列名解析
+        columns = []
+        for col in columns_part.split(','):
+            col = col.strip()
+            # 处理别名 (column AS alias 或 column alias)
+            if ' AS ' in col.upper():
+                alias = col.upper().split(' AS ')[1].strip()
+                columns.append(alias)
+            elif ' ' in col and not any(func in col.upper() for func in ['COUNT', 'SUM', 'AVG', 'MAX', 'MIN']):
+                # 简单的别名检测
+                parts = col.split()
+                if len(parts) >= 2:
+                    columns.append(parts[-1])
+                else:
+                    columns.append(col)
+            else:
+                # 提取列名
+                if '.' in col:
+                    columns.append(col.split('.')[-1])
+                else:
+                    columns.append(col)
+
+        return columns
 
     def _load_indexes_from_catalog(self):
         """从目录文件中加载索引信息"""

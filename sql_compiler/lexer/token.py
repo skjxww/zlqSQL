@@ -116,6 +116,19 @@ class TokenType(Enum):
     REPEATABLE = "REPEATABLE"
     SERIALIZABLE = "SERIALIZABLE"
 
+    # 视图相关
+    VIEW = "VIEW"
+    VIEWS = "VIEWS"
+    MATERIALIZED = "MATERIALIZED"
+    REPLACE = "REPLACE"
+    CASCADE = "CASCADE"
+    OPTION = "OPTION"
+    DESCRIBE = "DESCRIBE"
+    LIKE = "LIKE"
+    IF = "IF"
+    EXISTS = "EXISTS"
+    CHECK = "CHECK"
+    WITH = "WITH"
 
 class Token:
     def __init__(self, token_type: TokenType, lexeme: str, line: int, column: int, value: Any = None):
