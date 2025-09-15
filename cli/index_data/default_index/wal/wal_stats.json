@@ -1,8 +1,8 @@
 {
-  "timestamp": 1757845207.0081482,
-  "uptime": 2567.932606458664,
+  "timestamp": 1757905095.771693,
+  "uptime": 65.72907280921936,
   "metrics": {
-    "total_writes": 20,
+    "total_writes": 39,
     "total_bytes_written": 0,
     "average_write_latency": 0.0,
     "max_write_latency": 0.0,
@@ -11,8 +11,8 @@
     "checkpoint_count": 0,
     "average_checkpoint_duration": 0.0,
     "recovery_count": 1,
-    "recovery_duration_ms": 14.640569686889648,
-    "pages_recovered": 6,
+    "recovery_duration_ms": 11.036157608032227,
+    "pages_recovered": 3,
     "transactions_rolled_back": 0,
     "current_file_count": 0,
     "total_file_size_mb": 0.0,
@@ -20,22 +20,20 @@
     "write_errors": 0,
     "sync_errors": 0,
     "corruption_detected": 0,
-    "writes_per_second": 1195.9294583921417,
+    "writes_per_second": 2440.1858133810697,
     "mb_per_second": 0.0
   },
   "health": {
-    "status": "degraded",
-    "issues": [
-      "Long time since last checkpoint: 2568 seconds"
-    ],
-    "uptime_seconds": 2567.932606458664,
-    "last_checkpoint_ago": 2567.932606458664,
+    "status": "healthy",
+    "issues": [],
+    "uptime_seconds": 65.72907280921936,
+    "last_checkpoint_ago": 65.72907280921936,
     "metrics_summary": {
-      "total_writes": 20,
+      "total_writes": 39,
       "total_mb_written": 0.0,
       "average_write_latency_ms": 0.0,
       "max_write_latency_ms": 0.0,
-      "writes_per_second": 1195.93,
+      "writes_per_second": 2440.19,
       "mb_per_second": 0.0,
       "checkpoint_count": 0,
       "error_count": 0,

@@ -1847,3 +1847,697 @@
 2025-09-14 17:38:19,098 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=22 | tablespace=default | data_length=4096 | file_offset=86016
 2025-09-14 18:20:07,011 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
 2025-09-14 18:20:07,011 - page_manager - INFO - _log_with_context:97 - PageManager cleanup completed
+2025-09-14 21:28:15,798 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-14 21:28:15,798 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=24 | allocated_count=23 | free_count=0
+2025-09-14 21:28:15,798 - page_manager - WARNING - _log_with_context:97 - Data file size inconsistent with metadata | Context: file_size=73728 | expected_size=94208
+2025-09-14 21:28:15,798 - page_manager - INFO - _log_with_context:97 - No tablespace manager, using default file mode
+2025-09-14 21:28:15,798 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=23 | tablespace_support=False
+2025-09-14 21:28:15,801 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-14 21:28:15,802 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=24 | allocated_count=23 | free_count=0
+2025-09-14 21:28:15,802 - page_manager - WARNING - _log_with_context:97 - Data file size inconsistent with metadata | Context: file_size=73728 | expected_size=94208
+2025-09-14 21:28:15,802 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=default | file_path=data\database.db
+2025-09-14 21:28:15,802 - page_manager - INFO - _log_with_context:97 - Created tablespace file | Context: tablespace=system | file_path=data\system_tablespace.db
+2025-09-14 21:28:15,802 - page_manager - INFO - _log_with_context:97 - Created tablespace file | Context: tablespace=user_data | file_path=data\user_data_tablespace.db
+2025-09-14 21:28:15,803 - page_manager - INFO - _log_with_context:97 - Created tablespace file | Context: tablespace=temp | file_path=data\temp_tablespace.db
+2025-09-14 21:28:15,803 - page_manager - INFO - _log_with_context:97 - Created tablespace file | Context: tablespace=log | file_path=data\log_tablespace.db
+2025-09-14 21:28:15,803 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=23 | tablespace_support=True
+2025-09-14 21:28:15,830 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=index_data\default_index | meta_dir=index_data\default_index
+2025-09-14 21:28:15,830 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=23 | allocated_count=22 | free_count=0
+2025-09-14 21:28:15,831 - page_manager - WARNING - _log_with_context:97 - Data file size inconsistent with metadata | Context: file_size=0 | expected_size=90112
+2025-09-14 21:28:15,831 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=default | file_path=index_data\default_index\database.db
+2025-09-14 21:28:15,831 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=index_data\default_index\database.db | meta_file=index_data\default_index\metadata.json | allocated_pages=22 | tablespace_support=True
+2025-09-14 21:28:15,836 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 23 in tablespace 'default'
+2025-09-14 21:28:15,837 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-14 21:28:15,837 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=23 | tablespace=default | total_allocated=23
+2025-09-14 21:28:34,960 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-14 21:28:34,960 - page_manager - INFO - _log_with_context:97 - PageManager cleanup completed
+2025-09-14 21:28:35,021 - page_manager - DEBUG - _log_with_context:97 - Writing page 23 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-14 21:28:35,021 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=94208
+2025-09-14 21:28:35,022 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=23 | tablespace=default | data_length=4096 | file_offset=90112
+2025-09-14 21:28:35,031 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-14 21:28:35,031 - page_manager - INFO - _log_with_context:97 - PageManager cleanup completed
+2025-09-15 08:56:35,049 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-15 08:56:35,049 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=24 | allocated_count=23 | free_count=0
+2025-09-15 08:56:35,049 - page_manager - WARNING - _log_with_context:97 - Data file size inconsistent with metadata | Context: file_size=73728 | expected_size=94208
+2025-09-15 08:56:35,049 - page_manager - INFO - _log_with_context:97 - No tablespace manager, using default file mode
+2025-09-15 08:56:35,050 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=23 | tablespace_support=False
+2025-09-15 08:56:35,052 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-15 08:56:35,052 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=24 | allocated_count=23 | free_count=0
+2025-09-15 08:56:35,052 - page_manager - WARNING - _log_with_context:97 - Data file size inconsistent with metadata | Context: file_size=73728 | expected_size=94208
+2025-09-15 08:56:35,052 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=default | file_path=data\database.db
+2025-09-15 08:56:35,053 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=system | file_path=data\system_tablespace.db
+2025-09-15 08:56:35,053 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=user_data | file_path=data\user_data_tablespace.db
+2025-09-15 08:56:35,053 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=temp | file_path=data\temp_tablespace.db
+2025-09-15 08:56:35,053 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=log | file_path=data\log_tablespace.db
+2025-09-15 08:56:35,053 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=23 | tablespace_support=True
+2025-09-15 08:56:35,070 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=index_data\default_index | meta_dir=index_data\default_index
+2025-09-15 08:56:35,070 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=24 | allocated_count=23 | free_count=0
+2025-09-15 08:56:35,070 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=default | file_path=index_data\default_index\database.db
+2025-09-15 08:56:35,070 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=index_data\default_index\database.db | meta_file=index_data\default_index\metadata.json | allocated_pages=23 | tablespace_support=True
+2025-09-15 08:56:35,079 - page_manager - DEBUG - _log_with_context:97 - Writing page 23 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 08:56:35,079 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=94208
+2025-09-15 08:56:35,080 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=23 | tablespace=default | data_length=4096 | file_offset=90112
+2025-09-15 08:56:35,081 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 24 in tablespace 'default'
+2025-09-15 08:56:35,081 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 08:56:35,082 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=24 | tablespace=default | total_allocated=24
+2025-09-15 08:57:35,086 - page_manager - DEBUG - _log_with_context:97 - Writing page 24 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 08:57:35,088 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=98304
+2025-09-15 08:57:35,090 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=24 | tablespace=default | data_length=4096 | file_offset=94208
+2025-09-15 09:02:14,364 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 09:02:14,364 - page_manager - INFO - _log_with_context:97 - PageManager cleanup completed
+2025-09-15 09:02:14,841 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-15 09:02:14,842 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=24 | allocated_count=23 | free_count=0
+2025-09-15 09:02:14,842 - page_manager - WARNING - _log_with_context:97 - Data file size inconsistent with metadata | Context: file_size=73728 | expected_size=94208
+2025-09-15 09:02:14,842 - page_manager - INFO - _log_with_context:97 - No tablespace manager, using default file mode
+2025-09-15 09:02:14,842 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=23 | tablespace_support=False
+2025-09-15 09:02:14,844 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-15 09:02:14,845 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=24 | allocated_count=23 | free_count=0
+2025-09-15 09:02:14,845 - page_manager - WARNING - _log_with_context:97 - Data file size inconsistent with metadata | Context: file_size=73728 | expected_size=94208
+2025-09-15 09:02:14,845 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=default | file_path=data\database.db
+2025-09-15 09:02:14,845 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=system | file_path=data\system_tablespace.db
+2025-09-15 09:02:14,845 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=user_data | file_path=data\user_data_tablespace.db
+2025-09-15 09:02:14,845 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=temp | file_path=data\temp_tablespace.db
+2025-09-15 09:02:14,845 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=log | file_path=data\log_tablespace.db
+2025-09-15 09:02:14,845 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=23 | tablespace_support=True
+2025-09-15 09:02:14,856 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=index_data\default_index | meta_dir=index_data\default_index
+2025-09-15 09:02:14,856 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=25 | allocated_count=24 | free_count=0
+2025-09-15 09:02:14,856 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=default | file_path=index_data\default_index\database.db
+2025-09-15 09:02:14,856 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=index_data\default_index\database.db | meta_file=index_data\default_index\metadata.json | allocated_pages=24 | tablespace_support=True
+2025-09-15 09:02:14,862 - page_manager - DEBUG - _log_with_context:97 - Writing page 2 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 09:02:14,862 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=8192
+2025-09-15 09:02:14,862 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=2 | tablespace=default | data_length=4096 | file_offset=4096
+2025-09-15 09:02:14,863 - page_manager - DEBUG - _log_with_context:97 - Writing page 23 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 09:02:14,863 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=94208
+2025-09-15 09:02:14,863 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=23 | tablespace=default | data_length=4096 | file_offset=90112
+2025-09-15 09:02:14,864 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 25 in tablespace 'default'
+2025-09-15 09:02:14,865 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 09:02:14,865 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=25 | tablespace=default | total_allocated=25
+2025-09-15 09:02:28,240 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 09:02:28,240 - page_manager - INFO - _log_with_context:97 - PageManager cleanup completed
+2025-09-15 09:02:28,290 - page_manager - DEBUG - _log_with_context:97 - Writing page 25 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 09:02:28,290 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=102400
+2025-09-15 09:02:28,291 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=25 | tablespace=default | data_length=4096 | file_offset=98304
+2025-09-15 09:02:28,298 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 09:02:28,298 - page_manager - INFO - _log_with_context:97 - PageManager cleanup completed
+2025-09-15 09:04:19,182 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-15 09:04:19,182 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=24 | allocated_count=23 | free_count=0
+2025-09-15 09:04:19,183 - page_manager - WARNING - _log_with_context:97 - Data file size inconsistent with metadata | Context: file_size=73728 | expected_size=94208
+2025-09-15 09:04:19,183 - page_manager - INFO - _log_with_context:97 - No tablespace manager, using default file mode
+2025-09-15 09:04:19,183 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=23 | tablespace_support=False
+2025-09-15 09:04:19,185 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-15 09:04:19,185 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=24 | allocated_count=23 | free_count=0
+2025-09-15 09:04:19,185 - page_manager - WARNING - _log_with_context:97 - Data file size inconsistent with metadata | Context: file_size=73728 | expected_size=94208
+2025-09-15 09:04:19,185 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=default | file_path=data\database.db
+2025-09-15 09:04:19,186 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=system | file_path=data\system_tablespace.db
+2025-09-15 09:04:19,186 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=user_data | file_path=data\user_data_tablespace.db
+2025-09-15 09:04:19,186 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=temp | file_path=data\temp_tablespace.db
+2025-09-15 09:04:19,186 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=log | file_path=data\log_tablespace.db
+2025-09-15 09:04:19,186 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=23 | tablespace_support=True
+2025-09-15 09:04:19,196 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=index_data\default_index | meta_dir=index_data\default_index
+2025-09-15 09:04:19,196 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=26 | allocated_count=25 | free_count=0
+2025-09-15 09:04:19,196 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=default | file_path=index_data\default_index\database.db
+2025-09-15 09:04:19,196 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=index_data\default_index\database.db | meta_file=index_data\default_index\metadata.json | allocated_pages=25 | tablespace_support=True
+2025-09-15 09:04:19,202 - page_manager - DEBUG - _log_with_context:97 - Writing page 2 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 09:04:19,203 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=8192
+2025-09-15 09:04:19,203 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=2 | tablespace=default | data_length=4096 | file_offset=4096
+2025-09-15 09:04:19,204 - page_manager - DEBUG - _log_with_context:97 - Writing page 23 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 09:04:19,204 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=94208
+2025-09-15 09:04:19,204 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=23 | tablespace=default | data_length=4096 | file_offset=90112
+2025-09-15 09:04:19,205 - page_manager - DEBUG - _log_with_context:97 - Writing page 25 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 09:04:19,205 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=102400
+2025-09-15 09:04:19,205 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=25 | tablespace=default | data_length=4096 | file_offset=98304
+2025-09-15 09:04:19,206 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 26 in tablespace 'default'
+2025-09-15 09:04:19,207 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 09:04:19,207 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=26 | tablespace=default | total_allocated=26
+2025-09-15 09:04:49,207 - page_manager - DEBUG - _log_with_context:97 - Writing page 26 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 09:04:49,207 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=106496
+2025-09-15 09:04:49,208 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=26 | tablespace=default | data_length=4096 | file_offset=102400
+2025-09-15 09:05:58,679 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 09:05:58,679 - page_manager - INFO - _log_with_context:97 - PageManager cleanup completed
+2025-09-15 09:06:03,270 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-15 09:06:03,271 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=24 | allocated_count=23 | free_count=0
+2025-09-15 09:06:03,271 - page_manager - WARNING - _log_with_context:97 - Data file size inconsistent with metadata | Context: file_size=73728 | expected_size=94208
+2025-09-15 09:06:03,271 - page_manager - INFO - _log_with_context:97 - No tablespace manager, using default file mode
+2025-09-15 09:06:03,271 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=23 | tablespace_support=False
+2025-09-15 09:06:03,273 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-15 09:06:03,273 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=24 | allocated_count=23 | free_count=0
+2025-09-15 09:06:03,274 - page_manager - WARNING - _log_with_context:97 - Data file size inconsistent with metadata | Context: file_size=73728 | expected_size=94208
+2025-09-15 09:06:03,274 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=default | file_path=data\database.db
+2025-09-15 09:06:03,274 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=system | file_path=data\system_tablespace.db
+2025-09-15 09:06:03,274 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=user_data | file_path=data\user_data_tablespace.db
+2025-09-15 09:06:03,274 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=temp | file_path=data\temp_tablespace.db
+2025-09-15 09:06:03,274 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=log | file_path=data\log_tablespace.db
+2025-09-15 09:06:03,274 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=23 | tablespace_support=True
+2025-09-15 09:06:03,286 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=index_data\default_index | meta_dir=index_data\default_index
+2025-09-15 09:06:03,286 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=27 | allocated_count=26 | free_count=0
+2025-09-15 09:06:03,287 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=default | file_path=index_data\default_index\database.db
+2025-09-15 09:06:03,287 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=index_data\default_index\database.db | meta_file=index_data\default_index\metadata.json | allocated_pages=26 | tablespace_support=True
+2025-09-15 09:06:03,293 - page_manager - DEBUG - _log_with_context:97 - Writing page 2 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 09:06:03,293 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=8192
+2025-09-15 09:06:03,294 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=2 | tablespace=default | data_length=4096 | file_offset=4096
+2025-09-15 09:06:03,294 - page_manager - DEBUG - _log_with_context:97 - Writing page 23 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 09:06:03,294 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=94208
+2025-09-15 09:06:03,295 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=23 | tablespace=default | data_length=4096 | file_offset=90112
+2025-09-15 09:06:03,296 - page_manager - DEBUG - _log_with_context:97 - Writing page 25 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 09:06:03,296 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=102400
+2025-09-15 09:06:03,297 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=25 | tablespace=default | data_length=4096 | file_offset=98304
+2025-09-15 09:06:03,297 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 27 in tablespace 'default'
+2025-09-15 09:06:03,299 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 09:06:03,299 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=27 | tablespace=default | total_allocated=27
+2025-09-15 09:06:11,376 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 24 in tablespace 'user_data'
+2025-09-15 09:06:11,377 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 09:06:11,377 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=24 | tablespace=user_data | total_allocated=24
+2025-09-15 09:06:11,377 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 25 in tablespace 'user_data'
+2025-09-15 09:06:11,379 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 09:06:11,379 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=25 | tablespace=user_data | total_allocated=25
+2025-09-15 09:06:11,379 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 26 in tablespace 'user_data'
+2025-09-15 09:06:11,380 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 09:06:11,380 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=26 | tablespace=user_data | total_allocated=26
+2025-09-15 09:06:11,380 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 27 in tablespace 'user_data'
+2025-09-15 09:06:11,380 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 09:06:11,380 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=27 | tablespace=user_data | total_allocated=27
+2025-09-15 09:06:15,052 - page_manager - DEBUG - _log_with_context:97 - Writing page 24 to tablespace 'user_data', file: data\user_data_tablespace.db
+2025-09-15 09:06:15,053 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=data\user_data_tablespace.db | target_size=98304
+2025-09-15 09:06:15,055 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=24 | tablespace=user_data | data_length=4096 | file_offset=94208
+2025-09-15 09:06:15,057 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 09:06:15,057 - page_manager - INFO - _log_with_context:97 - PageManager cleanup completed
+2025-09-15 09:06:15,113 - page_manager - DEBUG - _log_with_context:97 - Writing page 27 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 09:06:15,114 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=110592
+2025-09-15 09:06:15,115 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=27 | tablespace=default | data_length=4096 | file_offset=106496
+2025-09-15 09:06:15,124 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 09:06:15,124 - page_manager - INFO - _log_with_context:97 - PageManager cleanup completed
+2025-09-15 09:28:37,819 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-15 09:28:37,820 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=28 | allocated_count=27 | free_count=0
+2025-09-15 09:28:37,820 - page_manager - WARNING - _log_with_context:97 - Data file size inconsistent with metadata | Context: file_size=73728 | expected_size=110592
+2025-09-15 09:28:37,820 - page_manager - INFO - _log_with_context:97 - No tablespace manager, using default file mode
+2025-09-15 09:28:37,820 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=27 | tablespace_support=False
+2025-09-15 09:28:37,822 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-15 09:28:37,822 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=28 | allocated_count=27 | free_count=0
+2025-09-15 09:28:37,822 - page_manager - WARNING - _log_with_context:97 - Data file size inconsistent with metadata | Context: file_size=73728 | expected_size=110592
+2025-09-15 09:28:37,822 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=default | file_path=data\database.db
+2025-09-15 09:28:37,822 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=system | file_path=data\system_tablespace.db
+2025-09-15 09:28:37,822 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=user_data | file_path=data\user_data_tablespace.db
+2025-09-15 09:28:37,822 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=temp | file_path=data\temp_tablespace.db
+2025-09-15 09:28:37,822 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=log | file_path=data\log_tablespace.db
+2025-09-15 09:28:37,823 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=27 | tablespace_support=True
+2025-09-15 09:28:37,835 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=index_data\default_index | meta_dir=index_data\default_index
+2025-09-15 09:28:37,835 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=28 | allocated_count=27 | free_count=0
+2025-09-15 09:28:37,835 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=default | file_path=index_data\default_index\database.db
+2025-09-15 09:28:37,836 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=index_data\default_index\database.db | meta_file=index_data\default_index\metadata.json | allocated_pages=27 | tablespace_support=True
+2025-09-15 09:28:37,842 - page_manager - DEBUG - _log_with_context:97 - Writing page 2 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 09:28:37,842 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=8192
+2025-09-15 09:28:37,843 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=2 | tablespace=default | data_length=4096 | file_offset=4096
+2025-09-15 09:28:37,844 - page_manager - DEBUG - _log_with_context:97 - Writing page 23 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 09:28:37,844 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=94208
+2025-09-15 09:28:37,845 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=23 | tablespace=default | data_length=4096 | file_offset=90112
+2025-09-15 09:28:37,845 - page_manager - DEBUG - _log_with_context:97 - Writing page 25 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 09:28:37,845 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=102400
+2025-09-15 09:28:37,846 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=25 | tablespace=default | data_length=4096 | file_offset=98304
+2025-09-15 09:28:37,846 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 28 in tablespace 'default'
+2025-09-15 09:28:37,847 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 09:28:37,847 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=28 | tablespace=default | total_allocated=28
+2025-09-15 09:28:42,067 - page_manager - DEBUG - _log_with_context:97 - Writing page 28 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 09:28:42,067 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=114688
+2025-09-15 09:28:42,068 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=28 | tablespace=default | data_length=4096 | file_offset=110592
+2025-09-15 09:28:42,069 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 09:28:42,069 - page_manager - INFO - _log_with_context:97 - PageManager cleanup completed
+2025-09-15 09:29:17,435 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-15 09:29:17,436 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=28 | allocated_count=27 | free_count=0
+2025-09-15 09:29:17,436 - page_manager - WARNING - _log_with_context:97 - Data file size inconsistent with metadata | Context: file_size=73728 | expected_size=110592
+2025-09-15 09:29:17,436 - page_manager - INFO - _log_with_context:97 - No tablespace manager, using default file mode
+2025-09-15 09:29:17,436 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=27 | tablespace_support=False
+2025-09-15 09:29:17,437 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-15 09:29:17,438 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=28 | allocated_count=27 | free_count=0
+2025-09-15 09:29:17,438 - page_manager - WARNING - _log_with_context:97 - Data file size inconsistent with metadata | Context: file_size=73728 | expected_size=110592
+2025-09-15 09:29:17,438 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=default | file_path=data\database.db
+2025-09-15 09:29:17,438 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=system | file_path=data\system_tablespace.db
+2025-09-15 09:29:17,438 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=user_data | file_path=data\user_data_tablespace.db
+2025-09-15 09:29:17,438 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=temp | file_path=data\temp_tablespace.db
+2025-09-15 09:29:17,438 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=log | file_path=data\log_tablespace.db
+2025-09-15 09:29:17,438 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=27 | tablespace_support=True
+2025-09-15 09:29:17,451 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=index_data\default_index | meta_dir=index_data\default_index
+2025-09-15 09:29:17,452 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=29 | allocated_count=28 | free_count=0
+2025-09-15 09:29:17,452 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=default | file_path=index_data\default_index\database.db
+2025-09-15 09:29:17,452 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=index_data\default_index\database.db | meta_file=index_data\default_index\metadata.json | allocated_pages=28 | tablespace_support=True
+2025-09-15 09:29:17,459 - page_manager - DEBUG - _log_with_context:97 - Writing page 2 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 09:29:17,459 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=8192
+2025-09-15 09:29:17,460 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=2 | tablespace=default | data_length=4096 | file_offset=4096
+2025-09-15 09:29:17,460 - page_manager - DEBUG - _log_with_context:97 - Writing page 23 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 09:29:17,460 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=94208
+2025-09-15 09:29:17,461 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=23 | tablespace=default | data_length=4096 | file_offset=90112
+2025-09-15 09:29:17,461 - page_manager - DEBUG - _log_with_context:97 - Writing page 25 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 09:29:17,461 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=102400
+2025-09-15 09:29:17,462 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=25 | tablespace=default | data_length=4096 | file_offset=98304
+2025-09-15 09:29:17,463 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 29 in tablespace 'default'
+2025-09-15 09:29:17,464 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 09:29:17,464 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=29 | tablespace=default | total_allocated=29
+2025-09-15 09:29:22,104 - page_manager - DEBUG - _log_with_context:97 - Writing page 29 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 09:29:22,104 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=118784
+2025-09-15 09:29:22,105 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=29 | tablespace=default | data_length=4096 | file_offset=114688
+2025-09-15 09:29:22,107 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 09:29:22,107 - page_manager - INFO - _log_with_context:97 - PageManager cleanup completed
+2025-09-15 09:40:18,545 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-15 09:40:18,546 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=28 | allocated_count=27 | free_count=0
+2025-09-15 09:40:18,546 - page_manager - WARNING - _log_with_context:97 - Data file size inconsistent with metadata | Context: file_size=73728 | expected_size=110592
+2025-09-15 09:40:18,546 - page_manager - INFO - _log_with_context:97 - No tablespace manager, using default file mode
+2025-09-15 09:40:18,546 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=27 | tablespace_support=False
+2025-09-15 09:40:18,548 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-15 09:40:18,548 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=28 | allocated_count=27 | free_count=0
+2025-09-15 09:40:18,548 - page_manager - WARNING - _log_with_context:97 - Data file size inconsistent with metadata | Context: file_size=73728 | expected_size=110592
+2025-09-15 09:40:18,548 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=default | file_path=data\database.db
+2025-09-15 09:40:18,548 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=system | file_path=data\system_tablespace.db
+2025-09-15 09:40:18,548 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=user_data | file_path=data\user_data_tablespace.db
+2025-09-15 09:40:18,548 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=temp | file_path=data\temp_tablespace.db
+2025-09-15 09:40:18,548 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=log | file_path=data\log_tablespace.db
+2025-09-15 09:40:18,548 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=27 | tablespace_support=True
+2025-09-15 09:40:18,563 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=index_data\default_index | meta_dir=index_data\default_index
+2025-09-15 09:40:18,563 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=30 | allocated_count=29 | free_count=0
+2025-09-15 09:40:18,563 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=default | file_path=index_data\default_index\database.db
+2025-09-15 09:40:18,563 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=index_data\default_index\database.db | meta_file=index_data\default_index\metadata.json | allocated_pages=29 | tablespace_support=True
+2025-09-15 09:40:18,573 - page_manager - DEBUG - _log_with_context:97 - Writing page 2 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 09:40:18,573 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=8192
+2025-09-15 09:40:18,574 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=2 | tablespace=default | data_length=4096 | file_offset=4096
+2025-09-15 09:40:18,575 - page_manager - DEBUG - _log_with_context:97 - Writing page 23 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 09:40:18,575 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=94208
+2025-09-15 09:40:18,576 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=23 | tablespace=default | data_length=4096 | file_offset=90112
+2025-09-15 09:40:18,577 - page_manager - DEBUG - _log_with_context:97 - Writing page 25 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 09:40:18,577 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=102400
+2025-09-15 09:40:18,578 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=25 | tablespace=default | data_length=4096 | file_offset=98304
+2025-09-15 09:40:18,579 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 30 in tablespace 'default'
+2025-09-15 09:40:18,581 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 09:40:18,581 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=30 | tablespace=default | total_allocated=30
+2025-09-15 09:40:21,262 - page_manager - DEBUG - _log_with_context:97 - Writing page 30 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 09:40:21,263 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=122880
+2025-09-15 09:40:21,264 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=30 | tablespace=default | data_length=4096 | file_offset=118784
+2025-09-15 09:40:21,265 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 09:40:21,266 - page_manager - INFO - _log_with_context:97 - PageManager cleanup completed
+2025-09-15 09:41:33,035 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-15 09:41:33,036 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=28 | allocated_count=27 | free_count=0
+2025-09-15 09:41:33,036 - page_manager - WARNING - _log_with_context:97 - Data file size inconsistent with metadata | Context: file_size=73728 | expected_size=110592
+2025-09-15 09:41:33,036 - page_manager - INFO - _log_with_context:97 - No tablespace manager, using default file mode
+2025-09-15 09:41:33,037 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=27 | tablespace_support=False
+2025-09-15 09:41:33,038 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-15 09:41:33,038 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=28 | allocated_count=27 | free_count=0
+2025-09-15 09:41:33,039 - page_manager - WARNING - _log_with_context:97 - Data file size inconsistent with metadata | Context: file_size=73728 | expected_size=110592
+2025-09-15 09:41:33,039 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=default | file_path=data\database.db
+2025-09-15 09:41:33,039 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=system | file_path=data\system_tablespace.db
+2025-09-15 09:41:33,039 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=user_data | file_path=data\user_data_tablespace.db
+2025-09-15 09:41:33,039 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=temp | file_path=data\temp_tablespace.db
+2025-09-15 09:41:33,039 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=log | file_path=data\log_tablespace.db
+2025-09-15 09:41:33,039 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=27 | tablespace_support=True
+2025-09-15 09:41:33,052 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=index_data\default_index | meta_dir=index_data\default_index
+2025-09-15 09:41:33,053 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=31 | allocated_count=30 | free_count=0
+2025-09-15 09:41:33,053 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=default | file_path=index_data\default_index\database.db
+2025-09-15 09:41:33,053 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=index_data\default_index\database.db | meta_file=index_data\default_index\metadata.json | allocated_pages=30 | tablespace_support=True
+2025-09-15 09:41:33,060 - page_manager - DEBUG - _log_with_context:97 - Writing page 2 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 09:41:33,060 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=8192
+2025-09-15 09:41:33,061 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=2 | tablespace=default | data_length=4096 | file_offset=4096
+2025-09-15 09:41:33,061 - page_manager - DEBUG - _log_with_context:97 - Writing page 23 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 09:41:33,061 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=94208
+2025-09-15 09:41:33,062 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=23 | tablespace=default | data_length=4096 | file_offset=90112
+2025-09-15 09:41:33,062 - page_manager - DEBUG - _log_with_context:97 - Writing page 25 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 09:41:33,062 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=102400
+2025-09-15 09:41:33,063 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=25 | tablespace=default | data_length=4096 | file_offset=98304
+2025-09-15 09:41:33,063 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 31 in tablespace 'default'
+2025-09-15 09:41:33,064 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 09:41:33,064 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=31 | tablespace=default | total_allocated=31
+2025-09-15 09:41:36,499 - page_manager - DEBUG - _log_with_context:97 - Writing page 31 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 09:41:36,499 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=126976
+2025-09-15 09:41:36,500 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=31 | tablespace=default | data_length=4096 | file_offset=122880
+2025-09-15 09:41:36,501 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 09:41:36,501 - page_manager - INFO - _log_with_context:97 - PageManager cleanup completed
+2025-09-15 09:47:23,825 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-15 09:47:23,826 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=28 | allocated_count=27 | free_count=0
+2025-09-15 09:47:23,826 - page_manager - WARNING - _log_with_context:97 - Data file size inconsistent with metadata | Context: file_size=73728 | expected_size=110592
+2025-09-15 09:47:23,826 - page_manager - INFO - _log_with_context:97 - No tablespace manager, using default file mode
+2025-09-15 09:47:23,826 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=27 | tablespace_support=False
+2025-09-15 09:47:23,828 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-15 09:47:23,828 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=28 | allocated_count=27 | free_count=0
+2025-09-15 09:47:23,828 - page_manager - WARNING - _log_with_context:97 - Data file size inconsistent with metadata | Context: file_size=73728 | expected_size=110592
+2025-09-15 09:47:23,828 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=default | file_path=data\database.db
+2025-09-15 09:47:23,828 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=system | file_path=data\system_tablespace.db
+2025-09-15 09:47:23,828 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=user_data | file_path=data\user_data_tablespace.db
+2025-09-15 09:47:23,829 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=temp | file_path=data\temp_tablespace.db
+2025-09-15 09:47:23,829 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=log | file_path=data\log_tablespace.db
+2025-09-15 09:47:23,829 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=27 | tablespace_support=True
+2025-09-15 09:47:23,841 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=index_data\default_index | meta_dir=index_data\default_index
+2025-09-15 09:47:23,841 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=32 | allocated_count=31 | free_count=0
+2025-09-15 09:47:23,841 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=default | file_path=index_data\default_index\database.db
+2025-09-15 09:47:23,841 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=index_data\default_index\database.db | meta_file=index_data\default_index\metadata.json | allocated_pages=31 | tablespace_support=True
+2025-09-15 09:47:23,849 - page_manager - DEBUG - _log_with_context:97 - Writing page 2 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 09:47:23,849 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=8192
+2025-09-15 09:47:23,850 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=2 | tablespace=default | data_length=4096 | file_offset=4096
+2025-09-15 09:47:23,850 - page_manager - DEBUG - _log_with_context:97 - Writing page 23 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 09:47:23,850 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=94208
+2025-09-15 09:47:23,851 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=23 | tablespace=default | data_length=4096 | file_offset=90112
+2025-09-15 09:47:23,851 - page_manager - DEBUG - _log_with_context:97 - Writing page 25 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 09:47:23,851 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=102400
+2025-09-15 09:47:23,851 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=25 | tablespace=default | data_length=4096 | file_offset=98304
+2025-09-15 09:47:23,852 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 32 in tablespace 'default'
+2025-09-15 09:47:23,853 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 09:47:23,853 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=32 | tablespace=default | total_allocated=32
+2025-09-15 09:47:44,327 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 09:47:44,327 - page_manager - INFO - _log_with_context:97 - PageManager cleanup completed
+2025-09-15 09:47:44,387 - page_manager - DEBUG - _log_with_context:97 - Writing page 32 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 09:47:44,387 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=131072
+2025-09-15 09:47:44,388 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=32 | tablespace=default | data_length=4096 | file_offset=126976
+2025-09-15 09:47:44,396 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 09:47:44,396 - page_manager - INFO - _log_with_context:97 - PageManager cleanup completed
+2025-09-15 09:48:08,438 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-15 09:48:08,439 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=28 | allocated_count=27 | free_count=0
+2025-09-15 09:48:08,439 - page_manager - WARNING - _log_with_context:97 - Data file size inconsistent with metadata | Context: file_size=73728 | expected_size=110592
+2025-09-15 09:48:08,439 - page_manager - INFO - _log_with_context:97 - No tablespace manager, using default file mode
+2025-09-15 09:48:08,439 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=27 | tablespace_support=False
+2025-09-15 09:48:08,441 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-15 09:48:08,441 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=28 | allocated_count=27 | free_count=0
+2025-09-15 09:48:08,441 - page_manager - WARNING - _log_with_context:97 - Data file size inconsistent with metadata | Context: file_size=73728 | expected_size=110592
+2025-09-15 09:48:08,441 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=default | file_path=data\database.db
+2025-09-15 09:48:08,441 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=system | file_path=data\system_tablespace.db
+2025-09-15 09:48:08,441 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=user_data | file_path=data\user_data_tablespace.db
+2025-09-15 09:48:08,441 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=temp | file_path=data\temp_tablespace.db
+2025-09-15 09:48:08,441 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=log | file_path=data\log_tablespace.db
+2025-09-15 09:48:08,441 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=27 | tablespace_support=True
+2025-09-15 09:48:08,453 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=index_data\default_index | meta_dir=index_data\default_index
+2025-09-15 09:48:08,453 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=33 | allocated_count=32 | free_count=0
+2025-09-15 09:48:08,454 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=default | file_path=index_data\default_index\database.db
+2025-09-15 09:48:08,454 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=index_data\default_index\database.db | meta_file=index_data\default_index\metadata.json | allocated_pages=32 | tablespace_support=True
+2025-09-15 09:48:08,463 - page_manager - DEBUG - _log_with_context:97 - Writing page 2 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 09:48:08,463 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=8192
+2025-09-15 09:48:08,464 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=2 | tablespace=default | data_length=4096 | file_offset=4096
+2025-09-15 09:48:08,464 - page_manager - DEBUG - _log_with_context:97 - Writing page 23 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 09:48:08,464 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=94208
+2025-09-15 09:48:08,465 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=23 | tablespace=default | data_length=4096 | file_offset=90112
+2025-09-15 09:48:08,465 - page_manager - DEBUG - _log_with_context:97 - Writing page 25 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 09:48:08,465 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=102400
+2025-09-15 09:48:08,466 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=25 | tablespace=default | data_length=4096 | file_offset=98304
+2025-09-15 09:48:08,466 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 33 in tablespace 'default'
+2025-09-15 09:48:08,469 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 09:48:08,470 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=33 | tablespace=default | total_allocated=33
+2025-09-15 09:48:13,697 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 09:48:13,698 - page_manager - INFO - _log_with_context:97 - PageManager cleanup completed
+2025-09-15 09:48:13,758 - page_manager - DEBUG - _log_with_context:97 - Writing page 33 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 09:48:13,759 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=135168
+2025-09-15 09:48:13,760 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=33 | tablespace=default | data_length=4096 | file_offset=131072
+2025-09-15 09:48:13,769 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 09:48:13,769 - page_manager - INFO - _log_with_context:97 - PageManager cleanup completed
+2025-09-15 10:16:54,031 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-15 10:16:54,033 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=28 | allocated_count=27 | free_count=0
+2025-09-15 10:16:54,033 - page_manager - WARNING - _log_with_context:97 - Data file size inconsistent with metadata | Context: file_size=73728 | expected_size=110592
+2025-09-15 10:16:54,033 - page_manager - INFO - _log_with_context:97 - No tablespace manager, using default file mode
+2025-09-15 10:16:54,033 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=27 | tablespace_support=False
+2025-09-15 10:16:54,036 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-15 10:16:54,036 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=28 | allocated_count=27 | free_count=0
+2025-09-15 10:16:54,036 - page_manager - WARNING - _log_with_context:97 - Data file size inconsistent with metadata | Context: file_size=73728 | expected_size=110592
+2025-09-15 10:16:54,036 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=default | file_path=data\database.db
+2025-09-15 10:16:54,036 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=system | file_path=data\system_tablespace.db
+2025-09-15 10:16:54,036 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=user_data | file_path=data\user_data_tablespace.db
+2025-09-15 10:16:54,036 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=temp | file_path=data\temp_tablespace.db
+2025-09-15 10:16:54,036 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=log | file_path=data\log_tablespace.db
+2025-09-15 10:16:54,036 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=27 | tablespace_support=True
+2025-09-15 10:16:54,052 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=index_data\default_index | meta_dir=index_data\default_index
+2025-09-15 10:16:54,052 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=34 | allocated_count=33 | free_count=0
+2025-09-15 10:16:54,052 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=default | file_path=index_data\default_index\database.db
+2025-09-15 10:16:54,052 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=index_data\default_index\database.db | meta_file=index_data\default_index\metadata.json | allocated_pages=33 | tablespace_support=True
+2025-09-15 10:16:54,067 - page_manager - DEBUG - _log_with_context:97 - Writing page 2 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 10:16:54,067 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=8192
+2025-09-15 10:16:54,078 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=2 | tablespace=default | data_length=4096 | file_offset=4096
+2025-09-15 10:16:54,078 - page_manager - DEBUG - _log_with_context:97 - Writing page 23 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 10:16:54,078 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=94208
+2025-09-15 10:16:54,078 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=23 | tablespace=default | data_length=4096 | file_offset=90112
+2025-09-15 10:16:54,078 - page_manager - DEBUG - _log_with_context:97 - Writing page 25 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 10:16:54,078 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=102400
+2025-09-15 10:16:54,078 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=25 | tablespace=default | data_length=4096 | file_offset=98304
+2025-09-15 10:16:54,078 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 34 in tablespace 'default'
+2025-09-15 10:16:54,078 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 10:16:54,078 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=34 | tablespace=default | total_allocated=34
+2025-09-15 10:17:25,664 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 28 in tablespace 'user_data'
+2025-09-15 10:17:25,670 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 10:17:25,670 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=28 | tablespace=user_data | total_allocated=28
+2025-09-15 10:17:25,670 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 29 in tablespace 'user_data'
+2025-09-15 10:17:25,670 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 10:17:25,670 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=29 | tablespace=user_data | total_allocated=29
+2025-09-15 10:17:25,670 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 30 in tablespace 'user_data'
+2025-09-15 10:17:25,675 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 10:17:25,675 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=30 | tablespace=user_data | total_allocated=30
+2025-09-15 10:17:25,675 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 31 in tablespace 'user_data'
+2025-09-15 10:17:25,675 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 10:17:25,675 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=31 | tablespace=user_data | total_allocated=31
+2025-09-15 10:17:37,436 - page_manager - DEBUG - _log_with_context:97 - Writing page 28 to tablespace 'user_data', file: data\user_data_tablespace.db
+2025-09-15 10:17:37,436 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=data\user_data_tablespace.db | target_size=114688
+2025-09-15 10:17:37,436 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=28 | tablespace=user_data | data_length=4096 | file_offset=110592
+2025-09-15 10:17:37,436 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 10:17:37,436 - page_manager - INFO - _log_with_context:97 - PageManager cleanup completed
+2025-09-15 10:17:37,507 - page_manager - DEBUG - _log_with_context:97 - Writing page 34 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 10:17:37,507 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=139264
+2025-09-15 10:17:37,507 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=34 | tablespace=default | data_length=4096 | file_offset=135168
+2025-09-15 10:17:37,512 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 10:17:37,512 - page_manager - INFO - _log_with_context:97 - PageManager cleanup completed
+2025-09-15 10:29:04,697 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-15 10:29:04,698 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=32 | allocated_count=31 | free_count=0
+2025-09-15 10:29:04,698 - page_manager - WARNING - _log_with_context:97 - Data file size inconsistent with metadata | Context: file_size=73728 | expected_size=126976
+2025-09-15 10:29:04,698 - page_manager - INFO - _log_with_context:97 - No tablespace manager, using default file mode
+2025-09-15 10:29:04,698 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=31 | tablespace_support=False
+2025-09-15 10:29:04,700 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-15 10:29:04,700 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=32 | allocated_count=31 | free_count=0
+2025-09-15 10:29:04,700 - page_manager - WARNING - _log_with_context:97 - Data file size inconsistent with metadata | Context: file_size=73728 | expected_size=126976
+2025-09-15 10:29:04,700 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=default | file_path=data\database.db
+2025-09-15 10:29:04,700 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=system | file_path=data\system_tablespace.db
+2025-09-15 10:29:04,700 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=user_data | file_path=data\user_data_tablespace.db
+2025-09-15 10:29:04,700 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=temp | file_path=data\temp_tablespace.db
+2025-09-15 10:29:04,700 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=log | file_path=data\log_tablespace.db
+2025-09-15 10:29:04,700 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=31 | tablespace_support=True
+2025-09-15 10:29:04,716 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=index_data\default_index | meta_dir=index_data\default_index
+2025-09-15 10:29:04,716 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=35 | allocated_count=34 | free_count=0
+2025-09-15 10:29:04,716 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=default | file_path=index_data\default_index\database.db
+2025-09-15 10:29:04,716 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=index_data\default_index\database.db | meta_file=index_data\default_index\metadata.json | allocated_pages=34 | tablespace_support=True
+2025-09-15 10:29:04,726 - page_manager - DEBUG - _log_with_context:97 - Writing page 2 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 10:29:04,726 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=8192
+2025-09-15 10:29:04,727 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=2 | tablespace=default | data_length=4096 | file_offset=4096
+2025-09-15 10:29:04,727 - page_manager - DEBUG - _log_with_context:97 - Writing page 23 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 10:29:04,727 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=94208
+2025-09-15 10:29:04,728 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=23 | tablespace=default | data_length=4096 | file_offset=90112
+2025-09-15 10:29:04,728 - page_manager - DEBUG - _log_with_context:97 - Writing page 25 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 10:29:04,728 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=102400
+2025-09-15 10:29:04,729 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=25 | tablespace=default | data_length=4096 | file_offset=98304
+2025-09-15 10:29:04,729 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 35 in tablespace 'default'
+2025-09-15 10:29:04,730 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 10:29:04,730 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=35 | tablespace=default | total_allocated=35
+2025-09-15 10:29:07,010 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 10:29:07,010 - page_manager - INFO - _log_with_context:97 - PageManager cleanup completed
+2025-09-15 10:29:07,070 - page_manager - DEBUG - _log_with_context:97 - Writing page 35 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 10:29:07,071 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=143360
+2025-09-15 10:29:07,072 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=35 | tablespace=default | data_length=4096 | file_offset=139264
+2025-09-15 10:29:07,080 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 10:29:07,080 - page_manager - INFO - _log_with_context:97 - PageManager cleanup completed
+2025-09-15 10:35:50,688 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-15 10:35:50,688 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=32 | allocated_count=31 | free_count=0
+2025-09-15 10:35:50,694 - page_manager - WARNING - _log_with_context:97 - Data file size inconsistent with metadata | Context: file_size=73728 | expected_size=126976
+2025-09-15 10:35:50,694 - page_manager - INFO - _log_with_context:97 - No tablespace manager, using default file mode
+2025-09-15 10:35:50,694 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=31 | tablespace_support=False
+2025-09-15 10:35:50,696 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-15 10:35:50,696 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=32 | allocated_count=31 | free_count=0
+2025-09-15 10:35:50,696 - page_manager - WARNING - _log_with_context:97 - Data file size inconsistent with metadata | Context: file_size=73728 | expected_size=126976
+2025-09-15 10:35:50,696 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=default | file_path=data\database.db
+2025-09-15 10:35:50,696 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=system | file_path=data\system_tablespace.db
+2025-09-15 10:35:50,696 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=user_data | file_path=data\user_data_tablespace.db
+2025-09-15 10:35:50,696 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=temp | file_path=data\temp_tablespace.db
+2025-09-15 10:35:50,696 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=log | file_path=data\log_tablespace.db
+2025-09-15 10:35:50,696 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=31 | tablespace_support=True
+2025-09-15 10:35:50,714 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=index_data\default_index | meta_dir=index_data\default_index
+2025-09-15 10:35:50,714 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=36 | allocated_count=35 | free_count=0
+2025-09-15 10:35:50,714 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=default | file_path=index_data\default_index\database.db
+2025-09-15 10:35:50,714 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=index_data\default_index\database.db | meta_file=index_data\default_index\metadata.json | allocated_pages=35 | tablespace_support=True
+2025-09-15 10:35:50,730 - page_manager - DEBUG - _log_with_context:97 - Writing page 2 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 10:35:50,730 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=8192
+2025-09-15 10:35:50,730 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=2 | tablespace=default | data_length=4096 | file_offset=4096
+2025-09-15 10:35:50,730 - page_manager - DEBUG - _log_with_context:97 - Writing page 23 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 10:35:50,730 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=94208
+2025-09-15 10:35:50,730 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=23 | tablespace=default | data_length=4096 | file_offset=90112
+2025-09-15 10:35:50,735 - page_manager - DEBUG - _log_with_context:97 - Writing page 25 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 10:35:50,735 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=102400
+2025-09-15 10:35:50,735 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=25 | tablespace=default | data_length=4096 | file_offset=98304
+2025-09-15 10:35:50,735 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 36 in tablespace 'default'
+2025-09-15 10:35:50,735 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 10:35:50,735 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=36 | tablespace=default | total_allocated=36
+2025-09-15 10:35:57,047 - page_manager - DEBUG - _log_with_context:97 - Writing page 36 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 10:35:57,047 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=147456
+2025-09-15 10:35:57,048 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=36 | tablespace=default | data_length=4096 | file_offset=143360
+2025-09-15 10:35:57,052 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 10:35:57,052 - page_manager - INFO - _log_with_context:97 - PageManager cleanup completed
+2025-09-15 10:41:19,500 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-15 10:41:19,500 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=32 | allocated_count=31 | free_count=0
+2025-09-15 10:41:19,500 - page_manager - WARNING - _log_with_context:97 - Data file size inconsistent with metadata | Context: file_size=73728 | expected_size=126976
+2025-09-15 10:41:19,500 - page_manager - INFO - _log_with_context:97 - No tablespace manager, using default file mode
+2025-09-15 10:41:19,500 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=31 | tablespace_support=False
+2025-09-15 10:41:19,500 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-15 10:41:19,505 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=32 | allocated_count=31 | free_count=0
+2025-09-15 10:41:19,505 - page_manager - WARNING - _log_with_context:97 - Data file size inconsistent with metadata | Context: file_size=73728 | expected_size=126976
+2025-09-15 10:41:19,505 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=default | file_path=data\database.db
+2025-09-15 10:41:19,505 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=system | file_path=data\system_tablespace.db
+2025-09-15 10:41:19,505 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=user_data | file_path=data\user_data_tablespace.db
+2025-09-15 10:41:19,505 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=temp | file_path=data\temp_tablespace.db
+2025-09-15 10:41:19,505 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=log | file_path=data\log_tablespace.db
+2025-09-15 10:41:19,505 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=31 | tablespace_support=True
+2025-09-15 10:41:19,515 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=index_data\default_index | meta_dir=index_data\default_index
+2025-09-15 10:41:19,518 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=37 | allocated_count=36 | free_count=0
+2025-09-15 10:41:19,518 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=default | file_path=index_data\default_index\database.db
+2025-09-15 10:41:19,518 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=index_data\default_index\database.db | meta_file=index_data\default_index\metadata.json | allocated_pages=36 | tablespace_support=True
+2025-09-15 10:41:19,532 - page_manager - DEBUG - _log_with_context:97 - Writing page 2 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 10:41:19,538 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=8192
+2025-09-15 10:41:19,538 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=2 | tablespace=default | data_length=4096 | file_offset=4096
+2025-09-15 10:41:19,538 - page_manager - DEBUG - _log_with_context:97 - Writing page 23 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 10:41:19,538 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=94208
+2025-09-15 10:41:19,538 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=23 | tablespace=default | data_length=4096 | file_offset=90112
+2025-09-15 10:41:19,538 - page_manager - DEBUG - _log_with_context:97 - Writing page 25 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 10:41:19,538 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=102400
+2025-09-15 10:41:19,538 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=25 | tablespace=default | data_length=4096 | file_offset=98304
+2025-09-15 10:41:19,538 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 37 in tablespace 'default'
+2025-09-15 10:41:19,538 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 10:41:19,538 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=37 | tablespace=default | total_allocated=37
+2025-09-15 10:41:23,093 - page_manager - DEBUG - _log_with_context:97 - Writing page 37 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 10:41:23,093 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=151552
+2025-09-15 10:41:23,094 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=37 | tablespace=default | data_length=4096 | file_offset=147456
+2025-09-15 10:41:23,095 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 10:41:23,095 - page_manager - INFO - _log_with_context:97 - PageManager cleanup completed
+2025-09-15 10:41:34,627 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-15 10:41:34,627 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=32 | allocated_count=31 | free_count=0
+2025-09-15 10:41:34,628 - page_manager - WARNING - _log_with_context:97 - Data file size inconsistent with metadata | Context: file_size=73728 | expected_size=126976
+2025-09-15 10:41:34,628 - page_manager - INFO - _log_with_context:97 - No tablespace manager, using default file mode
+2025-09-15 10:41:34,628 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=31 | tablespace_support=False
+2025-09-15 10:41:34,629 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-15 10:41:34,629 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=32 | allocated_count=31 | free_count=0
+2025-09-15 10:41:34,630 - page_manager - WARNING - _log_with_context:97 - Data file size inconsistent with metadata | Context: file_size=73728 | expected_size=126976
+2025-09-15 10:41:34,630 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=default | file_path=data\database.db
+2025-09-15 10:41:34,630 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=system | file_path=data\system_tablespace.db
+2025-09-15 10:41:34,630 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=user_data | file_path=data\user_data_tablespace.db
+2025-09-15 10:41:34,630 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=temp | file_path=data\temp_tablespace.db
+2025-09-15 10:41:34,630 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=log | file_path=data\log_tablespace.db
+2025-09-15 10:41:34,630 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=31 | tablespace_support=True
+2025-09-15 10:41:34,642 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=index_data\default_index | meta_dir=index_data\default_index
+2025-09-15 10:41:34,642 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=38 | allocated_count=37 | free_count=0
+2025-09-15 10:41:34,642 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=default | file_path=index_data\default_index\database.db
+2025-09-15 10:41:34,642 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=index_data\default_index\database.db | meta_file=index_data\default_index\metadata.json | allocated_pages=37 | tablespace_support=True
+2025-09-15 10:41:34,653 - page_manager - DEBUG - _log_with_context:97 - Writing page 2 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 10:41:34,653 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=8192
+2025-09-15 10:41:34,654 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=2 | tablespace=default | data_length=4096 | file_offset=4096
+2025-09-15 10:41:34,654 - page_manager - DEBUG - _log_with_context:97 - Writing page 23 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 10:41:34,655 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=94208
+2025-09-15 10:41:34,655 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=23 | tablespace=default | data_length=4096 | file_offset=90112
+2025-09-15 10:41:34,655 - page_manager - DEBUG - _log_with_context:97 - Writing page 25 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 10:41:34,656 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=102400
+2025-09-15 10:41:34,656 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=25 | tablespace=default | data_length=4096 | file_offset=98304
+2025-09-15 10:41:34,657 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 38 in tablespace 'default'
+2025-09-15 10:41:34,658 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 10:41:34,658 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=38 | tablespace=default | total_allocated=38
+2025-09-15 10:41:41,120 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 10:41:41,121 - page_manager - INFO - _log_with_context:97 - PageManager cleanup completed
+2025-09-15 10:41:41,186 - page_manager - DEBUG - _log_with_context:97 - Writing page 38 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 10:41:41,186 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=155648
+2025-09-15 10:41:41,187 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=38 | tablespace=default | data_length=4096 | file_offset=151552
+2025-09-15 10:41:41,195 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 10:41:41,196 - page_manager - INFO - _log_with_context:97 - PageManager cleanup completed
+2025-09-15 10:46:14,840 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-15 10:46:14,841 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=32 | allocated_count=31 | free_count=0
+2025-09-15 10:46:14,841 - page_manager - WARNING - _log_with_context:97 - Data file size inconsistent with metadata | Context: file_size=73728 | expected_size=126976
+2025-09-15 10:46:14,841 - page_manager - INFO - _log_with_context:97 - No tablespace manager, using default file mode
+2025-09-15 10:46:14,841 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=31 | tablespace_support=False
+2025-09-15 10:46:14,843 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-15 10:46:14,843 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=32 | allocated_count=31 | free_count=0
+2025-09-15 10:46:14,843 - page_manager - WARNING - _log_with_context:97 - Data file size inconsistent with metadata | Context: file_size=73728 | expected_size=126976
+2025-09-15 10:46:14,843 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=default | file_path=data\database.db
+2025-09-15 10:46:14,843 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=system | file_path=data\system_tablespace.db
+2025-09-15 10:46:14,843 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=user_data | file_path=data\user_data_tablespace.db
+2025-09-15 10:46:14,843 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=temp | file_path=data\temp_tablespace.db
+2025-09-15 10:46:14,843 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=log | file_path=data\log_tablespace.db
+2025-09-15 10:46:14,843 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=31 | tablespace_support=True
+2025-09-15 10:46:14,855 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=index_data\default_index | meta_dir=index_data\default_index
+2025-09-15 10:46:14,855 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=39 | allocated_count=38 | free_count=0
+2025-09-15 10:46:14,855 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=default | file_path=index_data\default_index\database.db
+2025-09-15 10:46:14,855 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=index_data\default_index\database.db | meta_file=index_data\default_index\metadata.json | allocated_pages=38 | tablespace_support=True
+2025-09-15 10:46:14,868 - page_manager - DEBUG - _log_with_context:97 - Writing page 2 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 10:46:14,868 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=8192
+2025-09-15 10:46:14,869 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=2 | tablespace=default | data_length=4096 | file_offset=4096
+2025-09-15 10:46:14,869 - page_manager - DEBUG - _log_with_context:97 - Writing page 23 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 10:46:14,869 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=94208
+2025-09-15 10:46:14,870 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=23 | tablespace=default | data_length=4096 | file_offset=90112
+2025-09-15 10:46:14,870 - page_manager - DEBUG - _log_with_context:97 - Writing page 25 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 10:46:14,870 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=102400
+2025-09-15 10:46:14,871 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=25 | tablespace=default | data_length=4096 | file_offset=98304
+2025-09-15 10:46:14,871 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 39 in tablespace 'default'
+2025-09-15 10:46:14,872 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 10:46:14,872 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=39 | tablespace=default | total_allocated=39
+2025-09-15 10:46:19,896 - page_manager - DEBUG - _log_with_context:97 - Writing page 39 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 10:46:19,897 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=159744
+2025-09-15 10:46:19,898 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=39 | tablespace=default | data_length=4096 | file_offset=155648
+2025-09-15 10:46:19,899 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 10:46:19,899 - page_manager - INFO - _log_with_context:97 - PageManager cleanup completed
+2025-09-15 10:47:36,934 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-15 10:47:36,934 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=32 | allocated_count=31 | free_count=0
+2025-09-15 10:47:36,935 - page_manager - WARNING - _log_with_context:97 - Data file size inconsistent with metadata | Context: file_size=73728 | expected_size=126976
+2025-09-15 10:47:36,935 - page_manager - INFO - _log_with_context:97 - No tablespace manager, using default file mode
+2025-09-15 10:47:36,935 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=31 | tablespace_support=False
+2025-09-15 10:47:36,936 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-15 10:47:36,936 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=32 | allocated_count=31 | free_count=0
+2025-09-15 10:47:36,937 - page_manager - WARNING - _log_with_context:97 - Data file size inconsistent with metadata | Context: file_size=73728 | expected_size=126976
+2025-09-15 10:47:36,937 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=default | file_path=data\database.db
+2025-09-15 10:47:36,937 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=system | file_path=data\system_tablespace.db
+2025-09-15 10:47:36,937 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=user_data | file_path=data\user_data_tablespace.db
+2025-09-15 10:47:36,937 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=temp | file_path=data\temp_tablespace.db
+2025-09-15 10:47:36,937 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=log | file_path=data\log_tablespace.db
+2025-09-15 10:47:36,937 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=31 | tablespace_support=True
+2025-09-15 10:47:36,949 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=index_data\default_index | meta_dir=index_data\default_index
+2025-09-15 10:47:36,950 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=40 | allocated_count=39 | free_count=0
+2025-09-15 10:47:36,950 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=default | file_path=index_data\default_index\database.db
+2025-09-15 10:47:36,950 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=index_data\default_index\database.db | meta_file=index_data\default_index\metadata.json | allocated_pages=39 | tablespace_support=True
+2025-09-15 10:47:36,960 - page_manager - DEBUG - _log_with_context:97 - Writing page 2 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 10:47:36,960 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=8192
+2025-09-15 10:47:36,961 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=2 | tablespace=default | data_length=4096 | file_offset=4096
+2025-09-15 10:47:36,961 - page_manager - DEBUG - _log_with_context:97 - Writing page 23 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 10:47:36,961 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=94208
+2025-09-15 10:47:36,962 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=23 | tablespace=default | data_length=4096 | file_offset=90112
+2025-09-15 10:47:36,962 - page_manager - DEBUG - _log_with_context:97 - Writing page 25 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 10:47:36,962 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=102400
+2025-09-15 10:47:36,963 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=25 | tablespace=default | data_length=4096 | file_offset=98304
+2025-09-15 10:47:36,964 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 40 in tablespace 'default'
+2025-09-15 10:47:36,964 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 10:47:36,965 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=40 | tablespace=default | total_allocated=40
+2025-09-15 10:47:41,290 - page_manager - DEBUG - _log_with_context:97 - Writing page 40 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 10:47:41,291 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=163840
+2025-09-15 10:47:41,293 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=40 | tablespace=default | data_length=4096 | file_offset=159744
+2025-09-15 10:47:41,297 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 10:47:41,297 - page_manager - INFO - _log_with_context:97 - PageManager cleanup completed
+2025-09-15 10:57:10,024 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-15 10:57:10,024 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=32 | allocated_count=31 | free_count=0
+2025-09-15 10:57:10,025 - page_manager - WARNING - _log_with_context:97 - Data file size inconsistent with metadata | Context: file_size=73728 | expected_size=126976
+2025-09-15 10:57:10,025 - page_manager - INFO - _log_with_context:97 - No tablespace manager, using default file mode
+2025-09-15 10:57:10,025 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=31 | tablespace_support=False
+2025-09-15 10:57:10,027 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=data | meta_dir=data
+2025-09-15 10:57:10,028 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=32 | allocated_count=31 | free_count=0
+2025-09-15 10:57:10,028 - page_manager - WARNING - _log_with_context:97 - Data file size inconsistent with metadata | Context: file_size=73728 | expected_size=126976
+2025-09-15 10:57:10,028 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=default | file_path=data\database.db
+2025-09-15 10:57:10,028 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=system | file_path=data\system_tablespace.db
+2025-09-15 10:57:10,028 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=user_data | file_path=data\user_data_tablespace.db
+2025-09-15 10:57:10,028 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=temp | file_path=data\temp_tablespace.db
+2025-09-15 10:57:10,028 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=log | file_path=data\log_tablespace.db
+2025-09-15 10:57:10,028 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=data\database.db | meta_file=data\metadata.json | allocated_pages=31 | tablespace_support=True
+2025-09-15 10:57:10,041 - page_manager - DEBUG - _log_with_context:97 - Directories initialized | Context: data_dir=index_data\default_index | meta_dir=index_data\default_index
+2025-09-15 10:57:10,041 - page_manager - INFO - _log_with_context:97 - Metadata loaded successfully | Context: next_page_id=41 | allocated_count=40 | free_count=0
+2025-09-15 10:57:10,041 - page_manager - DEBUG - _log_with_context:97 - Tablespace file exists | Context: tablespace=default | file_path=index_data\default_index\database.db
+2025-09-15 10:57:10,041 - page_manager - INFO - _log_with_context:97 - PageManager initialized | Context: data_file=index_data\default_index\database.db | meta_file=index_data\default_index\metadata.json | allocated_pages=40 | tablespace_support=True
+2025-09-15 10:57:10,052 - page_manager - DEBUG - _log_with_context:97 - Writing page 2 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 10:57:10,052 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=8192
+2025-09-15 10:57:10,053 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=2 | tablespace=default | data_length=4096 | file_offset=4096
+2025-09-15 10:57:10,053 - page_manager - DEBUG - _log_with_context:97 - Writing page 23 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 10:57:10,053 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=94208
+2025-09-15 10:57:10,054 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=23 | tablespace=default | data_length=4096 | file_offset=90112
+2025-09-15 10:57:10,054 - page_manager - DEBUG - _log_with_context:97 - Writing page 25 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 10:57:10,054 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=102400
+2025-09-15 10:57:10,055 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=25 | tablespace=default | data_length=4096 | file_offset=98304
+2025-09-15 10:57:10,055 - page_manager - DEBUG - _log_with_context:97 - Allocated new page 41 in tablespace 'default'
+2025-09-15 10:57:10,058 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 10:57:10,058 - page_manager - INFO - _log_with_context:97 - Page allocated | Context: page_id=41 | tablespace=default | total_allocated=41
+2025-09-15 10:58:10,059 - page_manager - DEBUG - _log_with_context:97 - Writing page 41 to tablespace 'default', file: index_data\default_index\database.db
+2025-09-15 10:58:10,060 - page_manager - DEBUG - _log_with_context:97 - File extended if needed | Context: file_path=index_data\default_index\database.db | target_size=167936
+2025-09-15 10:58:10,061 - page_manager - DEBUG - _log_with_context:97 - Wrote page to disk | Context: page_id=41 | tablespace=default | data_length=4096 | file_offset=163840
+2025-09-15 10:58:15,772 - page_manager - DEBUG - _log_with_context:97 - Metadata saved successfully
+2025-09-15 10:58:15,772 - page_manager - INFO - _log_with_context:97 - PageManager cleanup completed

@@ -1,12 +1,12 @@
 {
-  "checkpoint_lsn": 18,
-  "checkpoint_time": 1757845207.0033827,
-  "start_lsn": 15,
-  "end_lsn": 17,
+  "checkpoint_lsn": 1,
+  "checkpoint_time": 1757905095.769185,
+  "start_lsn": 0,
+  "end_lsn": 0,
   "dirty_pages": {
-    "22": 1
+    "41": 1
   },
   "active_transactions": [],
   "file_number": 22,
-  "file_offset": 6811
+  "file_offset": 4234
 }

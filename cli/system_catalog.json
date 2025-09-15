@@ -413,6 +413,50 @@
       ],
       "created_at": "2025-09-13T23:46:22.780772",
       "row_count": 0
+    },
+    "users121": {
+      "name": "users121",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INT",
+          "constraints": null
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR(50)",
+          "constraints": null
+        },
+        {
+          "name": "email",
+          "type": "VARCHAR(100)",
+          "constraints": null
+        }
+      ],
+      "created_at": "2025-09-15T09:06:11.375811",
+      "row_count": 0
+    },
+    "users11": {
+      "name": "users11",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INT",
+          "constraints": null
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR(50)",
+          "constraints": null
+        },
+        {
+          "name": "email",
+          "type": "VARCHAR(100)",
+          "constraints": null
+        }
+      ],
+      "created_at": "2025-09-15T10:17:25.664788",
+      "row_count": 0
     }
   },
   "metadata": {
@@ -428,7 +472,7 @@
       ],
       "unique": false,
       "type": "BTREE",
-      "created_at": "2025-09-13T23:46:22.780772"
+      "created_at": "2025-09-15T10:17:25.664788"
     }
   }
 }

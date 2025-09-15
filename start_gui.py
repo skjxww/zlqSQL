@@ -11,7 +11,7 @@ project_root = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, project_root)
 
 # 启动GUI
-from cli.gui_main import main
+from gui.gui_main import main
 
 if __name__ == "__main__":
     main()

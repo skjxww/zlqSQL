@@ -1,5 +1,5 @@
 {
-  "next_page_id": 23,
+  "next_page_id": 42,
   "free_pages": [],
   "allocated_pages": [
     1,
@@ -23,7 +23,26 @@
     19,
     20,
     21,
-    22
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41
   ],
   "page_usage": {
     "1": {
@@ -34,8 +53,8 @@
     },
     "2": {
       "allocated_time": 1757762714.4723566,
-      "access_count": 18,
-      "last_access": 1757842639.0866067,
+      "access_count": 35,
+      "last_access": 1757905030.0536013,
       "tablespace": "default"
     },
     "3": {
@@ -157,6 +176,120 @@
       "access_count": 1,
       "last_access": 1757842699.0985625,
       "tablespace": "default"
+    },
+    "23": {
+      "allocated_time": 1757856495.8360019,
+      "access_count": 19,
+      "last_access": 1757905030.0546017,
+      "tablespace": "default"
+    },
+    "24": {
+      "allocated_time": 1757897795.0810304,
+      "access_count": 1,
+      "last_access": 1757897855.0903053,
+      "tablespace": "default"
+    },
+    "25": {
+      "allocated_time": 1757898134.8644607,
+      "access_count": 17,
+      "last_access": 1757905030.055638,
+      "tablespace": "default"
+    },
+    "26": {
+      "allocated_time": 1757898259.2068446,
+      "access_count": 1,
+      "last_access": 1757898289.2087505,
+      "tablespace": "default"
+    },
+    "27": {
+      "allocated_time": 1757898363.2978966,
+      "access_count": 1,
+      "last_access": 1757898375.1151593,
+      "tablespace": "default"
+    },
+    "28": {
+      "allocated_time": 1757899717.846437,
+      "access_count": 1,
+      "last_access": 1757899722.068205,
+      "tablespace": "default"
+    },
+    "29": {
+      "allocated_time": 1757899757.4631813,
+      "access_count": 1,
+      "last_access": 1757899762.1051006,
+      "tablespace": "default"
+    },
+    "30": {
+      "allocated_time": 1757900418.5798771,
+      "access_count": 1,
+      "last_access": 1757900421.2644062,
+      "tablespace": "default"
+    },
+    "31": {
+      "allocated_time": 1757900493.0633612,
+      "access_count": 1,
+      "last_access": 1757900496.5007243,
+      "tablespace": "default"
+    },
+    "32": {
+      "allocated_time": 1757900843.8528125,
+      "access_count": 1,
+      "last_access": 1757900864.3885272,
+      "tablespace": "default"
+    },
+    "33": {
+      "allocated_time": 1757900888.4693058,
+      "access_count": 1,
+      "last_access": 1757900893.7609863,
+      "tablespace": "default"
+    },
+    "34": {
+      "allocated_time": 1757902614.0781095,
+      "access_count": 1,
+      "last_access": 1757902657.5079618,
+      "tablespace": "default"
+    },
+    "35": {
+      "allocated_time": 1757903344.7298057,
+      "access_count": 1,
+      "last_access": 1757903347.0726104,
+      "tablespace": "default"
+    },
+    "36": {
+      "allocated_time": 1757903750.7359564,
+      "access_count": 1,
+      "last_access": 1757903757.0484228,
+      "tablespace": "default"
+    },
+    "37": {
+      "allocated_time": 1757904079.538034,
+      "access_count": 1,
+      "last_access": 1757904083.0940773,
+      "tablespace": "default"
+    },
+    "38": {
+      "allocated_time": 1757904094.6573348,
+      "access_count": 1,
+      "last_access": 1757904101.1874568,
+      "tablespace": "default"
+    },
+    "39": {
+      "allocated_time": 1757904374.8713372,
+      "access_count": 1,
+      "last_access": 1757904379.8971248,
+      "tablespace": "default"
+    },
+    "40": {
+      "allocated_time": 1757904456.964114,
+      "access_count": 1,
+      "last_access": 1757904461.29293,
+      "tablespace": "default"
+    },
+    "41": {
+      "allocated_time": 1757905030.0576198,
+      "access_count": 1,
+      "last_access": 1757905090.0612092,
+      "tablespace": "default"
     }
   },
   "page_tablespaces": {
@@ -181,10 +314,29 @@
     "19": "default",
     "20": "default",
     "21": "default",
-    "22": "default"
+    "22": "default",
+    "23": "default",
+    "24": "default",
+    "25": "default",
+    "26": "default",
+    "27": "default",
+    "28": "default",
+    "29": "default",
+    "30": "default",
+    "31": "default",
+    "32": "default",
+    "33": "default",
+    "34": "default",
+    "35": "default",
+    "36": "default",
+    "37": "default",
+    "38": "default",
+    "39": "default",
+    "40": "default",
+    "41": "default"
   },
-  "last_modification": 1757845207.0081482,
+  "last_modification": 1757905095.771693,
   "version": "1.0",
-  "total_allocated": 22,
+  "total_allocated": 41,
   "total_free": 0
 }

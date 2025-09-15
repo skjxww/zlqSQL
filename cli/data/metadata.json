@@ -1,5 +1,5 @@
 {
-  "next_page_id": 24,
+  "next_page_id": 32,
   "free_pages": [],
   "allocated_pages": [
     1,
@@ -24,7 +24,15 @@
     20,
     21,
     22,
-    23
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31
   ],
   "page_usage": {
     "1": {
@@ -145,16 +153,72 @@
       "access_count": 0,
       "last_access": null,
       "tablespace": "user_data"
+    },
+    "24": {
+      "allocated_time": 1757898371.3768032,
+      "access_count": 1,
+      "last_access": 1757898375.0550425,
+      "tablespace": "user_data"
+    },
+    "25": {
+      "allocated_time": 1757898371.3778298,
+      "access_count": 0,
+      "last_access": null,
+      "tablespace": "user_data"
+    },
+    "26": {
+      "allocated_time": 1757898371.3791175,
+      "access_count": 0,
+      "last_access": null,
+      "tablespace": "user_data"
+    },
+    "27": {
+      "allocated_time": 1757898371.380119,
+      "access_count": 0,
+      "last_access": null,
+      "tablespace": "user_data"
+    },
+    "28": {
+      "allocated_time": 1757902645.6647887,
+      "access_count": 1,
+      "last_access": 1757902657.436025,
+      "tablespace": "user_data"
+    },
+    "29": {
+      "allocated_time": 1757902645.6701033,
+      "access_count": 0,
+      "last_access": null,
+      "tablespace": "user_data"
+    },
+    "30": {
+      "allocated_time": 1757902645.6701033,
+      "access_count": 0,
+      "last_access": null,
+      "tablespace": "user_data"
+    },
+    "31": {
+      "allocated_time": 1757902645.6753416,
+      "access_count": 0,
+      "last_access": null,
+      "tablespace": "user_data"
     }
   },
   "page_tablespaces": {
     "20": "user_data",
     "21": "user_data",
     "22": "user_data",
-    "23": "user_data"
+    "23": "user_data",
+    "24": "user_data",
+    "25": "user_data",
+    "26": "user_data",
+    "27": "user_data",
+    "28": "user_data",
+    "29": "user_data",
+    "30": "user_data",
+    "31": "user_data"
   },
-  "last_modification": 1757837346.0860107,
+  "last_modification": 1757904101.1200469,
   "version": "1.0",
-  "total_allocated": 23,
+  "total_allocated": 31,
   "total_free": 0
 }

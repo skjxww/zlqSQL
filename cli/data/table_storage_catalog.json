@@ -1,7 +1,7 @@
 {
   "version": "1.0",
-  "created_time": 1757778382.7896736,
-  "table_count": 19,
+  "created_time": 1757902645.6753416,
+  "table_count": 21,
   "tables": [
     {
       "table_name": "customers",
@@ -246,6 +246,32 @@
       "tablespace_name": "user_data",
       "created_time": 1757778382.7896736,
       "last_modified": 1757778382.7896736,
+      "total_page_allocations": 1,
+      "total_page_reads": 0,
+      "total_page_writes": 0
+    },
+    {
+      "table_name": "users121",
+      "pages": [
+        24
+      ],
+      "estimated_record_size": 159,
+      "tablespace_name": "user_data",
+      "created_time": 1757898371.380119,
+      "last_modified": 1757898371.380119,
+      "total_page_allocations": 1,
+      "total_page_reads": 0,
+      "total_page_writes": 0
+    },
+    {
+      "table_name": "users11",
+      "pages": [
+        28
+      ],
+      "estimated_record_size": 159,
+      "tablespace_name": "user_data",
+      "created_time": 1757902645.6753416,
+      "last_modified": 1757902645.6753416,
       "total_page_allocations": 1,
       "total_page_reads": 0,
       "total_page_writes": 0

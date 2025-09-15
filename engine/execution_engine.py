@@ -1,7 +1,7 @@
 # engine/execution_engine.py
 from typing import List, Dict, Any, Optional, Tuple
 from engine.storage_engine import StorageEngine
-from sql_compiler.catalog.catalog_manager import CatalogManager
+from catalog.catalog_manager import CatalogManager
 from sql_compiler.codegen.operators import (Operator, CreateTableOp, InsertOp, SeqScanOp, FilterOp, ProjectOp, UpdateOp, \
     DeleteOp, OptimizedSeqScanOp, GroupByOp, OrderByOp, JoinOp, FilteredSeqScanOp, IndexScanOp, IndexOnlyScanOp, CreateIndexOp,
     DropIndexOp, BeginTransactionOp, CommitTransactionOp, RollbackTransactionOp)
