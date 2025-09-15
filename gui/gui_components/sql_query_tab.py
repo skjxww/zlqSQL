@@ -2,9 +2,8 @@ import tkinter as tk
 from tkinter import ttk, scrolledtext, messagebox
 import threading
 from datetime import datetime
-from gui.utils.code_completion import CodeCompletion
 from gui.utils.syntax_highlight import SyntaxHighlighter
-
+from extensions.smart_completion import CompletionUI
 
 class SQLQueryTab:
     def __init__(self, parent, db_manager, ai_manager, result_display):
@@ -35,7 +34,7 @@ class SQLQueryTab:
 
         # 设置代码补全和语法高亮
         if self.ai_manager.completion_engine:
-            self.completion = CodeCompletion(self.sql_text, self.ai_manager.completion_engine)
+            self.completion = CompletionUI(self.sql_text, self.ai_manager.completion_engine)
         self.highlighter = SyntaxHighlighter(self.sql_text)
 
         # 按钮框架

@@ -100,10 +100,45 @@ class SyntaxHighlighter:
         """高亮匹配的模式"""
         start = "1.0"
         while True:
-            pos = self.text_widget.search(pattern, start, tk.END, regexp=True, flags=flags)
+            # Remove the flags parameter - tkinter search doesn't support it
+            pos = self.text_widget.search(pattern, start, tk.END, regexp=True)
             if not pos:
                 break
-            end = f"{pos}+{len(self.text_widget.get(pos, f'{pos} lineend'))}c"
+
+            # For patterns that need case-insensitive matching, modify the pattern itself
+            if flags & re.IGNORECASE and not any(c in pattern for c in ['(?i)', '(?-i)']):
+                # If we need case-insensitive search, we need to handle it differently
+                # since tkinter search doesn't support flags directly
+                content = self.text_widget.get(start, tk.END)
+                match = re.search(pattern, content, flags)
+                if not match:
+                    break
+                # Calculate position based on match
+                match_start = start
+                for i in range(match.start()):
+                    match_start = self.text_widget.index(f"{match_start}+1c")
+                pos = match_start
+                match_end = pos
+                for i in range(len(match.group())):
+                    match_end = self.text_widget.index(f"{match_end}+1c")
+                end = match_end
+            else:
+                # For patterns without special flags, use the simpler approach
+                end_pos = self.text_widget.index(f"{pos} lineend")
+                line_content = self.text_widget.get(pos, end_pos)
+                match = re.match(pattern.replace(r'\b', ''), line_content)
+                if match:
+                    end = self.text_widget.index(f"{pos}+{len(match.group())}c")
+                else:
+                    # Fallback: find the end of the matched text
+                    current_char = self.text_widget.get(pos)
+                    end = self.text_widget.index(f"{pos}+1c")
+                    while end != self.text_widget.index(tk.END):
+                        if not re.match(pattern, self.text_widget.get(pos, end)):
+                            end = self.text_widget.index(f"{end}-1c")
+                            break
+                        end = self.text_widget.index(f"{end}+1c")
+
             self.text_widget.tag_add(tag, pos, end)
             start = end
 
