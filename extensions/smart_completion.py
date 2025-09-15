@@ -620,6 +620,8 @@ class SmartSQLCompletion:
         ]
 
 
+
+
 # 集成到GUI
 class CompletionUI:
     def __init__(self, sql_text_widget, completion_engine):
@@ -629,28 +631,56 @@ class CompletionUI:
         self.suggestions = []
         self.selected_index = 0
 
-        # 绑定事件
-        self.text_widget.bind('<KeyRelease>', self._on_key_release)
-        self.text_widget.bind('<Control-space>', self._trigger_completion)
+        print(f"CompletionUI初始化 - text_widget: {self.text_widget}")
+        print(f"text_widget类型: {type(self.text_widget)}")
+        print(f"text_widget的所有属性: {dir(self.text_widget)}")
+
+        # 检查是否有.text属性
+        if hasattr(self.text_widget, 'text'):
+            print("发现.text属性!")
+            actual_text_widget = self.text_widget.text
+            print(f"内部text组件: {actual_text_widget}")
+            print(f"内部text组件类型: {type(actual_text_widget)}")
+        else:
+            print("没有.text属性，检查其他可能的子组件...")
+            # 检查子组件
+            try:
+                children = self.text_widget.winfo_children()
+                print(f"子组件: {children}")
+                for i, child in enumerate(children):
+                    print(f"子组件{i}: {child}, 类型: {type(child)}")
+                    if "text" in str(type(child)).lower():
+                        print(f"找到Text类型的子组件: {child}")
+                        actual_text_widget = child
+                        break
+                else:
+                    actual_text_widget = self.text_widget
+            except:
+                actual_text_widget = self.text_widget
+
+        print(f"最终绑定的组件: {actual_text_widget}")
+
+        # 绑定事件到正确的组件
+        print("绑定键盘事件...")
+        try:
+            actual_text_widget.bind('<KeyRelease>', self._on_key_release)
+            actual_text_widget.bind('<Control-space>', self._trigger_completion)
+            actual_text_widget.bind('<Button-1>', self._test_event_binding)
+            print("事件绑定成功")
+        except Exception as e:
+            print(f"事件绑定失败: {e}")
+
+        # 保存实际的文本组件引用
+        self.actual_text_widget = actual_text_widget
+
+    def _test_event_binding(self, event):
+        """测试事件绑定是否工作"""
+        print("鼠标点击事件被捕获！事件绑定正常工作")
 
     def _trigger_completion(self, event):
         """手动触发补全"""
         self._show_completion()
         return 'break'
-
-    def _auto_complete(self):
-        """自动补全逻辑"""
-        cursor_pos = self.text_widget.index(tk.INSERT)
-        sql_content = self.text_widget.get('1.0', tk.END)
-
-        # 转换cursor位置为字符偏移
-        char_pos = len(
-            sql_content[:sql_content.find('\n') * int(cursor_pos.split('.')[0]) + int(cursor_pos.split('.')[1])])
-
-        suggestions = self.completion_engine.get_completions(sql_content, char_pos)
-
-        if suggestions and len(suggestions) > 0:
-            self._show_completion_popup(suggestions)
 
     def _show_completion(self):
         """显示补全窗口"""
@@ -744,28 +774,51 @@ class CompletionUI:
 
     def _on_key_release(self, event):
         """键盘释放事件处理"""
+        print(f"=== 键盘事件 ===")
+        print(f"按键: {event.keysym}")
+        print(f"字符: '{event.char}'")
+        print(f"按键码: {event.keycode}")
+
         if event.keysym in ['Up', 'Down', 'Left', 'Right', 'Return', 'Tab', 'Escape']:
+            print("是控制按键，隐藏补全")
             self._hide_completion()
             return
 
         # 检查是否应该触发补全
         if event.char and (event.char.isalnum() or event.char in '._'):
+            print(f"满足触发条件，将在300ms后触发自动补全")
             self.text_widget.after(300, self._auto_complete)
+        else:
+            print(f"不满足触发条件")
+            if not event.char:
+                print("  原因: event.char 为空")
+            elif not (event.char.isalnum() or event.char in '._'):
+                print(f"  原因: 字符 '{event.char}' 不是字母数字或._")
 
     def _auto_complete(self):
         """自动补全逻辑"""
+        print("执行自动补全...")  # 调试
         try:
             cursor_pos = self.text_widget.index(tk.INSERT)
             sql_content = self.text_widget.get('1.0', tk.END)
 
+            print(f"光标位置: {cursor_pos}")  # 调试
+            print(f"SQL内容: '{sql_content.strip()}'")  # 调试
+
             # 修复字符位置计算
             char_pos = self._calculate_char_position(cursor_pos, sql_content)
+            print(f"计算的字符位置: {char_pos}")  # 调试
 
             suggestions = self.completion_engine.get_completions(sql_content, char_pos)
-            print(f"获得建议数量: {len(suggestions)}")  # 调试输出
+            print(f"获得建议数量: {len(suggestions)}")  # 调试
 
             if suggestions and len(suggestions) > 0:
+                print("创建补全窗口...")  # 调试
                 self._create_completion_window(suggestions)
+            else:
+                print("没有建议，不显示窗口")  # 调试
 
         except Exception as e:
-            print(f"自动补全出错: {e}")
+            print(f"自动补全出错: {e}")  # 调试
+            import traceback
+            traceback.print_exc()  # 打印完整错误堆栈

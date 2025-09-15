@@ -32,9 +32,22 @@ class SQLQueryTab:
         )
         self.sql_text.pack(fill=tk.BOTH, expand=True)
 
+        # 立即测试事件绑定
+        print("立即测试ScrolledText事件...")
+        self.sql_text.bind('<KeyRelease>', lambda e: print(f"ScrolledText键盘事件: {e.keysym}"))
+        self.sql_text.focus_set()  # 给组件焦点
+        print("ScrolledText事件绑定完成")
+
         # 设置代码补全和语法高亮
+        print(f"AI manager completion engine: {self.ai_manager.completion_engine}")  # 调试
         if self.ai_manager.completion_engine:
+            print("正在初始化CompletionUI...")  # 调试
+            from extensions.smart_completion import CompletionUI
             self.completion = CompletionUI(self.sql_text, self.ai_manager.completion_engine)
+            print("CompletionUI初始化完成")  # 调试
+        else:
+            print("补全引擎未初始化!")  # 调试
+
         self.highlighter = SyntaxHighlighter(self.sql_text)
 
         # 按钮框架
