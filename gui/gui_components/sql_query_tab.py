@@ -32,12 +32,6 @@ class SQLQueryTab:
         )
         self.sql_text.pack(fill=tk.BOTH, expand=True)
 
-        # 立即测试事件绑定
-        print("立即测试ScrolledText事件...")
-        self.sql_text.bind('<KeyRelease>', lambda e: print(f"ScrolledText键盘事件: {e.keysym}"))
-        self.sql_text.focus_set()  # 给组件焦点
-        print("ScrolledText事件绑定完成")
-
         # 设置代码补全和语法高亮
         print(f"AI manager completion engine: {self.ai_manager.completion_engine}")  # 调试
         if self.ai_manager.completion_engine:
