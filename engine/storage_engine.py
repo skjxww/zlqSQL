@@ -1,4 +1,5 @@
 # engine/storage_engine.py
+# engine/storage_engine.py
 from typing import List, Dict, Any, Optional
 from storage.core.storage_manager import StorageManager
 from storage.core.table_storage import TableStorage
@@ -23,6 +24,9 @@ class StorageEngine:
 
         # 添加事务管理器
         self.transaction_manager = TransactionManager(storage_manager)
+
+        # 添加视图存储
+        self.views = {}  # 视图名 -> 视图定义
 
     # 添加事务操作方法
     def begin_transaction(self, isolation_level: IsolationLevel = IsolationLevel.READ_COMMITTED) -> int:
@@ -93,6 +97,45 @@ class StorageEngine:
             }
         else:
             return {"error": f"Transaction {txn_id} not found"}
+
+    # 添加视图操作方法
+    def create_view(self, view_name: str, definition: Any, columns: Optional[List[str]] = None,
+                    materialized: bool = False, with_check_option: bool = False) -> bool:
+        """创建视图"""
+        try:
+            self.views[view_name] = {
+                'definition': definition,
+                'columns': columns,
+                'materialized': materialized,
+                'with_check_option': with_check_option
+            }
+            self.logger.info(f"View '{view_name}' created successfully")
+            return True
+        except Exception as e:
+            self.logger.error(f"Error creating view '{view_name}': {e}")
+            return False
+
+    def drop_view(self, view_name: str) -> bool:
+        """删除视图"""
+        try:
+            if view_name in self.views:
+                del self.views[view_name]
+                self.logger.info(f"View '{view_name}' dropped successfully")
+                return True
+            else:
+                self.logger.warning(f"View '{view_name}' does not exist")
+                return False
+        except Exception as e:
+            self.logger.error(f"Error dropping view '{view_name}': {e}")
+            return False
+
+    def get_view(self, view_name: str) -> Optional[Dict]:
+        """获取视图定义"""
+        return self.views.get(view_name)
+
+    def get_all_views(self) -> Dict[str, Dict]:
+        """获取所有视图"""
+        return self.views.copy()
 
     # 添加事务性数据操作方法
     def insert_row_transactional(self, table_name: str, row_data: List[Any], txn_id: int) -> bool:
@@ -952,3 +995,11 @@ class StorageEngine:
         except Exception as e:
             self.logger.error(f"Error querying index '{index_name}' for key '{key}': {e}")
             return []
+
+    def get_view_definition(self, view_name: str) -> Optional[Dict]:
+        """获取视图定义"""
+        return self.views.get(view_name)
+
+    def view_exists(self, view_name: str) -> bool:
+        """检查视图是否存在"""
+        return view_name in self.views

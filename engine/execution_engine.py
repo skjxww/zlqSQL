@@ -4,7 +4,8 @@ from engine.storage_engine import StorageEngine
 from catalog.catalog_manager import CatalogManager
 from sql_compiler.codegen.operators import (Operator, CreateTableOp, InsertOp, SeqScanOp, FilterOp, ProjectOp, UpdateOp, \
     DeleteOp, OptimizedSeqScanOp, GroupByOp, OrderByOp, JoinOp, FilteredSeqScanOp, IndexScanOp, IndexOnlyScanOp, CreateIndexOp,
-    DropIndexOp, BeginTransactionOp, CommitTransactionOp, RollbackTransactionOp)
+    DropIndexOp, BeginTransactionOp, CommitTransactionOp, RollbackTransactionOp, CreateViewOp, DropViewOp, ShowViewsOp,
+    DescribeViewOp, ViewScanOp)
 from sql_compiler.exceptions.compiler_errors import SemanticError
 from sql_compiler.semantic.symbol_table import SymbolTable
 from sql_compiler.semantic.type_checker import TypeChecker
@@ -23,6 +24,9 @@ class ExecutionEngine:
         self.current_transaction_id = None
         self.transaction_mode = None
         self.isolation_level = IsolationLevel.READ_COMMITTED
+
+        # 添加视图相关属性
+        self.views = {}  # 存储视图定义
 
     def set_transaction_manager(self, transaction_manager: TransactionManager):
         """设置事务管理器"""
@@ -149,6 +153,30 @@ class ExecutionEngine:
                 self.rollback_transaction()
                 return "Transaction rolled back successfully"
 
+            # 添加视图操作符处理
+            elif isinstance(plan, CreateViewOp):
+                return self.execute_create_view(
+                    plan.view_name,
+                    plan.select_plan,
+                    plan.columns,
+                    plan.or_replace,
+                    plan.materialized,
+                    plan.with_check_option
+                )
+            elif isinstance(plan, DropViewOp):
+                return self.execute_drop_view(
+                    plan.view_names,
+                    plan.if_exists,
+                    plan.cascade,
+                    plan.materialized
+                )
+            elif isinstance(plan, ShowViewsOp):
+                return self.execute_show_views(plan.pattern, plan.database)
+            elif isinstance(plan, DescribeViewOp):
+                return self.execute_describe_view(plan.view_name)
+            elif isinstance(plan, ViewScanOp):
+                return self.execute_view_scan(plan.underlying_plan)
+
             if isinstance(plan, CreateTableOp):
                 return self.execute_create_table(plan.table_name, plan.columns)
             elif isinstance(plan, InsertOp):
@@ -201,6 +229,104 @@ class ExecutionEngine:
                 except:
                     pass  # 忽略回滚过程中的错误
             raise SemanticError(f"执行错误: {str(e)}")
+
+    def execute_create_view(self, view_name: str, select_plan: Operator, columns: Optional[List[str]] = None,
+                            or_replace: bool = False, materialized: bool = False,
+                            with_check_option: bool = False) -> str:
+        """执行CREATE VIEW语句 - 修复版本"""
+        try:
+            # 检查视图是否已存在
+            if view_name in self.views and not or_replace:
+                raise SemanticError(f"View '{view_name}' already exists")
+
+            # 存储视图定义（保存执行计划而不是执行结果）
+            self.views[view_name] = {
+                'plan': select_plan,  # 保存执行计划
+                'columns': columns,
+                'materialized': materialized,
+                'with_check_option': with_check_option
+            }
+
+            # 更新catalog
+            if hasattr(self.catalog, 'create_view'):
+                self.catalog.create_view(view_name, select_plan, columns, materialized, with_check_option)
+
+            return f"View '{view_name}' created successfully"
+        except Exception as e:
+            raise SemanticError(f"创建视图错误: {str(e)}")
+
+    def execute_drop_view(self, view_names: List[str], if_exists: bool = False,
+                          cascade: bool = False, materialized: bool = False) -> str:
+        """执行DROP VIEW语句"""
+        try:
+            dropped_count = 0
+            for view_name in view_names:
+                if view_name in self.views:
+                    # 删除视图
+                    del self.views[view_name]
+
+                    # 更新catalog
+                    if hasattr(self.catalog, 'drop_view'):
+                        self.catalog.drop_view(view_name)
+
+                    dropped_count += 1
+                elif not if_exists:
+                    raise SemanticError(f"View '{view_name}' does not exist")
+
+            return f"{dropped_count} view(s) dropped successfully"
+        except Exception as e:
+            raise SemanticError(f"删除视图错误: {str(e)}")
+
+    def execute_show_views(self, pattern: Optional[str] = None, database: Optional[str] = None) -> List[Dict]:
+        """执行SHOW VIEWS语句"""
+        try:
+            views_list = []
+            for view_name, view_info in self.views.items():
+                # 如果指定了模式，进行匹配
+                if pattern and not self._pattern_match(view_name, pattern):
+                    continue
+
+                views_list.append({
+                    'name': view_name,
+                    'materialized': view_info['materialized'],
+                    'columns': view_info['columns']
+                })
+
+            return views_list
+        except Exception as e:
+            raise SemanticError(f"显示视图错误: {str(e)}")
+
+    def execute_describe_view(self, view_name: str) -> Dict[str, Any]:
+        """执行DESCRIBE VIEW语句"""
+        try:
+            if view_name not in self.views:
+                raise SemanticError(f"View '{view_name}' does not exist")
+
+            view_info = self.views[view_name]
+            return {
+                'name': view_name,
+                'columns': view_info['columns'],
+                'materialized': view_info['materialized'],
+                'with_check_option': view_info['with_check_option'],
+                'definition': view_info['definition']
+            }
+        except Exception as e:
+            raise SemanticError(f"描述视图错误: {str(e)}")
+
+    def execute_view_scan(self, underlying_plan: Operator) -> List[Dict]:
+        """执行视图扫描操作"""
+        try:
+            # 执行底层查询计划
+            return self.execute_plan(underlying_plan)
+        except Exception as e:
+            raise SemanticError(f"视图扫描错误: {str(e)}")
+
+    def _pattern_match(self, name: str, pattern: str) -> bool:
+        """简单的模式匹配函数"""
+        # 将SQL模式转换为正则表达式
+        import re
+        regex_pattern = pattern.replace('%', '.*').replace('_', '.')
+        return re.match(regex_pattern, name) is not None
 
     def _requires_transaction(self, plan: Operator) -> bool:
         """检查执行计划是否需要事务支持"""
@@ -331,11 +457,23 @@ class ExecutionEngine:
             raise SemanticError(f"插入行错误: {str(e)}")
 
     def execute_seq_scan(self, table_name: str) -> List[Dict]:
-        """执行顺序扫描"""
+        """执行顺序扫描 - 添加视图支持"""
         try:
-            return self.storage_engine.get_all_rows(table_name)
+            # 首先检查是否是视图
+            if table_name in self.views:
+                # 这是视图，执行视图定义
+                view_info = self.views[table_name]
+                if 'plan' in view_info:
+                    # 执行视图的SELECT计划
+                    return list(self.execute_plan(view_info['plan']))
+                else:
+                    # 回退到直接使用视图定义（如果有）
+                    return view_info.get('definition', [])
+            else:
+                # 普通表，从存储引擎获取数据
+                return self.storage_engine.get_all_rows(table_name)
         except Exception as e:
-            raise SemanticError(f"扫描表 {table_name} 错误: {str(e)}")
+            raise SemanticError(f"扫描表/视图 {table_name} 错误: {str(e)}")
 
     def execute_filter(self, condition: Any, child_plan: Operator) -> List[Dict]:
         """执行过滤操作"""
