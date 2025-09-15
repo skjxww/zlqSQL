@@ -496,7 +496,7 @@ class SyntaxAnalyzer:
 
     def _parse_create_table(self) -> CreateTableStmt:
         """解析CREATE TABLE语句"""
-        self._expect(TokenType.TABLE)
+        # self._expect(TokenType.TABLE)
         table_name = self._expect(TokenType.IDENTIFIER).lexeme
 
         self._expect(TokenType.LEFT_PAREN)
