@@ -17,6 +17,11 @@ from catalog.catalog_manager import CatalogManager
 from engine.storage_engine import StorageEngine
 from engine.execution_engine import ExecutionEngine
 from sql_compiler.diagnostics.error_analyzer import SmartSQLCorrector
+try:
+    from cli.storage_monitor_gui import StorageMonitorWindow
+    STORAGE_MONITOR_AVAILABLE = True
+except ImportError as e:
+    STORAGE_MONITOR_AVAILABLE = False
 
 
 class SimpleDBGUI:
@@ -47,6 +52,9 @@ class SimpleDBGUI:
 
         # 执行历史
         self.query_history = []
+
+        # 添加存储监控窗口引用
+        self.storage_monitor_window = None
 
     def _init_database(self):
         """初始化数据库组件"""
@@ -104,22 +112,35 @@ class SimpleDBGUI:
         )
         title_label.grid(row=0, column=0, columnspan=2, pady=(0, 20))
 
+        # 新增：工具栏
+        toolbar_frame = ttk.Frame(main_frame)
+        toolbar_frame.grid(row=1, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=(0, 10))
+
+        # 存储监控按钮
+        if STORAGE_MONITOR_AVAILABLE:
+            monitor_btn = ttk.Button(
+                toolbar_frame,
+                text="📊 存储监控",
+                command=self._open_storage_monitor
+            )
+            monitor_btn.pack(side=tk.LEFT, padx=(0, 10))
+
         # 左侧面板 - 输入区域
         self.left_panel = ttk.LabelFrame(main_frame, text="查询输入", padding="10")
-        self.left_panel.grid(row=1, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), padx=(0, 10))
+        self.left_panel.grid(row=2, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), padx=(0, 10))
         self.left_panel.columnconfigure(0, weight=1)
         self.left_panel.rowconfigure(1, weight=1)  # 让Notebook可以扩展
 
         # 右侧面板 - 输出区域
         self.right_panel = ttk.LabelFrame(main_frame, text="查询结果", padding="10")
-        self.right_panel.grid(row=1, column=1, sticky=(tk.W, tk.E, tk.N, tk.S))
+        self.right_panel.grid(row=2, column=1, sticky=(tk.W, tk.E, tk.N, tk.S))
         self.right_panel.columnconfigure(0, weight=1)
         self.right_panel.rowconfigure(0, weight=1)
 
         # 配置网格权重
         main_frame.columnconfigure(0, weight=1)  # 左侧列
         main_frame.columnconfigure(1, weight=2)  # 右侧列更宽
-        main_frame.rowconfigure(1, weight=1)     # 主内容行
+        main_frame.rowconfigure(2, weight=1)     # 主内容行
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=1)
 
@@ -172,9 +193,39 @@ class SimpleDBGUI:
     def _on_closing(self):
         """关闭程序时的处理"""
         try:
+            # 关闭存储监控窗口
+            if self.storage_monitor_window is not None:
+                try:
+                    if hasattr(self.storage_monitor_window, 'window') and self.storage_monitor_window.window:
+                        self.storage_monitor_window._stop_monitoring()
+                        self.storage_monitor_window.window.destroy()
+                except:
+                    pass
             self.db_manager.shutdown()
         finally:
             self.root.destroy()
+
+    def _open_storage_monitor(self):
+        """打开存储监控窗口"""
+        if not STORAGE_MONITOR_AVAILABLE:
+            messagebox.showerror("功能不可用", "存储监控功能不可用")
+            return
+
+        try:
+            if self.storage_monitor_window is None:
+                # 强制使用DB StorageManager（实际执行SQL的那个）
+                actual_storage_manager = self.db_manager.storage_manager
+                print(f"监控连接到 StorageManager ID: {id(actual_storage_manager)}")
+                self.storage_monitor_window = StorageMonitorWindow(actual_storage_manager)
+
+            self.storage_monitor_window.show()
+            print("存储监控窗口已打开")
+
+        except Exception as e:
+            print(f"打开存储监控失败: {e}")
+            import traceback
+            traceback.print_exc()
+            messagebox.showerror("错误", f"无法打开存储监控: {str(e)}")
 
 
 def main():
