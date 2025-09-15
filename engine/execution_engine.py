@@ -10,6 +10,7 @@ from sql_compiler.exceptions.compiler_errors import SemanticError
 from sql_compiler.semantic.symbol_table import SymbolTable
 from sql_compiler.semantic.type_checker import TypeChecker
 from storage.core.transaction_manager import TransactionManager, IsolationLevel  # 添加事务管理器导入
+from sql_compiler.parser.ast_nodes import TableRef
 
 
 class ExecutionEngine:
@@ -109,6 +110,17 @@ class ExecutionEngine:
     def execute_plan(self, plan: Operator) -> Any:
         """执行查询计划 - 修复GroupBy执行"""
         try:
+            # 检查是否为视图扫描
+            if isinstance(plan, SeqScanOp) and plan.table_name in self.views:
+                # 这是视图，执行视图定义
+                view_info = self.views[plan.table_name]
+                if 'plan' in view_info:
+                    # 执行视图的SELECT计划
+                    return self.execute_plan(view_info['plan'])
+                else:
+                    # 回退到直接使用视图定义（如果有）
+                    return view_info.get('definition', [])
+
             # 检查是否为事务操作
             if hasattr(plan, 'operation_type'):
                 if plan.operation_type == 'BEGIN_TRANSACTION':
@@ -181,8 +193,19 @@ class ExecutionEngine:
                 return self.execute_create_table(plan.table_name, plan.columns)
             elif isinstance(plan, InsertOp):
                 return self.execute_insert(plan.table_name, plan.columns, plan.values)
+            # 在 execute_plan 方法中添加对 SeqScanOp 的特殊处理
             elif isinstance(plan, SeqScanOp):
-                return self.execute_seq_scan(plan.table_name)
+                # 检查是否是视图
+                if plan.table_name in self.views:
+                    view_info = self.views[plan.table_name]
+                    if 'plan' in view_info:
+                        # 执行视图的SELECT计划
+                        return self.execute_plan(view_info['plan'])
+                    else:
+                        # 回退到直接使用视图定义
+                        return view_info.get('definition', [])
+                else:
+                    return self.execute_seq_scan(plan.table_name)
             elif isinstance(plan, OptimizedSeqScanOp):
                 return self.execute_optimized_seq_scan(plan.table_name, plan.selected_columns)
             elif isinstance(plan, FilterOp):
@@ -239,22 +262,32 @@ class ExecutionEngine:
             if view_name in self.views and not or_replace:
                 raise SemanticError(f"View '{view_name}' already exists")
 
-            # 存储视图定义（保存执行计划而不是执行结果）
+            # 存储视图定义（包括执行计划和列映射）
             self.views[view_name] = {
                 'plan': select_plan,  # 保存执行计划
-                'columns': columns,
+                'columns': columns,  # 保存视图列名
                 'materialized': materialized,
-                'with_check_option': with_check_option
+                'with_check_option': with_check_option,
+                'definition': f"CREATE VIEW {view_name} AS ..."  # 可选的文本定义
             }
 
-            # 更新catalog
-            if hasattr(self.catalog, 'create_view'):
-                self.catalog.create_view(view_name, select_plan, columns, materialized, with_check_option)
+            # 尝试存储到持久化存储（可选）
+            try:
+                self.storage_engine.create_view(
+                    view_name,
+                    select_plan,  # 保存执行计划
+                    columns,  # 保存视图列名
+                    materialized,
+                    with_check_option
+                )
+            except Exception as e:
+                self.logger.warning(f"Could not persist view '{view_name}': {e}")
 
             return f"View '{view_name}' created successfully"
         except Exception as e:
             raise SemanticError(f"创建视图错误: {str(e)}")
 
+    # 修改execute_drop_view方法
     def execute_drop_view(self, view_names: List[str], if_exists: bool = False,
                           cascade: bool = False, materialized: bool = False) -> str:
         """执行DROP VIEW语句"""
@@ -262,7 +295,12 @@ class ExecutionEngine:
             dropped_count = 0
             for view_name in view_names:
                 if view_name in self.views:
-                    # 删除视图
+                    # 从存储引擎删除视图
+                    success = self.storage_engine.drop_view(view_name)
+                    if not success:
+                        raise SemanticError(f"Failed to drop view '{view_name}' from persistent storage")
+
+                    # 从内存中删除视图
                     del self.views[view_name]
 
                     # 更新catalog
@@ -456,6 +494,7 @@ class ExecutionEngine:
         except Exception as e:
             raise SemanticError(f"插入行错误: {str(e)}")
 
+    # execution_engine.py 中的 execute_seq_scan 方法
     def execute_seq_scan(self, table_name: str) -> List[Dict]:
         """执行顺序扫描 - 添加视图支持"""
         try:
@@ -465,13 +504,42 @@ class ExecutionEngine:
                 view_info = self.views[table_name]
                 if 'plan' in view_info:
                     # 执行视图的SELECT计划
-                    return list(self.execute_plan(view_info['plan']))
+                    results = list(self.execute_plan(view_info['plan']))
+                    # 处理列映射（如果有）
+                    if view_info.get('columns'):
+                        mapped_results = []
+                        for row in results:
+                            mapped_row = {}
+                            for i, col_name in enumerate(view_info['columns']):
+                                if i < len(row):
+                                    original_keys = list(row.keys())
+                                    if i < len(original_keys):
+                                        mapped_row[col_name] = row[original_keys[i]]
+                            mapped_results.append(mapped_row)
+                        return mapped_results
+                    return results
                 else:
                     # 回退到直接使用视图定义（如果有）
                     return view_info.get('definition', [])
             else:
                 # 普通表，从存储引擎获取数据
-                return self.storage_engine.get_all_rows(table_name)
+                try:
+                    return self.storage_engine.get_all_rows(table_name)
+                except Exception as e:
+                    # 如果表不存在，检查是否是大小写问题
+                    if "not found" in str(e).lower():
+                        # 尝试查找可能的大小写变体
+                        all_tables = self.catalog.get_all_tables()
+                        matching_tables = [t for t in all_tables if t.lower() == table_name.lower()]
+
+                        if matching_tables:
+                            # 使用正确大小写的表名重试
+                            correct_name = matching_tables[0]
+                            self.logger.warning(f"Table '{table_name}' not found, using '{correct_name}' instead")
+                            return self.storage_engine.get_all_rows(correct_name)
+
+                    # 如果还是失败，重新抛出异常
+                    raise SemanticError(f"扫描表 {table_name} 错误: {str(e)}")
         except Exception as e:
             raise SemanticError(f"扫描表/视图 {table_name} 错误: {str(e)}")
 
@@ -1076,27 +1144,67 @@ class ExecutionEngine:
         return None
 
     def execute_optimized_seq_scan(self, table_name: str, selected_columns: List[str]) -> List[Dict]:
-        """执行优化的顺序扫描（包含投影下推）"""
+        """执行优化的顺序扫描（包含投影下推）- 添加视图支持"""
         try:
-            # 获取所有行数据
-            all_rows = self.storage_engine.get_all_rows(table_name)
+            # 首先检查是否是视图
+            if table_name in self.views:
+                # 这是视图，执行视图定义
+                view_info = self.views[table_name]
+                if 'plan' in view_info:
+                    # 执行视图的SELECT计划
+                    view_results = list(self.execute_plan(view_info['plan']))
 
-            # 应用投影：只选择指定的列
-            projected_rows = []
-            for row in all_rows:
-                projected_row = {}
-                for col in selected_columns:
-                    if col in row:
-                        projected_row[col] = row[col]
-                    # 处理通配符 *
-                    elif col == '*':
-                        projected_row = row.copy()
-                        break
-                projected_rows.append(projected_row)
+                    # 应用投影：只选择指定的列
+                    projected_rows = []
+                    for row in view_results:
+                        projected_row = {}
+                        for col in selected_columns:
+                            if col in row:
+                                projected_row[col] = row[col]
+                            # 处理通配符 *
+                            elif col == '*':
+                                projected_row = row.copy()
+                                break
+                        projected_rows.append(projected_row)
 
-            return projected_rows
+                    return projected_rows
+                else:
+                    # 回退到直接使用视图定义（如果有）
+                    view_data = view_info.get('definition', [])
+
+                    # 应用投影
+                    projected_rows = []
+                    for row in view_data:
+                        projected_row = {}
+                        for col in selected_columns:
+                            if col in row:
+                                projected_row[col] = row[col]
+                            elif col == '*':
+                                projected_row = row.copy()
+                                break
+                        projected_rows.append(projected_row)
+
+                    return projected_rows
+            else:
+                # 普通表，从存储引擎获取数据
+                all_rows = self.storage_engine.get_all_rows(table_name)
+
+                # 应用投影：只选择指定的列
+                projected_rows = []
+                for row in all_rows:
+                    projected_row = {}
+                    for col in selected_columns:
+                        if col in row:
+                            projected_row[col] = row[col]
+                        # 处理通配符 *
+                        elif col == '*':
+                            projected_row = row.copy()
+                            break
+                    projected_rows.append(projected_row)
+
+                return projected_rows
         except Exception as e:
-            raise SemanticError(f"扫描表 {table_name} 错误: {str(e)}")
+            raise SemanticError(f"扫描表/视图 {table_name} 错误: {str(e)}")
 
     def execute_delete(self, table_name: str, child_plan: Operator) -> str:
         """执行DELETE语句"""
@@ -1682,5 +1790,19 @@ class ExecutionEngine:
             return f"Index '{index_name}' dropped successfully"
         except Exception as e:
             raise SemanticError(f"Drop index error: {str(e)}")
+
+    # 在计划生成器中添加视图识别逻辑
+    def _visit_table_ref(self, node: TableRef):
+        table_name = node.table_name
+
+        # 检查是否是视图
+        if table_name in self.execution_engine.views:
+            view_info = self.execution_engine.views[table_name]
+            if 'plan' in view_info:
+                # 返回视图扫描操作符
+                return ViewScanOp(table_name, view_info['plan'])
+
+        # 普通表，返回顺序扫描
+        return SeqScanOp(table_name)
 
 
