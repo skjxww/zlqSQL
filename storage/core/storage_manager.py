@@ -76,6 +76,9 @@ class StorageManager:
             self.last_flush_time = time.time()
             self.operation_count = 0
             self.flush_count = 0
+            # 添加这两行
+            self.read_count = 0
+            self.write_count = 0
 
             # 新增：ExtentManager集成
             self.enable_extent_management = enable_extent_management
@@ -211,6 +214,7 @@ class StorageManager:
 
         with self._lock:
             self.operation_count += 1
+            self.read_count += 1
 
             # 首先从缓存中尝试获取
             data = self.buffer_pool.get(page_id)
@@ -241,6 +245,7 @@ class StorageManager:
 
         with self._lock:
             self.operation_count += 1
+            self.write_count += 1
 
             # WAL: 先写日志（添加安全检查）
             if self.wal_enabled and hasattr(self, 'wal_manager') and self.wal_manager:

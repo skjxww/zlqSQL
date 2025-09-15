@@ -15,6 +15,12 @@ from engine.storage_engine import StorageEngine
 from engine.execution_engine import ExecutionEngine
 from sql_compiler.diagnostics.error_analyzer import SmartSQLCorrector
 
+try:
+    from storage_monitor_gui import StorageMonitorWindow
+    STORAGE_MONITOR_AVAILABLE = True
+except ImportError as e:
+    STORAGE_MONITOR_AVAILABLE = False
+
 
 class SimpleDBGUI:
     def __init__(self):
@@ -40,6 +46,9 @@ class SimpleDBGUI:
         # 智能纠错相关变量
         self.correction_choice = tk.StringVar(value="none")
         self.current_error_analysis = None
+
+        # 添加存储监控窗口引用
+        self.storage_monitor_window = None
 
     def _init_database(self):
         """初始化数据库组件"""
@@ -259,13 +268,28 @@ class SimpleDBGUI:
         self.tables_listbox.grid(row=1, column=0, sticky=(tk.W, tk.E), pady=(2, 0))
         self.tables_listbox.bind('<Double-1>', self._show_table_details)
 
-        # 刷新按钮
+        # **新增：按钮框架，用来放置两个按钮**
+        button_frame = ttk.Frame(info_frame)
+        button_frame.grid(row=2, column=0, sticky=(tk.W, tk.E), pady=(5, 0))
+        button_frame.columnconfigure(0, weight=1)
+        button_frame.columnconfigure(1, weight=1)
+
+        # 刷新按钮（移到button_frame中）
         refresh_btn = ttk.Button(
-            info_frame,
-            text="🔄 刷新信息",
+            button_frame,  # 改为button_frame
+            text="刷新信息",
             command=self._refresh_database_info
         )
-        refresh_btn.grid(row=2, column=0, sticky=(tk.W, tk.E), pady=(5, 0))
+        refresh_btn.grid(row=0, column=0, sticky=(tk.W, tk.E), padx=(0, 2))
+
+        # 存储监控按钮
+        if STORAGE_MONITOR_AVAILABLE:
+            monitor_btn = ttk.Button(
+                button_frame,
+                text="存储监控",
+                command=self._open_storage_monitor
+            )
+            monitor_btn.grid(row=0, column=1, sticky=(tk.W, tk.E), padx=(2, 0))
 
         table_frame.columnconfigure(0, weight=1)
 
@@ -1303,6 +1327,25 @@ class SimpleDBGUI:
             self._log(f"刷新信息失败: {str(e)}")
             messagebox.showerror("错误", f"刷新数据库信息失败: {str(e)}")
 
+    def _open_storage_monitor(self):
+        """打开存储监控窗口"""
+        if not STORAGE_MONITOR_AVAILABLE:
+            messagebox.showerror("功能不可用",
+                                 "存储监控功能不可用，请检查是否安装了matplotlib依赖：\n"
+                                 "pip install matplotlib")
+            return
+
+        try:
+            if self.storage_monitor_window is None:
+                self.storage_monitor_window = StorageMonitorWindow(self.storage_manager)
+
+            self.storage_monitor_window.show()
+            self._log("存储监控窗口已打开")
+
+        except Exception as e:
+            self._log(f"打开存储监控失败: {e}")
+            messagebox.showerror("错误", f"无法打开存储监控: {str(e)}")
+
     def run(self):
         """启动GUI"""
         # 初始化刷新数据库信息
@@ -1322,6 +1365,14 @@ class SimpleDBGUI:
     def _on_closing(self):
         """关闭程序时的处理"""
         try:
+            # 关闭存储监控窗口
+            if self.storage_monitor_window is not None:
+                try:
+                    if hasattr(self.storage_monitor_window, 'window') and self.storage_monitor_window.window:
+                        self.storage_monitor_window._stop_monitoring()
+                        self.storage_monitor_window.window.destroy()
+                except:
+                    pass
             # 关闭数据库连接
             self.storage_manager.shutdown()
             self._log("数据库连接已关闭")
