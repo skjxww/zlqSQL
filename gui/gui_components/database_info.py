@@ -92,43 +92,36 @@ class DatabaseInfoPanel:
         """刷新数据库信息"""
         try:
             # 获取表信息字典
-            self.tables_dict = self.db_manager.get_tables()
+            tables_dict = {}
+            try:
+                if hasattr(self.db_manager, 'get_all_tables'):
+                    tables_dict = self.db_manager.get_all_tables()
+            except Exception as e:
+                self._log(f"获取表信息时出错: {str(e)}")
+                raise e
 
             # 清空表列表
             self.tables_listbox.delete(0, tk.END)
 
-            if self.tables_dict and isinstance(self.tables_dict, dict):
-                # 获取表名列表并按字母顺序排序
-                table_names = sorted(list(self.tables_dict.keys()))
+            if tables_dict and isinstance(tables_dict, dict):
+                # 获取表名列表
+                table_names = list(tables_dict.keys())
 
                 # 添加到列表框中
                 for table_name in table_names:
-                    table_info = self.tables_dict.get(table_name, {})
-                    row_count = table_info.get('rows', 0)
-                    display_text = f"{table_name} ({row_count} rows)"
-                    self.tables_listbox.insert(tk.END, display_text)
+                    self.tables_listbox.insert(tk.END, table_name)
 
-                # 更新统计信息
-                total_tables = len(table_names)
-                total_rows = sum(table.get('row_count', 0) for table in self.tables_dict.values())
-
-                self.table_count_label.configure(text=f"表数量: {total_tables}")
-                self.total_rows_label.configure(text=f"总行数: {total_rows}")
-
-                self.status_label.configure(text="状态: 就绪", foreground="green")
-                self._log(f"成功获取 {total_tables} 张表，共 {total_rows} 行数据")
+                self._log(f"成功获取 {len(table_names)} 张表")
 
             else:
-                self.table_count_label.configure(text="表数量: 0")
-                self.total_rows_label.configure(text="总行数: 0")
-                self.status_label.configure(text="状态: 无表", foreground="orange")
-                self._log("数据库中没有表")
+                self._log("未找到表信息")
+
+            self.status_label.configure(text="状态: 就绪", foreground="green")
+            self._log("数据库信息已刷新")
 
         except Exception as e:
-            error_msg = f"刷新信息失败: {str(e)}"
-            self.status_label.configure(text="状态: 错误", foreground="red")
-            self._log(error_msg)
-            messagebox.showerror("错误", error_msg)
+            self._log(f"刷新信息失败: {str(e)}")
+            messagebox.showerror("错误", f"刷新数据库信息失败: {str(e)}")
 
     def _on_table_select(self, event):
         """当表被选择时的事件处理"""

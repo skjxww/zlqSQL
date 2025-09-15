@@ -1,6 +1,3 @@
-import tkinter as tk
-from tkinter import ttk, messagebox
-import traceback
 from gui_components.sql_query_tab import SQLQueryTab
 from gui_components.nl_query_tab import NLQueryTab
 from gui_components.plan_visualization_tab import PlanVisualizationTab
@@ -9,10 +6,23 @@ from gui_components.result_display import ResultDisplay
 from gui_components.smart_diagnosis import SmartDiagnosisPanel
 from core.database_manager import DatabaseManager
 from core.ai_features import AIFeatureManager
+import tkinter as tk
+from tkinter import ttk, scrolledtext, messagebox
+import traceback
+from sql_compiler.lexer.lexical_analyzer import LexicalAnalyzer
+from storage.core.page_manager import PageManager
+from storage.core.buffer_pool import BufferPool
+from storage.core.storage_manager import StorageManager
+from catalog.catalog_manager import CatalogManager
+from engine.storage_engine import StorageEngine
+from engine.execution_engine import ExecutionEngine
+from sql_compiler.diagnostics.error_analyzer import SmartSQLCorrector
 
 
 class SimpleDBGUI:
     def __init__(self):
+        # 初始化数据库组件
+        self._init_database()
         # 初始化数据库组件
         self.db_manager = DatabaseManager()
 
@@ -37,6 +47,49 @@ class SimpleDBGUI:
 
         # 执行历史
         self.query_history = []
+
+    def _init_database(self):
+        """初始化数据库组件"""
+        try:
+            # 初始化存储组件
+            self.page_manager = PageManager()
+            self.buffer_pool = BufferPool()
+            self.storage_manager = StorageManager()
+
+            # 初始化 TableStorage
+            from storage.core.table_storage import TableStorage
+            self.table_storage = TableStorage(self.storage_manager)
+
+            # 初始化数据库引擎组件
+            self.catalog_manager = CatalogManager()
+            self.storage_engine = StorageEngine(
+                storage_manager=self.storage_manager,
+                table_storage=self.table_storage,
+                catalog_manager=self.catalog_manager
+            )
+            self.execution_engine = ExecutionEngine(
+                storage_engine=self.storage_engine,
+                catalog_manager=self.catalog_manager
+            )
+
+            # 🔧 修复：设置事务管理器
+            # 确保存储引擎有事务管理器，然后设置给执行引擎
+            if hasattr(self.storage_engine, 'transaction_manager'):
+                self.execution_engine.set_transaction_manager(self.storage_engine.transaction_manager)
+            else:
+                # 如果存储引擎没有事务管理器，创建一个新的
+                from storage.core.transaction_manager import TransactionManager
+                transaction_manager = TransactionManager(self.storage_manager)
+                self.execution_engine.set_transaction_manager(transaction_manager)
+
+            # 初始化SQL编译器组件
+            self.lexer = LexicalAnalyzer
+
+            # 初始化智能纠错器
+            self.sql_corrector = SmartSQLCorrector(self.catalog_manager)
+
+        except Exception as e:
+            messagebox.showerror("初始化错误", f"数据库初始化失败: {str(e)}")
 
     def _create_main_frame(self):
         """创建主框架"""
