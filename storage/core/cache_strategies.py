@@ -246,57 +246,34 @@ class AdaptiveStrategy(CacheStrategy):
         repeat_rate = stats['repeat_rate']
         sequential_rate = stats['sequential_rate']
 
-        # 添加调试输出
-        print(f"DEBUG 决策分析:")
-        print(f"  repeat_rate: {repeat_rate} (阈值: {REPEAT_ACCESS_THRESHOLD})")
-        print(f"  sequential_rate: {sequential_rate} (阈值: {SEQUENTIAL_ACCESS_THRESHOLD})")
-
         if repeat_rate > REPEAT_ACCESS_THRESHOLD:
-            print(f"  决策: LRU (重复访问率 {repeat_rate} > {REPEAT_ACCESS_THRESHOLD})")
             return CACHE_STRATEGY_LRU
         elif sequential_rate > SEQUENTIAL_ACCESS_THRESHOLD:
-            print(f"  决策: FIFO (顺序访问率 {sequential_rate} > {SEQUENTIAL_ACCESS_THRESHOLD})")
             return CACHE_STRATEGY_FIFO
         else:
-            print(f"  决策: 保持当前策略 {self.current_strategy_name}")
             return self.current_strategy_name
 
     def _should_switch_strategy(self, recommended_strategy: str) -> bool:
-        """判断是否应该切换策略"""
-        print(f"DEBUG 切换检查:")
-        print(f"  推荐策略: {recommended_strategy}")
-        print(f"  当前策略: {self.current_strategy_name}")
 
         # 如果推荐的策略就是当前策略，不切换
         if recommended_strategy == self.current_strategy_name:
-            print(f"  结果: 推荐策略与当前策略相同，不切换")
             return False
 
         # 检查时间间隔
         current_time = time.time()
         time_diff = current_time - self.last_switch_time
-        print(f"  时间间隔: {time_diff:.2f}s (最小间隔: {ADAPTIVE_MIN_SWITCH_INTERVAL}s)")
 
         # 特殊处理：如果last_switch_time是初始化时间且从未切换过，允许第一次切换
         if time_diff < ADAPTIVE_MIN_SWITCH_INTERVAL and self.last_switch_time > 0:
-            print(f"  结果: 时间间隔太短，不切换")
             return False
-
-        # 检查连续决策
-        print(f"  连续决策: {self.consecutive_decisions}")
-        print(f"  决策长度: {len(self.consecutive_decisions)} (需要: {ADAPTIVE_DECISION_THRESHOLD})")
 
         if len(self.consecutive_decisions) >= ADAPTIVE_DECISION_THRESHOLD:
             recent_decisions = self.consecutive_decisions[-ADAPTIVE_DECISION_THRESHOLD:]
             all_same = all(decision == recommended_strategy for decision in recent_decisions)
-            print(f"  最近{ADAPTIVE_DECISION_THRESHOLD}次决策: {recent_decisions}")
-            print(f"  全部一致: {all_same}")
 
             if all_same:
-                print(f"  结果: 满足切换条件，执行切换")
                 return True
 
-        print(f"  结果: 不满足切换条件")
         return False
 
     def _switch_strategy(self, new_strategy_name: str):

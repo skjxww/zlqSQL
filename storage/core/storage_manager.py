@@ -18,6 +18,7 @@ from ..utils.exceptions import (
 from ..utils.logger import get_logger, PerformanceTimer, performance_monitor
 from .transaction_manager import TransactionManager, IsolationLevel, TransactionException
 from storage.core.lock_manager import SimpleLockManager, LockType
+from .preread import PrereadManager, PrereadConfig, PrereadMode
 
 
 class StorageManager:
@@ -105,6 +106,27 @@ class StorageManager:
 
             # 当前默认事务（用于非事务操作的兼容性）
             self._default_txn_id = None
+
+            # 预读系统集成（新增）
+            self.enable_preread = True  # 可以通过参数控制
+            if self.enable_preread:
+                try:
+                    # 创建预读配置
+                    preread_config = PrereadConfig()
+                    preread_config.enabled = True
+                    preread_config.mode = PrereadMode.ADAPTIVE
+                    preread_config.max_preread_pages = 6
+
+                    # 初始化预读管理器
+                    self.preread_manager = PrereadManager(self, preread_config)
+                    self.logger.info("Preread system enabled")
+                except Exception as e:
+                    self.logger.error(f"Failed to initialize preread system: {e}")
+                    self.preread_manager = None
+                    self.enable_preread = False
+            else:
+                self.preread_manager = None
+                self.logger.info("Preread system disabled")
 
             # 并发控制（新增）
             self.enable_concurrency = enable_concurrency
@@ -222,7 +244,6 @@ class StorageManager:
             if data is not None:
                 # 缓存命中
                 self.logger.debug(f"Cache hit for page {page_id}")
-                return data
             else:
                 # 缓存未命中，从磁盘读取
                 self.logger.debug(f"Cache miss for page {page_id}, reading from disk")
@@ -232,7 +253,17 @@ class StorageManager:
                 # 将数据放入缓存
                 self.buffer_pool.put(page_id, data, is_dirty=False)
 
-                return data
+            # 预读系统：记录页面访问（新增）
+            if self.enable_preread and self.preread_manager:
+                try:
+                    # 获取当前表上下文
+                    current_table = self.get_current_table_context()
+                    # 通知预读管理器
+                    self.preread_manager.on_page_access(page_id, current_table, "read")
+                except Exception as e:
+                    self.logger.debug(f"Preread system error: {e}")
+
+            return data
 
     @handle_storage_exceptions
     @performance_monitor("write_page")
@@ -628,6 +659,11 @@ class StorageManager:
 
         self.logger.info("Starting StorageManager shutdown")
 
+        # 关闭预读系统
+        if self.preread_manager:
+            self.preread_manager.shutdown()
+            self.logger.info("Preread system shutdown")
+
         # 回滚所有活跃事务
         if hasattr(self, 'transaction_manager'):
             self.logger.info("Aborting all active transactions...")
@@ -688,6 +724,110 @@ class StorageManager:
         return (f"StorageManager(status={stats['system_status']}, "
                 f"operations={stats['operation_count']}, "
                 f"cache_hit_rate={stats['cache_statistics'].get('hit_rate', 0)}%)")
+
+    def configure_preread(self, enabled: bool = None, mode: str = None,
+                          max_pages: int = None) -> bool:
+        """
+        配置预读系统
+
+        Args:
+            enabled: 是否启用预读
+            mode: 预读模式 ("sequential", "table_aware", "extent_based", "adaptive")
+            max_pages: 最大预读页数
+
+        Returns:
+            bool: 配置是否成功
+        """
+        if not self.preread_manager:
+            self.logger.warning("Preread system not initialized")
+            return False
+
+        try:
+            config = self.preread_manager.config
+
+            if enabled is not None:
+                config.enabled = enabled
+                self.enable_preread = enabled
+
+            if mode is not None:
+                mode_map = {
+                    "sequential": PrereadMode.SEQUENTIAL,
+                    "table_aware": PrereadMode.TABLE_AWARE,
+                    "extent_based": PrereadMode.EXTENT_BASED,
+                    "adaptive": PrereadMode.ADAPTIVE,
+                    "disabled": PrereadMode.DISABLED
+                }
+                if mode in mode_map:
+                    config.mode = mode_map[mode]
+                else:
+                    self.logger.warning(f"Invalid preread mode: {mode}")
+                    return False
+
+            if max_pages is not None:
+                config.max_preread_pages = max_pages
+
+            # 应用新配置
+            self.preread_manager.set_config(config)
+
+            self.logger.info(f"Preread configured: enabled={config.enabled}, mode={config.mode.value}")
+            return True
+
+        except Exception as e:
+            self.logger.error(f"Failed to configure preread: {e}")
+            return False
+
+    def get_preread_statistics(self) -> Optional[Dict]:
+        """获取预读系统统计信息"""
+        if not self.preread_manager:
+            return None
+
+        try:
+            return self.preread_manager.get_statistics()
+        except Exception as e:
+            self.logger.error(f"Failed to get preread statistics: {e}")
+            return None
+
+    def force_preread_pages(self, page_ids: List[int]) -> bool:
+        """
+        强制预读指定页面（用于测试）
+
+        Args:
+            page_ids: 要预读的页面ID列表
+
+        Returns:
+            bool: 是否成功
+        """
+        if not self.preread_manager or not self.enable_preread:
+            return False
+
+        try:
+            return self.preread_manager.force_preread(page_ids)
+        except Exception as e:
+            self.logger.error(f"Failed to force preread: {e}")
+            return False
+
+    def optimize_preread_for_table(self, table_name: str, aggressiveness: float = 0.7):
+        """
+        为特定表优化预读设置
+
+        Args:
+            table_name: 表名
+            aggressiveness: 预读激进程度 (0.0-1.0)
+        """
+        if not self.preread_manager:
+            return
+
+        try:
+            config = self.preread_manager.config
+            config.set_table_config(table_name, {
+                'preread_size': min(8, int(4 + aggressiveness * 4)),
+                'aggressiveness': aggressiveness
+            })
+
+            self.logger.info(f"Optimized preread for table '{table_name}' (aggressiveness={aggressiveness})")
+
+        except Exception as e:
+            self.logger.error(f"Failed to optimize preread for table '{table_name}': {e}")
 
     def __repr__(self) -> str:
         """详细字符串表示"""
