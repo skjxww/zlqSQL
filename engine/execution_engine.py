@@ -11,7 +11,10 @@ from sql_compiler.semantic.symbol_table import SymbolTable
 from sql_compiler.semantic.type_checker import TypeChecker
 from storage.core.transaction_manager import TransactionManager, IsolationLevel  # 添加事务管理器导入
 from sql_compiler.parser.ast_nodes import TableRef
+import logging
 
+# 添加日志记录器
+logger = logging.getLogger("execution_engine")
 
 class ExecutionEngine:
     def __init__(self, storage_engine: StorageEngine, catalog_manager: CatalogManager):
@@ -28,6 +31,9 @@ class ExecutionEngine:
 
         # 添加视图相关属性
         self.views = {}  # 存储视图定义
+
+        # 添加日志记录器实例
+        self.logger = logging.getLogger("execution_engine")
 
     def set_transaction_manager(self, transaction_manager: TransactionManager):
         """设置事务管理器"""
@@ -253,86 +259,354 @@ class ExecutionEngine:
                     pass  # 忽略回滚过程中的错误
             raise SemanticError(f"执行错误: {str(e)}")
 
+    # 修改execute_drop_view方法
+    # execution_engine.py 修改部分
+
     def execute_create_view(self, view_name: str, select_plan: Operator, columns: Optional[List[str]] = None,
                             or_replace: bool = False, materialized: bool = False,
                             with_check_option: bool = False) -> str:
-        """执行CREATE VIEW语句 - 修复版本"""
+        """执行CREATE VIEW语句 - 修复版本，确保持久化到catalog"""
         try:
             # 检查视图是否已存在
             if view_name in self.views and not or_replace:
                 raise SemanticError(f"View '{view_name}' already exists")
 
-            # 存储视图定义（包括执行计划和列映射）
+            # 从SELECT计划构建视图定义SQL
+            view_definition = self._construct_view_definition(
+                select_plan, view_name, columns, or_replace, materialized, with_check_option
+            )
+
+            # 调用catalog manager创建视图（这会持久化到system_catalog.json）
+            success = self.catalog.create_view(
+                view_name=view_name,
+                definition=view_definition,
+                columns=columns,
+                is_materialized=materialized,
+                or_replace=or_replace,
+                with_check_option=with_check_option
+            )
+
+            if not success:
+                raise SemanticError(f"Failed to create view '{view_name}' in catalog")
+
+            # 存储视图定义到内存
             self.views[view_name] = {
                 'plan': select_plan,  # 保存执行计划
                 'columns': columns,  # 保存视图列名
                 'materialized': materialized,
                 'with_check_option': with_check_option,
-                'definition': f"CREATE VIEW {view_name} AS ..."  # 可选的文本定义
+                'definition': view_definition  # 保存SQL定义
             }
 
             # 尝试存储到持久化存储（可选）
             try:
                 self.storage_engine.create_view(
                     view_name,
-                    select_plan,  # 保存执行计划
-                    columns,  # 保存视图列名
+                    view_definition,  # 使用SQL定义而不是执行计划
+                    columns,
                     materialized,
                     with_check_option
                 )
             except Exception as e:
-                self.logger.warning(f"Could not persist view '{view_name}': {e}")
+                self.logger.warning(f"Could not persist view '{view_name}' to storage: {e}")
 
             return f"View '{view_name}' created successfully"
         except Exception as e:
+            # 如果创建失败，确保从catalog中删除视图（如果已创建）
+            if self.catalog.view_exists(view_name):
+                self.catalog.drop_view(view_name, if_exists=True)
             raise SemanticError(f"创建视图错误: {str(e)}")
 
-    # 修改execute_drop_view方法
     def execute_drop_view(self, view_names: List[str], if_exists: bool = False,
                           cascade: bool = False, materialized: bool = False) -> str:
-        """执行DROP VIEW语句"""
+        """执行DROP VIEW语句 - 确保从catalog中删除"""
         try:
             dropped_count = 0
             for view_name in view_names:
+                # 首先从catalog中删除视图（这会持久化到system_catalog.json）
+                catalog_success = self.catalog.drop_view(
+                    view_name=view_name,
+                    if_exists=if_exists,
+                    cascade=cascade
+                )
+
+                if not catalog_success and not if_exists:
+                    raise SemanticError(f"Failed to drop view '{view_name}' from catalog")
+
+                # 然后从内存中删除视图
                 if view_name in self.views:
-                    # 从存储引擎删除视图
-                    success = self.storage_engine.drop_view(view_name)
-                    if not success:
-                        raise SemanticError(f"Failed to drop view '{view_name}' from persistent storage")
-
-                    # 从内存中删除视图
                     del self.views[view_name]
-
-                    # 更新catalog
-                    if hasattr(self.catalog, 'drop_view'):
-                        self.catalog.drop_view(view_name)
-
                     dropped_count += 1
-                elif not if_exists:
-                    raise SemanticError(f"View '{view_name}' does not exist")
+
+                # 从存储引擎删除视图
+                try:
+                    storage_success = self.storage_engine.drop_view(view_name)
+                    if not storage_success and not if_exists:
+                        self.logger.warning(f"Failed to drop view '{view_name}' from storage")
+                except Exception as e:
+                    self.logger.warning(f"Error dropping view '{view_name}' from storage: {e}")
 
             return f"{dropped_count} view(s) dropped successfully"
         except Exception as e:
             raise SemanticError(f"删除视图错误: {str(e)}")
 
-    def execute_show_views(self, pattern: Optional[str] = None, database: Optional[str] = None) -> List[Dict]:
-        """执行SHOW VIEWS语句"""
-        try:
-            views_list = []
-            for view_name, view_info in self.views.items():
-                # 如果指定了模式，进行匹配
-                if pattern and not self._pattern_match(view_name, pattern):
-                    continue
+    def _construct_view_definition(self, select_plan: Operator, view_name: str, columns: Optional[List[str]] = None,
+                                   or_replace: bool = False, materialized: bool = False,
+                                   with_check_option: bool = False) -> str:
+        """从SELECT计划构建视图定义SQL"""
 
-                views_list.append({
-                    'name': view_name,
-                    'materialized': view_info['materialized'],
-                    'columns': view_info['columns']
-                })
+        def reconstruct_sql(operator: Operator) -> str:
+            """递归重构SQL语句"""
+            if not operator:
+                return ""
 
-            return views_list
-        except Exception as e:
-            raise SemanticError(f"显示视图错误: {str(e)}")
+            operator_type = operator.__class__.__name__
+
+            # 处理投影操作 (SELECT子句)
+            if operator_type == "ProjectOp":
+                columns = getattr(operator, 'columns', ['*'])
+                columns_str = ', '.join(columns)
+
+                # 处理FROM子句
+                from_clause = ""
+                if operator.children:
+                    from_clause = reconstruct_sql(operator.children[0])
+
+                return f"SELECT {columns_str} FROM {from_clause}"
+
+            # 处理过滤操作 (WHERE子句)
+            elif operator_type == "FilterOp":
+                condition = getattr(operator, 'condition', None)
+                condition_str = reconstruct_expression(condition) if condition else "1=1"
+
+                child_sql = reconstruct_sql(operator.children[0]) if operator.children else "SELECT *"
+
+                # 检查child_sql是否已经有WHERE子句
+                if "WHERE" in child_sql.upper():
+                    # 如果已经有WHERE，使用AND连接
+                    return f"{child_sql} AND {condition_str}"
+                else:
+                    return f"{child_sql} WHERE {condition_str}"
+
+            # 处理连接操作
+            elif operator_type == "JoinOp":
+                join_type = getattr(operator, 'join_type', 'INNER').upper()
+                on_condition = getattr(operator, 'on_condition', None)
+
+                if len(operator.children) >= 2:
+                    left_sql = reconstruct_sql(operator.children[0])
+                    right_sql = reconstruct_sql(operator.children[1])
+
+                    join_clause = f"{left_sql} {join_type} JOIN {right_sql}"
+
+                    if on_condition:
+                        on_str = reconstruct_expression(on_condition)
+                        join_clause += f" ON {on_str}"
+
+                    return join_clause
+                return ""
+
+            # 处理分组操作 (GROUP BY子句)
+            elif operator_type == "GroupByOp":
+                group_columns = getattr(operator, 'group_columns', [])
+                having_condition = getattr(operator, 'having_condition', None)
+                aggregate_functions = getattr(operator, 'aggregate_functions', [])
+
+                # 构建SELECT子句（包含聚合函数）
+                select_parts = []
+
+                # 添加分组列
+                select_parts.extend(group_columns)
+
+                # 添加聚合函数
+                for func_name, column_name in aggregate_functions:
+                    if column_name == '*':
+                        select_parts.append(f"{func_name.upper()}(*)")
+                    else:
+                        select_parts.append(f"{func_name.upper()}({column_name})")
+
+                select_clause = ', '.join(select_parts) if select_parts else '*'
+
+                # 构建基础SQL
+                base_sql = reconstruct_sql(operator.children[0]) if operator.children else "SELECT *"
+
+                # 替换SELECT子句
+                if base_sql.upper().startswith('SELECT'):
+                    base_sql = f"SELECT {select_clause}" + base_sql[6:]  # 移除原来的SELECT部分
+
+                # 添加GROUP BY
+                if group_columns:
+                    group_by_str = ', '.join(group_columns)
+                    base_sql += f" GROUP BY {group_by_str}"
+
+                # 添加HAVING
+                if having_condition:
+                    having_str = reconstruct_expression(having_condition)
+                    base_sql += f" HAVING {having_str}"
+
+                return base_sql
+
+            # 处理排序操作 (ORDER BY子句)
+            elif operator_type == "OrderByOp" or operator_type == "SortOp":
+                order_columns = getattr(operator, 'order_columns', [])
+                order_by_parts = []
+
+                for col_info in order_columns:
+                    if isinstance(col_info, tuple):
+                        column, direction = col_info
+                        order_by_parts.append(f"{column} {direction.upper()}")
+                    elif isinstance(col_info, dict):
+                        column = col_info.get('column', '')
+                        direction = col_info.get('direction', 'ASC')
+                        order_by_parts.append(f"{column} {direction.upper()}")
+
+                order_by_str = ', '.join(order_by_parts)
+
+                child_sql = reconstruct_sql(operator.children[0]) if operator.children else "SELECT *"
+
+                return f"{child_sql} ORDER BY {order_by_str}"
+
+            # 处理表扫描操作
+            elif operator_type == "SeqScanOp" or operator_type == "FilteredSeqScanOp":
+                table_name = getattr(operator, 'table_name', 'unknown_table')
+                table_alias = getattr(operator, 'table_alias', None)
+
+                if table_alias and table_alias != table_name:
+                    return f"{table_name} AS {table_alias}"
+                return table_name
+
+            # 处理子查询
+            elif operator_type == "SubqueryOp":
+                subquery_sql = reconstruct_sql(operator.select_plan)
+                return f"({subquery_sql})"
+
+            # 处理联合操作
+            elif operator_type == "UnionOp":
+                union_type = getattr(operator, 'union_type', 'UNION')
+                child_sqls = [reconstruct_sql(child) for child in operator.children]
+                return f" {union_type} ".join([f"({sql})" for sql in child_sqls])
+
+            # 处理哈希聚合
+            elif operator_type == "HashAggregateOp":
+                group_columns = getattr(operator, 'group_columns', [])
+                agg_functions = getattr(operator, 'agg_functions', [])
+                having_condition = getattr(operator, 'having_condition', None)
+
+                # 构建SELECT子句
+                select_parts = []
+                select_parts.extend(group_columns)
+
+                for agg_func in agg_functions:
+                    func_name = agg_func.get('func', '')
+                    column = agg_func.get('column', '')
+                    alias = agg_func.get('alias', '')
+
+                    if column == '*':
+                        agg_expr = f"{func_name.upper()}(*)"
+                    else:
+                        agg_expr = f"{func_name.upper()}({column})"
+
+                    if alias:
+                        select_parts.append(f"{agg_expr} AS {alias}")
+                    else:
+                        select_parts.append(agg_expr)
+
+                select_clause = ', '.join(select_parts)
+
+                # 构建基础SQL
+                base_sql = reconstruct_sql(operator.children[0]) if operator.children else "SELECT *"
+
+                # 替换SELECT子句
+                if base_sql.upper().startswith('SELECT'):
+                    base_sql = f"SELECT {select_clause}" + base_sql[6:]
+
+                # 添加GROUP BY
+                if group_columns:
+                    group_by_str = ', '.join(group_columns)
+                    base_sql += f" GROUP BY {group_by_str}"
+
+                # 添加HAVING
+                if having_condition:
+                    having_str = reconstruct_expression(having_condition)
+                    base_sql += f" HAVING {having_str}"
+
+                return base_sql
+
+            # 默认情况：递归处理子节点
+            elif operator.children:
+                child_sqls = [reconstruct_sql(child) for child in operator.children]
+                return ' '.join([sql for sql in child_sqls if sql])
+
+            return "SELECT *"
+
+        def reconstruct_expression(expr) -> str:
+            """重构表达式"""
+            if expr is None:
+                return ""
+
+            # 如果是字典形式的表达式（来自to_dict()）
+            if isinstance(expr, dict):
+                expr_type = expr.get('type', '')
+
+                if expr_type == "BinaryExpr":
+                    left = reconstruct_expression(expr.get('left'))
+                    operator = expr.get('operator', '=')
+                    right = reconstruct_expression(expr.get('right'))
+                    return f"{left} {operator} {right}"
+
+                elif expr_type == "IdentifierExpr":
+                    table_name = expr.get('table_name')
+                    column_name = expr.get('name', 'unknown')
+                    if table_name:
+                        return f"{table_name}.{column_name}"
+                    return column_name
+
+                elif expr_type == "LiteralExpr":
+                    value = expr.get('value')
+                    if isinstance(value, str):
+                        return f"'{value}'"
+                    return str(value)
+
+                elif expr_type == "FunctionExpr":
+                    func_name = expr.get('function_name', 'UNKNOWN')
+                    args = expr.get('arguments', [])
+                    args_str = ', '.join([reconstruct_expression(arg) for arg in args])
+                    return f"{func_name}({args_str})"
+
+                elif expr_type == "BetweenExpr":
+                    expr_val = reconstruct_expression(expr.get('expr'))
+                    lower = reconstruct_expression(expr.get('lower'))
+                    upper = reconstruct_expression(expr.get('upper'))
+                    return f"{expr_val} BETWEEN {lower} AND {upper}"
+
+            # 如果是AST节点对象
+            elif hasattr(expr, 'to_dict'):
+                return reconstruct_expression(expr.to_dict())
+
+            # 如果是简单的值
+            else:
+                return str(expr)
+
+        # 构建完整的CREATE VIEW语句
+        select_statement = reconstruct_sql(select_plan)
+
+        # 添加视图选项
+        view_options = []
+        if or_replace:
+            view_options.append("OR REPLACE")
+        if materialized:
+            view_options.append("MATERIALIZED")
+        if with_check_option:
+            view_options.append("WITH CHECK OPTION")
+
+        options_str = ' '.join(view_options)
+
+        # 添加列定义
+        columns_str = ""
+        if columns:
+            columns_str = f" ({', '.join(columns)})"
+
+        return f"CREATE {options_str} VIEW {view_name}{columns_str} AS {select_statement}"
 
     def execute_describe_view(self, view_name: str) -> Dict[str, Any]:
         """执行DESCRIBE VIEW语句"""
@@ -630,24 +904,32 @@ class ExecutionEngine:
     def execute_update(self, table_name: str, assignments: List[tuple], child_plan: Operator) -> str:
         """执行UPDATE语句"""
         try:
+            # 检查事务状态
+            if self.current_transaction_id is None:
+                self.logger.warning("No active transaction for UPDATE operation, auto-starting one")
+                self.begin_transaction()
+
+            txn_status = self.get_transaction_status()
+            self.logger.debug(f"Transaction status before UPDATE: {txn_status}")
+
             # 设置类型检查器的上下文表
             self.type_checker.set_context_table(table_name)
 
             # 先执行子计划获取要更新的行
             rows_to_update = list(self.execute_plan(child_plan))
-            print(f"DEBUG: Found {len(rows_to_update)} rows to update")
+            self.logger.debug(f"Found {len(rows_to_update)} rows to update")
 
             # 应用更新操作
             updated_count = 0
             for i, row in enumerate(rows_to_update):
-                print(f"DEBUG: Processing row {i}: {row}")
+                self.logger.debug(f"Processing row {i}: {row}")
 
                 # 构建更新数据
                 update_data = {}
                 for col_name, value_expr in assignments:
                     # 计算表达式的值（需要传入当前行的上下文）
                     value = self._evaluate_expression(value_expr, row, table_name)
-                    print(f"DEBUG: Assignment {col_name} = {value} (from expression {value_expr})")
+                    self.logger.debug(f"Assignment {col_name} = {value} (from expression {value_expr})")
 
                     # 类型检查
                     expected_type = self.symbol_table.get_column_type(table_name, col_name)
@@ -656,7 +938,7 @@ class ExecutionEngine:
                             f"列 '{col_name}' 类型不兼容: 期望 {expected_type}, 得到 {type(value).__name__}")
                     update_data[col_name] = value
 
-                print(f"DEBUG: Update data: {update_data}")
+                self.logger.debug(f"Update data: {update_data}")
 
                 # 添加事务支持
                 if self.current_transaction_id is not None and self.transaction_manager is not None:
@@ -665,6 +947,10 @@ class ExecutionEngine:
                         table_name, row, update_data, self.current_transaction_id
                     )
                     if not success:
+                        self.logger.error(f"Failed to update row in transaction {self.current_transaction_id}")
+                        # 尝试获取更多错误信息
+                        txn_status = self.get_transaction_status()
+                        self.logger.error(f"Transaction status after failure: {txn_status}")
                         raise SemanticError("Failed to update row in transaction")
                 else:
                     # 非事务更新
@@ -673,6 +959,7 @@ class ExecutionEngine:
 
             return f"{updated_count} rows updated"
         except Exception as e:
+            self.logger.error(f"更新数据错误: {str(e)}")
             raise SemanticError(f"更新数据错误: {str(e)}")
 
     def execute_delete(self, table_name: str, child_plan: Operator) -> str:
@@ -1804,5 +2091,3 @@ class ExecutionEngine:
 
         # 普通表，返回顺序扫描
         return SeqScanOp(table_name)
-
-

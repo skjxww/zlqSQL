@@ -1,4 +1,5 @@
 # engine/storage_engine.py
+# engine/storage_engine.py
 import os
 import json
 from typing import List, Dict, Any, Optional
@@ -109,9 +110,11 @@ class StorageEngine:
             return {"error": f"Transaction {txn_id} not found"}
 
     # 添加视图操作方法
-    def create_view(self, view_name: str, definition: Any, columns: Optional[List[str]] = None,
+    # storage_engine.py 修改部分
+
+    def create_view(self, view_name: str, definition: str, columns: Optional[List[str]] = None,
                     materialized: bool = False, with_check_option: bool = False) -> bool:
-        """创建视图并持久化存储 - 修复版"""
+        """创建视图并持久化存储 - 修复版，确保与catalog同步"""
         try:
             # 存储到内存
             self.views[view_name] = {
@@ -129,14 +132,15 @@ class StorageEngine:
             view_file = os.path.join(views_dir, f"{view_name}.json")
             view_data = {
                 'name': view_name,
+                'definition': definition,  # 保存SQL定义
                 'columns': columns,
                 'materialized': materialized,
                 'with_check_option': with_check_option,
                 'type': 'VIEW'
             }
 
-            with open(view_file, 'w') as f:
-                json.dump(view_data, f)
+            with open(view_file, 'w', encoding='utf-8') as f:
+                json.dump(view_data, f, ensure_ascii=False, indent=2)
 
             self.logger.info(f"View '{view_name}' created and persisted successfully")
             return True
@@ -144,53 +148,22 @@ class StorageEngine:
         except Exception as e:
             self.logger.error(f"Error creating view '{view_name}': {e}")
             # 即使持久化失败，也保持在内存中可用
-            return True  # 改为返回True让视图在内存中可用
-
-    def _create_view_fallback(self, view_name: str, view_data: Dict) -> bool:
-        """创建视图的备选方法"""
-        try:
-            storage_table_name = f"system_views"
-
-            # 检查表是否已存在，如果不存在则创建
-            if not self.table_storage.table_exists(storage_table_name):
-                success = self.table_storage.create_table_storage(
-                    storage_table_name,
-                    estimated_size=1024,
-                    tablespace_name="system"
-                )
-                if not success:
-                    return False
-
-            # 获取现有数据
-            all_views = {}
-            try:
-                page_data = self.table_storage.read_table_page(storage_table_name, 0)
-                if page_data:
-                    all_views = json.loads(page_data.decode('utf-8'))
-            except:
-                pass  # 如果读取失败，从头开始
-
-            # 添加新视图
-            all_views[view_name] = view_data
-
-            # 写入更新后的数据
-            serialized_data = json.dumps(all_views).encode('utf-8')
-            self.table_storage.write_table_page(storage_table_name, 0, serialized_data)
-
             return True
-        except Exception as e:
-            self.logger.error(f"Fallback method also failed for view '{view_name}': {e}")
-            return False
 
     def drop_view(self, view_name: str) -> bool:
-        """删除视图及其持久化存储"""
+        """删除视图及其持久化存储 - 修复版"""
         try:
+            # 从内存中删除
             if view_name in self.views:
                 del self.views[view_name]
 
-            # 删除持久化存储
-            if self.table_storage.table_exists(f"system_views_{view_name}"):
-                self.table_storage.drop_table_storage(f"system_views_{view_name}")
+            # 删除持久化文件
+            views_dir = "system_views"
+            view_file = os.path.join(views_dir, f"{view_name}.json")
+
+            if os.path.exists(view_file):
+                os.remove(view_file)
+                self.logger.info(f"View file '{view_file}' deleted")
 
             self.logger.info(f"View '{view_name}' dropped successfully")
             return True
@@ -206,10 +179,11 @@ class StorageEngine:
                 for view_file in os.listdir(views_dir):
                     if view_file.endswith('.json'):
                         try:
-                            with open(os.path.join(views_dir, view_file), 'r') as f:
+                            with open(os.path.join(views_dir, view_file), 'r', encoding='utf-8') as f:
                                 view_data = json.load(f)
                             view_name = view_data['name']
                             self.views[view_name] = {
+                                'definition': view_data['definition'],  # 加载SQL定义
                                 'columns': view_data['columns'],
                                 'materialized': view_data['materialized'],
                                 'with_check_option': view_data['with_check_option']
@@ -348,6 +322,11 @@ class StorageEngine:
     def update_row_transactional(self, table_name: str, old_row: Dict, new_data: Dict, txn_id: int) -> bool:
         """在事务中更新一行数据"""
         try:
+            # 添加事务状态检查
+            if not self.transaction_manager or not self.transaction_manager.is_transaction_active(txn_id):
+                self.logger.error(f"Transaction {txn_id} is not active or doesn't exist")
+                return False
+
             # 获取表schema
             schema = self._get_table_schema(table_name)
             if not schema:
@@ -355,13 +334,15 @@ class StorageEngine:
 
             # 获取表的所有页
             page_count = self.table_storage.get_table_page_count(table_name)
+            self.logger.debug(f"Searching {page_count} pages for row to update")
 
             # 遍历所有页查找要更新的行
             for page_index in range(page_count):
                 # 准备读操作（获取锁）
                 page_id = self.table_storage.get_table_page_id(table_name, page_index)
                 if not self.transaction_manager.prepare_read(txn_id, page_id):
-                    raise StorageException(f"Failed to acquire read lock on page {page_id}")
+                    self.logger.error(f"Failed to acquire read lock on page {page_id}")
+                    continue
 
                 # 读取页数据
                 page_data = self.table_storage.read_table_page(table_name, page_index)
@@ -375,7 +356,8 @@ class StorageEngine:
                     if self._rows_match(record, old_row):
                         # 准备写操作（获取锁，保存undo信息）
                         if not self.transaction_manager.prepare_write(txn_id, page_id):
-                            raise StorageException(f"Failed to acquire write lock on page {page_id}")
+                            self.logger.error(f"Failed to acquire write lock on page {page_id}")
+                            return False
 
                         # 创建更新后的行数据
                         updated_row = record.copy()
@@ -391,7 +373,7 @@ class StorageEngine:
 
                         # 添加新记录
                         updated_page_data, success = PageSerializer.add_record_to_page(page_data_after_remove,
-                                                                                           binary_updated_row)
+                                                                                       binary_updated_row)
                         if not success:
                             raise StorageException("Failed to add updated record to page")
 
@@ -404,7 +386,9 @@ class StorageEngine:
                             f"Updated row in table '{table_name}', page {page_index} in transaction {txn_id}")
                         return True
 
-            raise StorageException(f"Row not found in table '{table_name}' for update")
+            self.logger.error(f"Row not found in table '{table_name}' for update: {old_row}")
+            return False
+
         except Exception as e:
             self.logger.error(f"Error updating row in table '{table_name}' in transaction {txn_id}: {e}")
             return False
@@ -923,13 +907,19 @@ class StorageEngine:
 
     def _rows_match(self, row1: Dict, row2: Dict) -> bool:
         """比较两行数据是否匹配"""
+        # 添加调试信息
+        self.logger.debug(f"Comparing rows:\nRow1: {row1}\nRow2: {row2}")
+
         if set(row1.keys()) != set(row2.keys()):
+            self.logger.debug("Row keys don't match")
             return False
 
         for key in row1.keys():
             if row1.get(key) != row2.get(key):
+                self.logger.debug(f"Value mismatch for key '{key}': {row1.get(key)} != {row2.get(key)}")
                 return False
 
+        self.logger.debug("Rows match")
         return True
 
     # def delete_row(self, table_name: str, row: Dict) -> None:
