@@ -1,5 +1,93 @@
 {
   "tables": {
+    "users122": {
+      "name": "users122",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INT",
+          "constraints": null
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR(50)",
+          "constraints": null
+        },
+        {
+          "name": "email",
+          "type": "VARCHAR(100)",
+          "constraints": null
+        }
+      ],
+      "created_at": "2025-09-15T21:14:40.804697",
+      "row_count": 0
+    },
+    "users123": {
+      "name": "users123",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INT",
+          "constraints": null
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR(50)",
+          "constraints": null
+        },
+        {
+          "name": "email",
+          "type": "VARCHAR(100)",
+          "constraints": null
+        }
+      ],
+      "created_at": "2025-09-15T21:15:46.713407",
+      "row_count": 0
+    },
+    "users1221": {
+      "name": "users1221",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INT",
+          "constraints": null
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR(50)",
+          "constraints": null
+        },
+        {
+          "name": "email",
+          "type": "VARCHAR(100)",
+          "constraints": null
+        }
+      ],
+      "created_at": "2025-09-15T23:14:36.911336",
+      "row_count": 0
+    },
+    "users1225": {
+      "name": "users1225",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INT",
+          "constraints": null
+        },
+        {
+          "name": "name",
+          "type": "VARCHAR(50)",
+          "constraints": null
+        },
+        {
+          "name": "email",
+          "type": "VARCHAR(100)",
+          "constraints": null
+        }
+      ],
+      "created_at": "2025-09-16T01:19:02.500726",
+      "row_count": 0
+    },
     "customers": {
       "name": "customers",
       "columns": [
@@ -24,7 +112,7 @@
           "constraints": null
         }
       ],
-      "created_at": "2025-09-11T16:38:15.763583",
+      "created_at": "2025-09-16T11:11:42.372519",
       "row_count": 0
     },
     "orders": {
@@ -51,7 +139,7 @@
           "constraints": null
         }
       ],
-      "created_at": "2025-09-11T16:38:15.765579",
+      "created_at": "2025-09-16T11:11:42.409298",
       "row_count": 0
     },
     "products": {
@@ -78,7 +166,7 @@
           "constraints": null
         }
       ],
-      "created_at": "2025-09-11T16:38:15.767695",
+      "created_at": "2025-09-16T11:11:42.472038",
       "row_count": 0
     },
     "customers1": {
@@ -105,77 +193,29 @@
           "constraints": null
         }
       ],
-      "created_at": "2025-09-12T21:59:03.291964",
-      "row_count": 0
-    },
-    "employees": {
-      "name": "employees",
-      "columns": [
-        {
-          "name": "id",
-          "type": "INT",
-          "constraints": "PRIMARY KEY"
-        },
-        {
-          "name": "name",
-          "type": "VARCHAR(50)",
-          "constraints": null
-        },
-        {
-          "name": "department",
-          "type": "VARCHAR(30)",
-          "constraints": null
-        },
-        {
-          "name": "salary",
-          "type": "DECIMAL(10,2)",
-          "constraints": null
-        }
-      ],
-      "created_at": "2025-09-14T17:19:34.451033",
-      "row_count": 0
-    },
-    "departments": {
-      "name": "departments",
-      "columns": [
-        {
-          "name": "id",
-          "type": "INT",
-          "constraints": "PRIMARY KEY"
-        },
-        {
-          "name": "name",
-          "type": "VARCHAR(30)",
-          "constraints": null
-        },
-        {
-          "name": "manager_id",
-          "type": "INT",
-          "constraints": null
-        }
-      ],
-      "created_at": "2025-09-14T17:19:34.452032",
+      "created_at": "2025-09-16T15:37:47.854405",
       "row_count": 0
     }
   },
+  "indexes": {},
   "metadata": {
     "version": "1.0",
     "created_at": null
   },
-  "indexes": {},
   "views": {
-    "employee_summary": {
-      "definition": "SELECT name, department, salary FROM employees",
+    "young_customers_view": {
+      "definition": "CREATE  VIEW young_customers_view AS SELECT customer_id, name, city, age FROM customers1 WHERE age < 35;",
       "columns": [
+        "customer_id",
         "name",
-        "department",
-        "salary"
+        "city",
+        "age"
       ],
       "is_materialized": false,
-      "created_at": "2025-09-16T09:30:18.096115",
+      "created_at": "2025-09-16T23:15:51.022283",
       "with_check_option": false,
       "dependencies": [
-        "employees"
+        "customers1"
       ]
     }
   }

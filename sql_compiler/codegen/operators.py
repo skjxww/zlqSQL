@@ -2101,6 +2101,15 @@ class DropViewOp(Operator):
                     "message": f"视图 {view_name} 删除错误: {str(e)}"
                 }
 
+    def to_dict(self) -> Dict[str, Any]:
+        """返回操作的字典表示"""
+        return {
+            "operator_type": "DropViewOp",
+            "view_names": self.view_names,
+            "if_exists": self.if_exists,
+            "cascade": self.cascade,
+            "materialized": self.materialized
+        }
 
 class ShowViewsOp(Operator):
     """SHOW VIEWS 操作符"""

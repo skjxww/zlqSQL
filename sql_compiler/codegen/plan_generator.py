@@ -686,8 +686,19 @@ class PlanGenerator:
             # 检查是否是视图
             if self._is_view(real_table_name):
                 # 获取视图定义并展开
-                view_definition = self._get_view_definition(real_table_name)
-                underlying_plan = self._generate_basic_select_plan(view_definition)
+                view_definition = self._get_view_definition(real_table_name)  # CreateViewStmt
+                print(f"视图定义类型: {type(view_definition).__name__}")
+
+                # ✅ 修复：从CreateViewStmt中提取SelectStmt
+                if isinstance(view_definition, CreateViewStmt):
+                    select_stmt = view_definition.select_stmt  # 获取内部的SelectStmt
+                    print(f"提取的SELECT语句类型: {type(select_stmt).__name__}")
+                    underlying_plan = self._generate_basic_select_plan(select_stmt)
+                else:
+                    # 如果直接是SelectStmt，直接使用
+                    underlying_plan = self._generate_basic_select_plan(view_definition)
+
+                print(f"生成的底层计划: {type(underlying_plan).__name__}")
 
                 return ViewScanOp(real_table_name, underlying_plan)
             else:

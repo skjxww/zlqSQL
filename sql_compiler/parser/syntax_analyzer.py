@@ -13,6 +13,8 @@ class SyntaxAnalyzer:
 
     def parse(self) -> Statement:
         """解析入口"""
+        self._debug_current_state("开始解析")
+
         if self._is_at_end() or (len(self.tokens) == 1 and self.tokens[0].type == TokenType.EOF):
             raise SyntaxErr("空的SQL语句", 1, 1, "SQL语句")
 
@@ -23,10 +25,13 @@ class SyntaxAnalyzer:
         if self._is_at_end():
             raise SyntaxErr("空的SQL语句", 1, 1, "SQL语句")
 
+        self._debug_current_state("开始解析语句")
         stmt = self._parse_statement()
+        self._debug_current_state("语句解析完成")
 
         # 检查分号
         if not self._check(TokenType.SEMICOLON):
+            self._debug_current_state("检查分号时出错")
             current_token = self._current_token()
             if current_token.type == TokenType.EOF:
                 raise SyntaxErr("SQL语句必须以分号结尾",
@@ -36,12 +41,14 @@ class SyntaxAnalyzer:
                                 current_token.line, current_token.column, "';'")
 
         self._advance()  # 消费分号
+        self._debug_current_state("分号已消费")
 
         # 检查多余token
         while self._check(TokenType.NEWLINE):
             self._advance()
 
         if not self._is_at_end():
+            self._debug_current_state("检查到多余token")
             extra_token = self._current_token()
             if extra_token.type != TokenType.EOF:
                 raise SyntaxErr(f"SQL语句结束后不应该有额外的内容: '{extra_token.lexeme}'",
@@ -128,6 +135,8 @@ class SyntaxAnalyzer:
 
     def _parse_create_view(self, or_replace: bool, materialized: bool) -> CreateViewStmt:
         """解析 CREATE VIEW 语句"""
+        self._debug_current_state("开始解析CREATE VIEW")
+
         # 解析视图名
         if not self._check(TokenType.IDENTIFIER):
             raise SyntaxErr("期望视图名称",
@@ -135,32 +144,43 @@ class SyntaxAnalyzer:
                             self._current_token().column, "视图名")
 
         view_name = self._advance().lexeme
+        self._debug_current_state(f"解析到视图名: {view_name}")
 
         # 可选的列列表
         columns = None
         if self._match(TokenType.LEFT_PAREN):
+            self._debug_current_state("开始解析列列表")
             columns = []
-            if not self._check(TokenType.IDENTIFIER):
-                raise SyntaxErr("期望列名",
+            if self._check(TokenType.RIGHT_PAREN):
+                raise SyntaxErr("列列表不能为空",
                                 self._current_token().line,
                                 self._current_token().column, "列名")
-            columns.append(self._advance().lexeme)
+
+            columns.append(self._expect(TokenType.IDENTIFIER).lexeme)
 
             while self._match(TokenType.COMMA):
-                if not self._check(TokenType.IDENTIFIER):
-                    raise SyntaxErr("期望列名",
-                                    self._current_token().line,
-                                    self._current_token().column, "列名")
-                columns.append(self._advance().lexeme)
+                columns.append(self._expect(TokenType.IDENTIFIER).lexeme)
 
             self._expect(TokenType.RIGHT_PAREN)
+            self._debug_current_state("列列表解析完成")
 
-        # 关键修复：必须消费AS token
+        # 必须消费AS token
+        self._debug_current_state("准备解析AS")
         self._expect(TokenType.AS)
-        self._expect(TokenType.SELECT)
+        self._debug_current_state("AS已消费")
 
-        # 解析SELECT语句
+        # 检查SELECT
+        self._debug_current_state("准备解析SELECT")
+        if not self._match(TokenType.SELECT):
+            raise SyntaxErr("期望 SELECT 语句",
+                            self._current_token().line,
+                            self._current_token().column, "SELECT")
+
+        self._debug_current_state("SELECT已消费，开始解析SELECT语句")
+
+        # 解析SELECT语句（SELECT token已经被消费）
         select_stmt = self._parse_select()
+        self._debug_current_state("SELECT语句解析完成")
 
         # 可选的 WITH CHECK OPTION
         with_check_option = False
@@ -169,6 +189,7 @@ class SyntaxAnalyzer:
             self._expect(TokenType.OPTION)
             with_check_option = True
 
+        self._debug_current_state("CREATE VIEW解析完成")
         return CreateViewStmt(
             view_name=view_name,
             select_stmt=select_stmt,
@@ -177,6 +198,25 @@ class SyntaxAnalyzer:
             materialized=materialized,
             with_check_option=with_check_option
         )
+
+    def _debug_current_state(self, context: str = ""):
+        """调试当前解析状态"""
+        print(f"[DEBUG] {context}")
+        print(f"  Current position: {self.current}")
+        print(f"  Total tokens: {len(self.tokens)}")
+
+        # 显示当前token周围的上下文
+        start = max(0, self.current - 3)
+        end = min(len(self.tokens), self.current + 4)
+
+        for i in range(start, end):
+            marker = " -> " if i == self.current else "    "
+            if i < len(self.tokens):
+                token = self.tokens[i]
+                print(f"{marker}[{i}] {token.type.name}: '{token.lexeme}' (line {token.line}, col {token.column})")
+            else:
+                print(f"{marker}[{i}] EOF")
+        print()
 
     def _parse_drop_statement(self) -> Statement:
         """解析DROP语句 - 修复版本"""
@@ -602,18 +642,25 @@ class SyntaxAnalyzer:
 
     def _parse_select(self) -> SelectStmt:
         """解析SELECT语句（SELECT token已经被消费）"""
+        self._debug_current_state("开始解析SELECT内容")
+
         # 解析选择列表
         columns = self._parse_select_list()
+        self._debug_current_state("选择列表解析完成")
 
-        # 其余代码保持不变...
         # 解析FROM子句
         self._expect(TokenType.FROM)
+        self._debug_current_state("FROM已消费")
+
         from_clause = self._parse_from_clause()
+        self._debug_current_state("FROM子句解析完成")
 
         # 可选的WHERE子句
         where_clause = None
         if self._match(TokenType.WHERE):
+            self._debug_current_state("开始解析WHERE")
             where_clause = self._parse_expression()
+            self._debug_current_state("WHERE解析完成")
 
         # 可选的GROUP BY子句
         group_by = None
@@ -653,6 +700,7 @@ class SyntaxAnalyzer:
                     direction = "DESC"
                 order_by.append((column, direction))
 
+        self._debug_current_state("SELECT语句完全解析完成")
         return SelectStmt(columns, from_clause, where_clause, group_by, having_clause, order_by)
 
     def _parse_select_list(self) -> List[str]:

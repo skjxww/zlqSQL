@@ -82,6 +82,9 @@ class CatalogManager:
             if not columns:
                 columns = self._infer_view_columns(definition)
 
+            if not definition.endswith(';'):
+                definition += ';'
+
             # 创建视图信息
             view_info = ViewInfo(
                 view_name=view_name,

@@ -346,7 +346,7 @@ class ExecutionEngine:
                 except Exception as e:
                     self.logger.warning(f"Error dropping view '{view_name}' from storage: {e}")
 
-            return f"{dropped_count} view(s) dropped successfully"
+            return f"view '{view_name}' dropped successfully"
         except Exception as e:
             raise SemanticError(f"删除视图错误: {str(e)}")
 
