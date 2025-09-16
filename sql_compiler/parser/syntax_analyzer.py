@@ -126,7 +126,7 @@ class SyntaxAnalyzer:
             return self._parse_create_view(or_replace, materialized)
         elif self._match(TokenType.TABLE):
             return self._parse_create_table()
-        elif self._match(TokenType.INDEX) or self._match(TokenType.UNIQUE):
+        elif self._check(TokenType.INDEX) or self._check(TokenType.UNIQUE):
             return self._parse_create_index()
         else:
             raise SyntaxErr("期望 VIEW, TABLE 或 INDEX",
