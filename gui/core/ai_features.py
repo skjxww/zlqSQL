@@ -31,6 +31,8 @@ class AIFeatureManager:
             self.nl2sql_engine = None
             self.completion_engine = None
 
+    from dotenv import load_dotenv
+    load_dotenv()
+
     def _get_api_key(self) -> Optional[str]:
-        """获取API密钥"""
         return os.getenv('DEEPSEEK_API')
