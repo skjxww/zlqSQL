@@ -124,7 +124,7 @@ class SyntaxAnalyzer:
 
         if self._match(TokenType.VIEW):
             return self._parse_create_view(or_replace, materialized)
-        elif self._check(TokenType.TABLE):
+        elif self._match(TokenType.TABLE):
             return self._parse_create_table()
         elif self._check(TokenType.INDEX) or self._check(TokenType.UNIQUE):
             return self._parse_create_index()
