@@ -273,7 +273,7 @@ class SyntaxAnalyzer:
         """解析SHOW语句 - 修复版本"""
         if self._match(TokenType.VIEWS):
             return self._parse_show_views()
-        elif self._match(TokenType.INDEXES):
+        elif self._check(TokenType.INDEXES):
             return self._parse_show_indexes()
         elif self._match(TokenType.TABLES):
             return self._parse_show_tables()
