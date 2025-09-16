@@ -73,7 +73,7 @@ class DatabaseManager:
 
             # 执行计划
             result = self.execution_engine.execute_plan(plan)
-            return result, plan.to_dict()
+            return result
 
         except Exception as e:
             raise e
@@ -95,3 +95,31 @@ class DatabaseManager:
     def refresh_info(self):
         """刷新数据库信息"""
         return self.get_tables()
+
+    def get_execution_plan(self, sql):
+        try:
+            # 词法分析
+            lexer = self.lexer(sql)
+            tokens = lexer.tokenize()
+
+            # 语法分析
+            parser = SyntaxAnalyzer(tokens)
+            ast = parser.parse()
+
+            # 生成执行计划
+            planner = PlanGenerator(
+                enable_optimization=True,
+                silent_mode=True,
+                catalog_manager=self.catalog_manager
+            )
+            plan = planner.generate(ast)
+
+            # 返回执行计划的字典表示
+            return plan.to_dict()
+
+        except Exception as e:
+            # 返回错误信息
+            return {
+                'error': str(e),
+                'error_type': type(e).__name__
+            }
