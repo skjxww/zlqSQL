@@ -848,74 +848,74 @@ class StorageEngine:
             self.logger.error(f"Error during storage engine shutdown: {e}")
             raise
 
-    # def update_row(self, table_name: str, old_row: Dict, new_data: Dict) -> None:
-    #     """更新表中的一行数据"""
-    #     try:
-    #         # 获取表schema
-    #         schema = self._get_table_schema(table_name)
-    #         if not schema:
-    #             raise StorageException(f"Schema not found for table '{table_name}'")
-    #
-    #         # 获取表的所有页
-    #         page_count = self.table_storage.get_table_page_count(table_name)
-    #
-    #         # 遍历所有页查找要更新的行
-    #         for page_index in range(page_count):
-    #             # 读取页数据
-    #             page_data = self.table_storage.read_table_page(table_name, page_index)
-    #
-    #             # 从页中提取所有记录
-    #             schema_format = self._convert_to_schema_format(schema)
-    #             records = PageSerializer.get_records_from_page(page_data, schema_format)
-    #
-    #             # 查找要更新的记录（基于所有字段的精确匹配）
-    #             for i, record in enumerate(records):
-    #                 # 检查是否是要更新的行（比较所有字段）
-    #                 if self._rows_match(record, old_row):
-    #                     # 创建更新后的行数据
-    #                     updated_row = record.copy()  # 使用当前记录而不是old_row
-    #                     updated_row.update(new_data)
-    #
-    #                     # 序列化更新后的记录
-    #                     binary_updated_row = self.serialize_row(updated_row, schema)
-    #
-    #                     # 更新页中的记录
-    #                     # 首先需要移除旧记录，然后添加新记录
-    #
-    #                     # 移除旧记录
-    #                     page_data_after_remove, success = PageSerializer.remove_data_from_page(page_data, i)
-    #                     if not success:
-    #                         raise StorageException("Failed to remove old record from page")
-    #
-    #                     # 添加新记录
-    #                     updated_page_data, success = PageSerializer.add_record_to_page(page_data_after_remove,
-    #                                                                                    binary_updated_row)
-    #                     if not success:
-    #                         raise StorageException("Failed to add updated record to page")
-    #
-    #                     # 写入更新后的页
-    #                     self.table_storage.write_table_page(table_name, page_index, updated_page_data)
-    #                     self.logger.debug(f"Updated row in table '{table_name}', page {page_index}")
-    #                     return
-    #
-    #         raise StorageException(f"Row not found in table '{table_name}' for update")
-    #
-    #     except Exception as e:
-    #         self.logger.error(f"Error updating row in table '{table_name}': {e}")
-    #         raise
-
     def update_row(self, table_name: str, old_row: Dict, new_data: Dict) -> None:
-        """更新一行数据 - 非事务版本"""
-        # 对于非事务操作，自动开始并提交一个事务
-        txn_id = self.begin_transaction()
+        """更新表中的一行数据"""
         try:
-            success = self.update_row_transactional(table_name, old_row, new_data, txn_id)
-            if not success:
-                raise StorageException("Failed to update row")
-            self.commit_transaction(txn_id)
+            # 获取表schema
+            schema = self._get_table_schema(table_name)
+            if not schema:
+                raise StorageException(f"Schema not found for table '{table_name}'")
+
+            # 获取表的所有页
+            page_count = self.table_storage.get_table_page_count(table_name)
+
+            # 遍历所有页查找要更新的行
+            for page_index in range(page_count):
+                # 读取页数据
+                page_data = self.table_storage.read_table_page(table_name, page_index)
+
+                # 从页中提取所有记录
+                schema_format = self._convert_to_schema_format(schema)
+                records = PageSerializer.get_records_from_page(page_data, schema_format)
+
+                # 查找要更新的记录（基于所有字段的精确匹配）
+                for i, record in enumerate(records):
+                    # 检查是否是要更新的行（比较所有字段）
+                    if self._rows_match(record, old_row):
+                        # 创建更新后的行数据
+                        updated_row = record.copy()  # 使用当前记录而不是old_row
+                        updated_row.update(new_data)
+
+                        # 序列化更新后的记录
+                        binary_updated_row = self.serialize_row(updated_row, schema)
+
+                        # 更新页中的记录
+                        # 首先需要移除旧记录，然后添加新记录
+
+                        # 移除旧记录
+                        page_data_after_remove, success = PageSerializer.remove_data_from_page(page_data, i)
+                        if not success:
+                            raise StorageException("Failed to remove old record from page")
+
+                        # 添加新记录
+                        updated_page_data, success = PageSerializer.add_record_to_page(page_data_after_remove,
+                                                                                       binary_updated_row)
+                        if not success:
+                            raise StorageException("Failed to add updated record to page")
+
+                        # 写入更新后的页
+                        self.table_storage.write_table_page(table_name, page_index, updated_page_data)
+                        self.logger.debug(f"Updated row in table '{table_name}', page {page_index}")
+                        return
+
+            raise StorageException(f"Row not found in table '{table_name}' for update")
+
         except Exception as e:
-            self.rollback_transaction(txn_id)
+            self.logger.error(f"Error updating row in table '{table_name}': {e}")
             raise
+
+    # def update_row(self, table_name: str, old_row: Dict, new_data: Dict) -> None:
+    #     """更新一行数据 - 非事务版本"""
+    #     # 对于非事务操作，自动开始并提交一个事务
+    #     txn_id = self.begin_transaction()
+    #     try:
+    #         success = self.update_row_transactional(table_name, old_row, new_data, txn_id)
+    #         if not success:
+    #             raise StorageException("Failed to update row")
+    #         self.commit_transaction(txn_id)
+    #     except Exception as e:
+    #         self.rollback_transaction(txn_id)
+    #         raise
 
     def _rows_match(self, row1: Dict, row2: Dict) -> bool:
         """比较两行数据是否匹配"""
@@ -934,68 +934,68 @@ class StorageEngine:
         self.logger.debug("Rows match")
         return True
 
-    # def delete_row(self, table_name: str, row: Dict) -> None:
-    #     """删除表中的一行数据"""
-    #     try:
-    #         # 获取表schema
-    #         schema = self._get_table_schema(table_name)
-    #         if not schema:
-    #             raise StorageException(f"Schema not found for table '{table_name}'")
-    #
-    #         # 获取表的所有页
-    #         page_count = self.table_storage.get_table_page_count(table_name)
-    #
-    #         # 遍历所有页查找要删除的行
-    #         for page_index in range(page_count):
-    #             # 读取页数据
-    #             page_data = self.table_storage.read_table_page(table_name, page_index)
-    #
-    #             # 从页中提取所有记录
-    #             schema_format = self._convert_to_schema_format(schema)
-    #             records = PageSerializer.get_records_from_page(page_data, schema_format)
-    #
-    #             # 查找要删除的记录（基于所有字段的精确匹配）
-    #             for i, record in enumerate(records):
-    #                 # 检查是否是要删除的行（比较所有字段）
-    #                 if self._rows_match(record, row):
-    #                     # 从页中移除记录
-    #                     updated_page_data, success = PageSerializer.remove_data_from_page(page_data, i)
-    #
-    #                     if success:
-    #                         # 写入更新后的页
-    #                         self.table_storage.write_table_page(table_name, page_index, updated_page_data)
-    #                         self.logger.debug(f"Deleted row from table '{table_name}', page {page_index}")
-    #
-    #                         # 维护所有索引
-    #                         if table_name in self.table_indexes:
-    #                             for index_name, index in self.table_indexes[table_name].items():
-    #                                 col_name = index_name.split('_')[-1]
-    #                                 key = row.get(col_name)
-    #                                 if key is not None:
-    #                                     index.delete(key)
-    #
-    #                         return
-    #                     else:
-    #                         raise StorageException("Failed to remove record from page")
-    #
-    #         raise StorageException(f"Row not found in table '{table_name}' for deletion")
-    #
-    #     except Exception as e:
-    #         self.logger.error(f"Error deleting row from table '{table_name}': {e}")
-    #         raise
-
     def delete_row(self, table_name: str, row: Dict) -> None:
-        """删除一行数据 - 非事务版本"""
-        # 对于非事务操作，自动开始并提交一个事务
-        txn_id = self.begin_transaction()
+        """删除表中的一行数据"""
         try:
-            success = self.delete_row_transactional(table_name, row, txn_id)
-            if not success:
-                raise StorageException("Failed to delete row")
-            self.commit_transaction(txn_id)
+            # 获取表schema
+            schema = self._get_table_schema(table_name)
+            if not schema:
+                raise StorageException(f"Schema not found for table '{table_name}'")
+
+            # 获取表的所有页
+            page_count = self.table_storage.get_table_page_count(table_name)
+
+            # 遍历所有页查找要删除的行
+            for page_index in range(page_count):
+                # 读取页数据
+                page_data = self.table_storage.read_table_page(table_name, page_index)
+
+                # 从页中提取所有记录
+                schema_format = self._convert_to_schema_format(schema)
+                records = PageSerializer.get_records_from_page(page_data, schema_format)
+
+                # 查找要删除的记录（基于所有字段的精确匹配）
+                for i, record in enumerate(records):
+                    # 检查是否是要删除的行（比较所有字段）
+                    if self._rows_match(record, row):
+                        # 从页中移除记录
+                        updated_page_data, success = PageSerializer.remove_data_from_page(page_data, i)
+
+                        if success:
+                            # 写入更新后的页
+                            self.table_storage.write_table_page(table_name, page_index, updated_page_data)
+                            self.logger.debug(f"Deleted row from table '{table_name}', page {page_index}")
+
+                            # 维护所有索引
+                            if table_name in self.table_indexes:
+                                for index_name, index in self.table_indexes[table_name].items():
+                                    col_name = index_name.split('_')[-1]
+                                    key = row.get(col_name)
+                                    if key is not None:
+                                        index.delete(key)
+
+                            return
+                        else:
+                            raise StorageException("Failed to remove record from page")
+
+            raise StorageException(f"Row not found in table '{table_name}' for deletion")
+
         except Exception as e:
-            self.rollback_transaction(txn_id)
+            self.logger.error(f"Error deleting row from table '{table_name}': {e}")
             raise
+
+    # def delete_row(self, table_name: str, row: Dict) -> None:
+    #     """删除一行数据 - 非事务版本"""
+    #     # 对于非事务操作，自动开始并提交一个事务
+    #     txn_id = self.begin_transaction()
+    #     try:
+    #         success = self.delete_row_transactional(table_name, row, txn_id)
+    #         if not success:
+    #             raise StorageException("Failed to delete row")
+    #         self.commit_transaction(txn_id)
+    #     except Exception as e:
+    #         self.rollback_transaction(txn_id)
+    #         raise
 
     def get_table_tablespace(self, table_name: str) -> str:
         """获取表所在的表空间"""
