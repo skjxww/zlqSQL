@@ -67,23 +67,23 @@ class DatabaseInfoPanel:
         action_frame = ttk.Frame(self.frame)
         action_frame.grid(row=4, column=0, sticky=(tk.W, tk.E), pady=(5, 0))
 
-        # 查看表结构按钮
-        self.view_structure_btn = ttk.Button(
-            action_frame,
-            text="📊 查看表结构",
-            command=self._view_selected_table_structure,
-            state=tk.DISABLED
-        )
-        self.view_structure_btn.pack(side=tk.LEFT, padx=(0, 5))
-
-        # 查看表数据按钮
-        self.view_data_btn = ttk.Button(
-            action_frame,
-            text="🔍 查看数据",
-            command=self._view_selected_table_data,
-            state=tk.DISABLED
-        )
-        self.view_data_btn.pack(side=tk.LEFT)
+        # # 查看表结构按钮
+        # self.view_structure_btn = ttk.Button(
+        #     action_frame,
+        #     text="📊 查看表结构",
+        #     command=self._view_selected_table_structure,
+        #     state=tk.DISABLED
+        # )
+        # self.view_structure_btn.pack(side=tk.LEFT, padx=(0, 5))
+        #
+        # # 查看表数据按钮
+        # self.view_data_btn = ttk.Button(
+        #     action_frame,
+        #     text="🔍 查看数据",
+        #     command=self._view_selected_table_data,
+        #     state=tk.DISABLED
+        # )
+        # self.view_data_btn.pack(side=tk.LEFT)
 
         # 绑定表选择事件
         self.tables_listbox.bind('<<ListboxSelect>>', self._on_table_select)
@@ -144,13 +144,13 @@ class DatabaseInfoPanel:
                     row_count = table_info.get('rows', 0)
 
                 # 显示格式: "表名 (行数: N)"
-                display_text = f"{table_name} (行数: {row_count})"
+                display_text = table_name
                 self.tables_listbox.insert(tk.END, display_text)
                 total_rows += row_count
 
             # 更新统计信息
             self.table_count_label.configure(text=f"表数量: {len(table_names)}")
-            self.total_rows_label.configure(text=f"总行数: {total_rows}")
+            self.total_rows_label.configure(text="")
 
             # 更新状态
             self.status_label.configure(text="状态: 就绪", foreground="green")
@@ -170,12 +170,12 @@ class DatabaseInfoPanel:
     def _on_table_select(self, event):
         """当表被选择时的事件处理"""
         selection = self.tables_listbox.curselection()
-        if selection:
-            self.view_structure_btn.configure(state=tk.NORMAL)
-            self.view_data_btn.configure(state=tk.NORMAL)
-        else:
-            self.view_structure_btn.configure(state=tk.DISABLED)
-            self.view_data_btn.configure(state=tk.DISABLED)
+        # if selection:
+        #     self.view_structure_btn.configure(state=tk.NORMAL)
+        #     self.view_data_btn.configure(state=tk.NORMAL)
+        # else:
+        #     self.view_structure_btn.configure(state=tk.DISABLED)
+        #     self.view_data_btn.configure(state=tk.DISABLED)
 
     def _show_table_details(self, event):
         """显示表详细信息"""
