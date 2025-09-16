@@ -651,6 +651,15 @@ class EnhancedNL2SQL:
     def _load_query_patterns(self) -> Dict:
         """加载查询模式"""
         return {
+        'create_table': {
+            'patterns': [
+                r'创建.*?表',
+                r'生成.*?表',
+                r'建立.*?表',
+                r'create.*?table'
+            ],
+            'template': 'CREATE TABLE {table} ({columns});'
+        },
             'select_all': [
                 r'显示所有',
                 r'查看全部',

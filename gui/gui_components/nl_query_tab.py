@@ -28,24 +28,6 @@ class NLQueryTab:
         nl_entry.pack(fill=tk.X, pady=(0, 10))
         nl_entry.bind('<Return>', lambda e: self._process_nl_query())
 
-        # 示例查询按钮
-        examples_frame = ttk.Frame(input_frame)
-        examples_frame.pack(fill=tk.X, pady=(0, 10))
-
-        ttk.Label(examples_frame, text="示例查询:").pack(side=tk.LEFT)
-
-        examples = [
-            "显示所有员工信息",
-            "查找薪资大于5000的员工",
-            "按部门统计员工数量",
-            "显示平均薪资"
-        ]
-
-        for example in examples:
-            btn = ttk.Button(examples_frame, text=example,
-                             command=lambda ex=example: self._set_example_query(ex))
-            btn.pack(side=tk.LEFT, padx=5)
-
         # 执行和清空按钮
         action_frame = ttk.Frame(input_frame)
         action_frame.pack(fill=tk.X)
@@ -86,10 +68,6 @@ class NLQueryTab:
         self.execute_generated_btn = ttk.Button(nl_action_frame, text="▶️ 执行SQL",
                                                 command=self._execute_generated_sql, state=tk.DISABLED)
         self.execute_generated_btn.pack(side=tk.LEFT)
-
-    def _set_example_query(self, example):
-        """设置示例查询"""
-        self.nl_query_var.set(example)
 
     def _process_nl_query(self):
         """处理自然语言查询"""

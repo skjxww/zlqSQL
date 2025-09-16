@@ -248,7 +248,21 @@ class ResultDisplay:
         # 基本信息
         content += f"分析时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
         content += f"SQL语句: {analysis.get('original_sql', '').strip()}\n"
-        content += f"执行状态: {'成功' if not analysis.get('has_error') else '失败'}\n\n"
+
+        # 检查是否为批量执行
+        if analysis.get('batch_details'):
+            batch_info = analysis['batch_details']
+            content += f"执行类型: 批量执行\n"
+            content += f"执行状态: {batch_info['successful']}/{batch_info['total']} 成功\n\n"
+
+            # 显示失败语句详情
+            if batch_info['failed_statements']:
+                content += "❌ 失败语句详情:\n"
+                for failed_stmt in batch_info['failed_statements']:
+                    content += f"   语句 #{failed_stmt['index']}: {failed_stmt['sql'][:50]}...\n"
+                    content += f"   错误: {failed_stmt['error']}\n\n"
+        else:
+            content += f"执行状态: {'成功' if not analysis.get('has_error') else '失败'}\n\n"
 
         # 错误分析
         if analysis.get('has_error') and analysis.get('error_message'):
@@ -257,7 +271,7 @@ class ResultDisplay:
 
         # 错误建议
         if analysis.get('suggestions'):
-            content += "💡 错误分析和建议:\n"
+            content += "💡 分析建议:\n"
             for i, suggestion in enumerate(analysis['suggestions'], 1):
                 confidence_bar = "█" * int(suggestion['confidence'] * 10)
                 content += f"{i}. {suggestion['description']}\n"
@@ -277,8 +291,8 @@ class ResultDisplay:
             for i, tip in enumerate(analysis['improvement_tips'], 1):
                 content += f"{i}. {tip['suggestion']}\n"
 
-        if not any(
-                [analysis.get('suggestions'), analysis.get('corrected_sql_options'), analysis.get('improvement_tips')]):
+        if not any([analysis.get('suggestions'), analysis.get('corrected_sql_options'),
+                    analysis.get('improvement_tips'), analysis.get('batch_details', {}).get('failed_statements')]):
             content += "✅ 未发现明显问题，SQL看起来不错！"
 
         self.analysis_text.insert(1.0, content)

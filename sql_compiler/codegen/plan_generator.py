@@ -374,7 +374,6 @@ class PlanGenerator:
         if stmt.where_clause:
             scan_plan = FilterOp(stmt.where_clause, [scan_plan])
 
-        scan_plan = SeqScanOp(stmt.table_name)
         # 创建更新操作符
         update_op = UpdateOp(
             stmt.table_name,
