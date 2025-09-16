@@ -16,38 +16,191 @@ class SmartSQLCompletion:
 
     def get_completions(self, sql: str, cursor_pos: int) -> List[Dict]:
         """获取智能补全建议"""
-        print(f"获取补全建议: SQL长度={len(sql)}, 光标位置={cursor_pos}")  # 调试输出
+        print(f"=== SmartSQLCompletion.get_completions ===")
+        print(f"输入SQL: '{sql.strip()}'")
+        print(f"光标位置: {cursor_pos}")
 
-        try:
-            # 分析上下文
-            context = self._analyze_context(sql, cursor_pos)
-            suggestions = []
+        # 获取当前输入的部分词
+        partial_word = self._get_current_word(sql, cursor_pos)
+        sql_upper = sql.upper().strip()
 
-            # 根据上下文类型生成建议
-            if context['type'] == 'after_select':
-                suggestions.extend(self._get_column_completions(context))
-                suggestions.extend(self._get_function_completions())
+        print(f"部分词: '{partial_word}'")
 
-            elif context['type'] == 'after_from':
-                suggestions.extend(self._get_table_completions())
-                suggestions.extend(self._get_view_completions())
+        suggestions = []
 
-            elif context['type'] == 'after_where':
-                suggestions.extend(self._get_column_completions(context))
-                suggestions.extend(self._get_operator_completions())
+        # 根据上下文和部分词生成建议
+        if not sql_upper or not partial_word:
+            # 空内容，返回基础关键字
+            suggestions = self._get_basic_keywords()
+        elif self._matches_keywords(partial_word):
+            # 匹配关键字
+            suggestions = self._get_matching_keywords(partial_word)
+            if 'SELECT' in sql_upper and 'FROM' not in sql_upper:
+                suggestions.extend(self._get_simple_column_suggestions(partial_word))  # 修改这里
+            elif 'FROM' in sql_upper:
+                suggestions.extend(self._get_table_suggestions(partial_word))
+        else:
+            # 上下文相关建议
+            if 'SELECT' in sql_upper and 'FROM' not in sql_upper:
+                suggestions = self._get_simple_column_suggestions(partial_word)  # 修改这里
+            elif 'FROM' in sql_upper:
+                suggestions = self._get_table_suggestions(partial_word)
+            else:
+                suggestions = self._get_matching_keywords(partial_word)
 
-            elif context['type'] == 'after_join':
-                suggestions.extend(self._get_table_completions())
-                suggestions.extend(self._get_join_conditions(context))
+        # 过滤和排序
+        filtered_suggestions = self._filter_and_rank(suggestions, partial_word)
 
-            elif context['type'] == 'keyword_context':
-                suggestions.extend(self._get_keyword_completions(context))
+        print(f"返回建议数量: {len(filtered_suggestions)}")
+        return filtered_suggestions
 
-            # 智能排序和过滤
-            return self._rank_suggestions(suggestions, context)
+    def _get_simple_column_suggestions(self, partial_word: str) -> List[Dict]:
+        """获取简单的列建议（不需要context）"""
+        columns = [
+            {'text': '*', 'type': 'column', 'description': '所有列'},
+            {'text': 'COUNT(*)', 'type': 'function', 'description': '统计行数'},
+            {'text': 'SUM()', 'type': 'function', 'description': '求和函数'},
+            {'text': 'AVG()', 'type': 'function', 'description': '平均值函数'},
+            {'text': 'MAX()', 'type': 'function', 'description': '最大值函数'},
+            {'text': 'MIN()', 'type': 'function', 'description': '最小值函数'},
+            {'text': 'id', 'type': 'column', 'description': 'ID列'},
+            {'text': 'name', 'type': 'column', 'description': '名称列'},
+            {'text': 'email', 'type': 'column', 'description': '邮箱列'},
+            {'text': 'created_at', 'type': 'column', 'description': '创建时间'},
+            {'text': 'updated_at', 'type': 'column', 'description': '更新时间'},
+            {'text': 'status', 'type': 'column', 'description': '状态列'},
+            {'text': 'price', 'type': 'column', 'description': '价格列'},
+            {'text': 'quantity', 'type': 'column', 'description': '数量列'},
+        ]
 
-        except Exception as e:
-            return [{'text': 'SELECT', 'type': 'keyword', 'description': 'Basic SELECT statement'}]
+        if not partial_word:
+            return columns
+        return [col for col in columns if col['text'].upper().startswith(partial_word)]
+
+    def _get_column_suggestions(self, partial_word: str) -> List[Dict]:
+        """获取列建议"""
+        columns = [
+            {'text': '*', 'type': 'column', 'description': '所有列'},
+            {'text': 'COUNT(*)', 'type': 'function', 'description': '统计行数'},
+            {'text': 'id', 'type': 'column', 'description': 'ID列'},
+            {'text': 'name', 'type': 'column', 'description': '名称列'},
+            {'text': 'email', 'type': 'column', 'description': '邮箱列'},
+            {'text': 'created_at', 'type': 'column', 'description': '创建时间'},
+            {'text': 'updated_at', 'type': 'column', 'description': '更新时间'},
+            {'text': 'status', 'type': 'column', 'description': '状态列'},
+            {'text': 'price', 'type': 'column', 'description': '价格列'},
+            {'text': 'quantity', 'type': 'column', 'description': '数量列'},
+        ]
+
+        if not partial_word:
+            return columns
+        return [col for col in columns if col['text'].upper().startswith(partial_word)]
+
+    def _get_current_word(self, sql: str, cursor_pos: int) -> str:
+        """获取光标处的当前单词"""
+        if cursor_pos <= 0:
+            return ""
+
+        # 向前查找单词的开始
+        start = cursor_pos - 1
+        while start >= 0 and (sql[start].isalnum() or sql[start] in '_'):
+            start -= 1
+        start += 1
+
+        return sql[start:cursor_pos].upper()
+
+    def _get_basic_keywords(self) -> List[Dict]:
+        """获取基础关键字"""
+        return [
+            {'text': 'SELECT', 'type': 'keyword', 'description': '选择数据'},
+            {'text': 'INSERT', 'type': 'keyword', 'description': '插入数据'},
+            {'text': 'UPDATE', 'type': 'keyword', 'description': '更新数据'},
+            {'text': 'DELETE', 'type': 'keyword', 'description': '删除数据'},
+            {'text': 'CREATE', 'type': 'keyword', 'description': '创建表'},
+            {'text': 'DROP', 'type': 'keyword', 'description': '删除表'},
+        ]
+
+    def _matches_keywords(self, partial_word: str) -> bool:
+        """检查部分词是否匹配关键字"""
+        # 扩展关键字列表
+        keywords = [
+            'SELECT', 'SET', 'SHOW', 'INSERT', 'INTO', 'UPDATE', 'DELETE', 'DROP',
+            'CREATE', 'ALTER', 'FROM', 'WHERE', 'ORDER', 'GROUP', 'HAVING', 'LIMIT',
+            'JOIN', 'LEFT', 'RIGHT', 'INNER', 'UNION', 'DISTINCT', 'COUNT', 'SUM',
+            'AVG', 'MAX', 'MIN', 'AND', 'OR', 'NOT', 'IN', 'LIKE', 'BETWEEN'
+        ]
+        return any(keyword.startswith(partial_word) or partial_word in keyword for keyword in keywords)
+
+    def _get_matching_keywords(self, partial_word: str) -> List[Dict]:
+        """获取匹配的关键字"""
+        all_keywords = [
+            {'text': 'SELECT', 'type': 'keyword', 'description': '查询数据'},
+            {'text': 'SET', 'type': 'keyword', 'description': '设置值'},
+            {'text': 'SHOW', 'type': 'keyword', 'description': '显示信息'},
+            {'text': 'INSERT', 'type': 'keyword', 'description': '插入数据'},
+            {'text': 'INTO', 'type': 'keyword', 'description': '插入到表'},
+            {'text': 'UPDATE', 'type': 'keyword', 'description': '更新数据'},
+            {'text': 'DELETE', 'type': 'keyword', 'description': '删除数据'},
+            {'text': 'DROP', 'type': 'keyword', 'description': '删除表/数据库'},
+            {'text': 'CREATE', 'type': 'keyword', 'description': '创建表/数据库'},
+            {'text': 'ALTER', 'type': 'keyword', 'description': '修改表结构'},
+            {'text': 'FROM', 'type': 'keyword', 'description': '指定数据源'},
+            {'text': 'WHERE', 'type': 'keyword', 'description': '过滤条件'},
+            {'text': 'ORDER BY', 'type': 'keyword', 'description': '排序'},
+            {'text': 'GROUP BY', 'type': 'keyword', 'description': '分组'},
+            {'text': 'HAVING', 'type': 'keyword', 'description': '分组过滤条件'},
+            {'text': 'LIMIT', 'type': 'keyword', 'description': '限制结果数量'},
+            {'text': 'JOIN', 'type': 'keyword', 'description': '连接表'},
+            {'text': 'LEFT JOIN', 'type': 'keyword', 'description': '左连接'},
+            {'text': 'RIGHT JOIN', 'type': 'keyword', 'description': '右连接'},
+            {'text': 'INNER JOIN', 'type': 'keyword', 'description': '内连接'},
+            {'text': 'UNION', 'type': 'keyword', 'description': '合并结果'},
+            {'text': 'DISTINCT', 'type': 'keyword', 'description': '去重'},
+            {'text': 'COUNT', 'type': 'function', 'description': '计数函数'},
+            {'text': 'SUM', 'type': 'function', 'description': '求和函数'},
+            {'text': 'AVG', 'type': 'function', 'description': '平均值函数'},
+            {'text': 'MAX', 'type': 'function', 'description': '最大值函数'},
+            {'text': 'MIN', 'type': 'function', 'description': '最小值函数'},
+        ]
+
+        # 匹配以partial_word开头的关键字
+        matches = [kw for kw in all_keywords if kw['text'].startswith(partial_word)]
+
+        # 如果没有前缀匹配，尝试包含匹配
+        if not matches:
+            matches = [kw for kw in all_keywords if partial_word in kw['text']]
+
+        return matches
+
+    def _get_table_suggestions(self, partial_word: str) -> List[Dict]:
+        """获取表建议"""
+        tables = [
+            {'text': 'users', 'type': 'table', 'description': '用户表'},
+            {'text': 'orders', 'type': 'table', 'description': '订单表'},
+            {'text': 'products', 'type': 'table', 'description': '产品表'},
+            {'text': 'customers', 'type': 'table', 'description': '客户表'},
+        ]
+
+        if not partial_word:
+            return tables
+        return [table for table in tables if table['text'].upper().startswith(partial_word)]
+
+    def _filter_and_rank(self, suggestions: List[Dict], partial_word: str) -> List[Dict]:
+        """过滤和排序建议"""
+        if not suggestions:
+            return []
+
+        # 按匹配度排序
+        def score_suggestion(suggestion):
+            text = suggestion['text'].upper()
+            if text.startswith(partial_word):
+                return 100 - len(text)  # 前缀匹配，越短越好
+            elif partial_word in text:
+                return 50 - len(text)  # 包含匹配
+            return 0
+
+        suggestions.sort(key=score_suggestion, reverse=True)
+        return suggestions[:8]  # 限制数量
 
     def _analyze_context(self, sql: str, cursor_pos: int) -> Dict:
         """智能分析SQL上下文"""
@@ -445,21 +598,6 @@ class SmartSQLCompletion:
             pass
         return suggestions
 
-    def _rank_suggestions(self, suggestions: List[Dict], context: Dict) -> List[Dict]:
-        """对建议进行排序"""
-        partial = context.get('partial_word', '').lower()
-
-        def score_suggestion(suggestion):
-            text = suggestion['text'].lower()
-            if text.startswith(partial):
-                return 100 - len(text)  # 优先短的匹配
-            elif partial in text:
-                return 50 - len(text)
-            return 0
-
-        suggestions.sort(key=score_suggestion, reverse=True)
-        return suggestions[:10]  # 限制数量
-
     def _determine_context_type(self, tokens: List, cursor_pos: int) -> str:
         """基于token序列确定上下文类型"""
         if not tokens:
@@ -538,88 +676,6 @@ class SmartSQLCompletion:
 
         return suggestions
 
-    def _suggest_join_conditions(self, table1: Dict, table2: Dict) -> List[Dict]:
-        """基于列名相似性建议JOIN条件"""
-        suggestions = []
-
-        if not (self.catalog.table_exists(table1['name']) and
-                self.catalog.table_exists(table2['name'])):
-            return suggestions
-
-        cols1 = self.catalog.get_table_columns(table1['name'])
-        cols2 = self.catalog.get_table_columns(table2['name'])
-
-        # 查找可能的连接列
-        for col1 in cols1:
-            for col2 in cols2:
-                if self._is_likely_join_column(col1, col2, table1['name'], table2['name']):
-                    t1_ref = table1.get('alias', table1['name'])
-                    t2_ref = table2.get('alias', table2['name'])
-
-                    suggestions.append({
-                        'text': f"ON {t1_ref}.{col1} = {t2_ref}.{col2}",
-                        'type': 'join_condition',
-                        'description': f'Suggested join condition',
-                        'confidence': self._calculate_join_confidence(col1, col2, table1['name'], table2['name'])
-                    })
-
-        return suggestions
-
-    def _is_likely_join_column(self, col1: str, col2: str, table1: str, table2: str) -> bool:
-        """判断两列是否可能用于JOIN"""
-        # 完全匹配
-        if col1 == col2:
-            return True
-
-        # ID列匹配模式
-        if (col1.endswith('_id') and col2 == col1[:-3]) or \
-                (col2.endswith('_id') and col1 == col2[:-3]):
-            return True
-
-        # 表名匹配模式
-        if (col1 == f"{table2.lower()}_id" and col2 == "id") or \
-                (col2 == f"{table1.lower()}_id" and col1 == "id"):
-            return True
-
-        return False
-
-    def _calculate_join_confidence(self, col1: str, col2: str, table1: str, table2: str) -> float:
-        """计算JOIN条件的置信度"""
-        if col1 == col2:
-            return 0.9
-        if col1.endswith('_id') or col2.endswith('_id'):
-            return 0.8
-        return 0.6
-
-    def _load_sql_keywords(self) -> List[str]:
-        """加载SQL关键字"""
-        return [
-            'SELECT', 'FROM', 'WHERE', 'GROUP BY', 'HAVING', 'ORDER BY',
-            'INSERT', 'INTO', 'VALUES', 'UPDATE', 'SET', 'DELETE',
-            'CREATE', 'TABLE', 'VIEW', 'INDEX', 'DROP', 'ALTER',
-            'JOIN', 'LEFT JOIN', 'RIGHT JOIN', 'INNER JOIN', 'OUTER JOIN',
-            'UNION', 'UNION ALL', 'DISTINCT', 'AS', 'AND', 'OR', 'NOT',
-            'IN', 'BETWEEN', 'LIKE', 'IS NULL', 'IS NOT NULL',
-            'LIMIT', 'OFFSET', 'CASE', 'WHEN', 'THEN', 'ELSE', 'END'
-        ]
-
-    def _load_sql_functions(self) -> List[Dict]:
-        """加载SQL函数"""
-        return [
-            {'name': 'COUNT(*)', 'type': 'aggregate', 'desc': '统计行数'},
-            {'name': 'COUNT(column)', 'type': 'aggregate', 'desc': '统计非空值数量'},
-            {'name': 'SUM(column)', 'type': 'aggregate', 'desc': '求和'},
-            {'name': 'AVG(column)', 'type': 'aggregate', 'desc': '平均值'},
-            {'name': 'MAX(column)', 'type': 'aggregate', 'desc': '最大值'},
-            {'name': 'MIN(column)', 'type': 'aggregate', 'desc': '最小值'},
-            {'name': 'UPPER(column)', 'type': 'string', 'desc': '转大写'},
-            {'name': 'LOWER(column)', 'type': 'string', 'desc': '转小写'},
-            {'name': 'LENGTH(column)', 'type': 'string', 'desc': '字符串长度'},
-            {'name': 'NOW()', 'type': 'datetime', 'desc': '当前时间'},
-            {'name': 'DATE(column)', 'type': 'datetime', 'desc': '提取日期部分'},
-        ]
-
-
 
 
 # 集成到GUI
@@ -629,13 +685,20 @@ class CompletionUI:
         self.completion_engine = completion_engine
         self.completion_window = None
         self.suggestions = []
+        self.current_suggestions = []
+        self.listbox = None
 
-        print(f"ScrolledText组件: {self.text_widget}")
-
-        # 主要使用KeyPress事件，因为KeyRelease可能不稳定
+        # 绑定事件
         self.text_widget.bind('<KeyPress>', self._on_key_press)
         self.text_widget.bind('<KeyRelease>', self._on_key_release)
         self.text_widget.bind('<Control-space>', self._trigger_completion)
+
+        # 绑定特殊按键处理
+        self.text_widget.bind('<Escape>', self._on_escape)
+        self.text_widget.bind('<Up>', self._on_arrow_key)
+        self.text_widget.bind('<Down>', self._on_arrow_key)
+        self.text_widget.bind('<Return>', self._on_return_key)
+        self.text_widget.bind('<Tab>', self._on_tab_key)
 
         self.text_widget.focus_set()
         print("事件绑定完成")
@@ -644,11 +707,61 @@ class CompletionUI:
         """按键按下事件"""
         print(f"KEY PRESS: {event.keysym} ('{event.char}')")
 
-        # 在KeyPress事件中延迟触发补全
+        # 如果补全窗口打开，处理特殊按键
+        if self.completion_window:
+            if event.keysym == 'Escape':
+                self._hide_completion()
+                return 'break'
+            elif event.keysym == 'Return' or event.keysym == 'Tab':
+                self._apply_current_selection()
+                return 'break'
+            elif event.keysym == 'Up':
+                self._move_selection(-1)
+                return 'break'
+            elif event.keysym == 'Down':
+                self._move_selection(1)
+                return 'break'
+            elif event.keysym in ['space', 'BackSpace']:
+                # 空格或退格时隐藏补全，允许正常输入
+                self._hide_completion()
+                return None  # 让事件继续传播，允许正常输入
+            elif event.char and (event.char.isalnum() or event.char in '._'):
+                # 继续输入字符时，隐藏当前窗口，准备显示新的
+                self._hide_completion()
+                self.text_widget.after(100, self._auto_complete)
+                return None  # 让事件继续传播，允许字符输入
+            else:
+                # 其他按键隐藏补全
+                self._hide_completion()
+                return None
+
+        # 如果没有补全窗口，正常处理输入
         if event.char and (event.char.isalnum() or event.char in '._'):
-            print(f"检测到输入字符: '{event.char}'")
-            # 使用after延迟触发，让字符先被插入到文本框中
             self.text_widget.after(100, self._auto_complete)
+
+    def _move_selection(self, direction):
+        """移动选择（改进版本）"""
+        if not self.listbox:
+            return
+
+        current = self.listbox.curselection()
+        if current:
+            index = current[0]
+            new_index = index + direction
+
+            # 边界检查
+            if new_index < 0:
+                new_index = 0
+            elif new_index >= self.listbox.size():
+                new_index = self.listbox.size() - 1
+
+            self.listbox.selection_clear(0, tk.END)
+            self.listbox.selection_set(new_index)
+            self.listbox.activate(new_index)
+            self.listbox.see(new_index)
+
+        # 确保文本框保持焦点
+        self.text_widget.focus_set()
 
     def _on_key_release(self, event):
         """按键释放事件"""
@@ -715,19 +828,261 @@ class CompletionUI:
 
     def _create_completion_window(self, suggestions):
         """创建补全窗口"""
-        print(f"=== 创建补全窗口，建议数量: {len(suggestions)} ===")
+        print(f"=== 创建UI补全窗口，建议数量: {len(suggestions)} ===")
 
-        # 先用控制台输出测试
-        print("可用的补全建议:")
-        for i, suggestion in enumerate(suggestions):
-            print(f"  {i + 1}. {suggestion['text']} - {suggestion.get('description', '')}")
+        # 隐藏之前的窗口
+        if self.completion_window:
+            self.completion_window.destroy()
+            self.completion_window = None
 
-        # TODO: 创建实际的UI弹窗
-        # 现在先确认功能能工作，再实现UI
-        print("✅ 补全功能工作正常!")
+        if not suggestions:
+            return
+
+        try:
+            # 获取光标位置
+            cursor_pos = self.text_widget.index(tk.INSERT)
+            bbox = self.text_widget.bbox(cursor_pos)
+
+            if bbox:
+                x = bbox[0] + self.text_widget.winfo_rootx()
+                y = bbox[1] + bbox[3] + self.text_widget.winfo_rooty()
+            else:
+                # 如果无法获取位置，使用默认位置
+                x = self.text_widget.winfo_rootx() + 50
+                y = self.text_widget.winfo_rooty() + 50
+
+            # 创建弹出窗口
+            self.completion_window = tk.Toplevel(self.text_widget)
+            self.completion_window.wm_overrideredirect(True)  # 去掉窗口边框
+            self.completion_window.configure(bg='white', relief='solid', bd=1)
+
+            # 重要：设置窗口属性，让它不抢夺焦点
+            self.completion_window.wm_attributes('-topmost', True)
+
+            # 设置窗口位置
+            self.completion_window.geometry(f"+{x}+{y}")
+
+            # 创建列表框
+            self.listbox = tk.Listbox(
+                self.completion_window,
+                height=min(8, len(suggestions)),
+                width=max(30, max(len(s['text'] + ' - ' + s.get('description', '')) for s in suggestions)),
+                font=("Consolas", 9),
+                activestyle='dotbox',
+                selectmode='single'
+            )
+            self.listbox.pack(padx=2, pady=2)
+
+            # 填充建议
+            self.current_suggestions = suggestions
+            for suggestion in suggestions:
+                display_text = f"{suggestion['text']} - {suggestion.get('description', '')}"
+                self.listbox.insert(tk.END, display_text)
+
+            # 选中第一项，但不给焦点
+            if suggestions:
+                self.listbox.selection_set(0)
+                self.listbox.activate(0)
+
+            # 绑定鼠标事件
+            self.listbox.bind('<Double-Button-1>', self._on_suggestion_select)
+            self.listbox.bind('<Button-1>', self._on_listbox_click)
+
+            # 不要给列表框焦点！让文本框保持焦点
+            # self.listbox.focus_set()  # 删除这行！
+
+            # 确保文本框保持焦点
+            self.text_widget.focus_set()
+
+            # 移除FocusOut绑定，因为会干扰正常输入
+            # self.completion_window.bind('<FocusOut>', lambda e: self._hide_completion())
+
+            print(f"✅ UI补全窗口已显示在位置 ({x}, {y})")
+
+        except Exception as e:
+            print(f"创建补全窗口出错: {e}")
+            import traceback
+            traceback.print_exc()
+
+    def _on_listbox_click(self, event):
+        """处理列表框点击事件"""
+        # 点击列表框时选择对应项目
+        index = self.listbox.nearest(event.y)
+        self.listbox.selection_clear(0, tk.END)
+        self.listbox.selection_set(index)
+        self.listbox.activate(index)
+
+        # 但立即将焦点还给文本框
+        self.text_widget.focus_set()
+
+    def _on_suggestion_select(self, event):
+        """处理建议选择"""
+        if not self.completion_window or not self.current_suggestions:
+            return
+
+        try:
+            selection = self.listbox.curselection()
+            if selection:
+                index = selection[0]
+                suggestion = self.current_suggestions[index]
+
+                print(f"用户选择了: {suggestion['text']}")
+
+                # 获取当前单词的位置
+                cursor_pos = self.text_widget.index(tk.INSERT)
+                current_line = self.text_widget.get(f"{cursor_pos.split('.')[0]}.0", cursor_pos)
+
+                # 找到当前单词的开始位置
+                words = current_line.split()
+                if words:
+                    last_word_start = current_line.rfind(words[-1])
+                    start_pos = f"{cursor_pos.split('.')[0]}.{last_word_start}"
+
+                    # 删除当前部分单词，插入完整建议
+                    self.text_widget.delete(start_pos, cursor_pos)
+                    self.text_widget.insert(start_pos, suggestion['text'])
+
+                    # 如果是关键字，添加空格
+                    if suggestion['type'] == 'keyword':
+                        self.text_widget.insert(tk.INSERT, ' ')
+
+                self._hide_completion()
+
+        except Exception as e:
+            print(f"选择建议出错: {e}")
+            self._hide_completion()
+
+    def _on_list_up(self, event):
+        """列表向上导航"""
+        current = self.listbox.curselection()
+        if current:
+            index = current[0]
+            if index > 0:
+                self.listbox.selection_clear(index)
+                self.listbox.selection_set(index - 1)
+                self.listbox.activate(index - 1)
+        return 'break'
+
+    def _on_list_down(self, event):
+        """列表向下导航"""
+        current = self.listbox.curselection()
+        if current:
+            index = current[0]
+            if index < self.listbox.size() - 1:
+                self.listbox.selection_clear(index)
+                self.listbox.selection_set(index + 1)
+                self.listbox.activate(index + 1)
+        return 'break'
+
+
+    def _handle_completion_navigation(self, event):
+        """处理补全窗口的键盘导航"""
+        if not self.completion_window or not self.listbox:
+            return None
+
+        if event.keysym == 'Escape':
+            self._hide_completion()
+            return 'break'
+
+        elif event.keysym == 'Return' or event.keysym == 'Tab':
+            self._apply_current_selection()
+            return 'break'
+
+        elif event.keysym == 'Up':
+            self._move_selection(-1)
+            return 'break'
+
+        elif event.keysym == 'Down':
+            self._move_selection(1)
+            return 'break'
+
+        return None
+
+    def _apply_current_selection(self):
+        """应用当前选择的建议"""
+        if not self.listbox or not self.current_suggestions:
+            return
+
+        selection = self.listbox.curselection()
+        if selection:
+            index = selection[0]
+            suggestion = self.current_suggestions[index]
+            self._insert_suggestion(suggestion)
+
+    def _insert_suggestion(self, suggestion):
+        """插入选择的建议"""
+        try:
+            cursor_pos = self.text_widget.index(tk.INSERT)
+
+            # 获取当前行内容
+            line_start = f"{cursor_pos.split('.')[0]}.0"
+            line_content = self.text_widget.get(line_start, cursor_pos)
+
+            # 找到当前单词的开始位置
+            import re
+            words = re.findall(r'\b\w+', line_content)
+            if words:
+                last_word = words[-1]
+                word_start_pos = line_content.rfind(last_word)
+                delete_start = f"{cursor_pos.split('.')[0]}.{word_start_pos}"
+
+                # 删除部分输入，插入完整建议
+                self.text_widget.delete(delete_start, cursor_pos)
+                self.text_widget.insert(delete_start, suggestion['text'])
+
+                # 对于关键字，添加空格
+                if suggestion['type'] == 'keyword':
+                    self.text_widget.insert(tk.INSERT, ' ')
+
+            self._hide_completion()
+
+            # 重新获得焦点
+            self.text_widget.focus_set()
+
+        except Exception as e:
+            print(f"插入建议失败: {e}")
+            self._hide_completion()
+
+    def _on_escape(self, event):
+        """Escape键处理"""
+        if self.completion_window:
+            self._hide_completion()
+            return 'break'
+        return None
+
+    def _on_return_key(self, event):
+        """回车键处理"""
+        if self.completion_window:
+            self._apply_current_selection()
+            return 'break'
+        return None
+
+    def _on_tab_key(self, event):
+        """Tab键处理"""
+        if self.completion_window:
+            self._apply_current_selection()
+            return 'break'
+        return None
+
+    def _on_arrow_key(self, event):
+        """方向键处理"""
+        if self.completion_window:
+            if event.keysym == 'Up':
+                self._move_selection(-1)
+                return 'break'
+            elif event.keysym == 'Down':
+                self._move_selection(1)
+                return 'break'
+        return None
 
     def _hide_completion(self):
         """隐藏补全窗口"""
         if self.completion_window:
+            print("隐藏补全窗口")
             self.completion_window.destroy()
             self.completion_window = None
+            self.current_suggestions = []
+            self.listbox = None
+
+            # 确保文本框重新获得焦点
+            self.text_widget.focus_set()
