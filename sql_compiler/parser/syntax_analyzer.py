@@ -273,14 +273,15 @@ class SyntaxAnalyzer:
         """解析SHOW语句 - 修复版本"""
         if self._match(TokenType.VIEWS):
             return self._parse_show_views()
-        elif self._check(TokenType.INDEXES):
+        elif self._check(TokenType.INDEXES) or self._check(TokenType.INDEX):
+            # 支持 SHOW INDEXES 和 SHOW INDEX 两种形式
             return self._parse_show_indexes()
         elif self._match(TokenType.TABLES):
             return self._parse_show_tables()
         else:
             # 如果没有匹配到具体的对象类型，给出更好的错误提示
             current = self._current_token()
-            raise SyntaxErr(f"期望 VIEWS, INDEXES 或 TABLES，但遇到 '{current.lexeme}'",
+            raise SyntaxErr(f"期望 VIEWS, INDEXES/INDEX 或 TABLES，但遇到 '{current.lexeme}'",
                             current.line, current.column, "SHOW对象类型")
 
     def _parse_show_views(self) -> ShowViewsStmt:
@@ -526,7 +527,12 @@ class SyntaxAnalyzer:
 
     def _parse_show_indexes(self) -> ShowIndexesStmt:
         """解析SHOW INDEXES语句"""
-        self._expect(TokenType.INDEXES)
+        # 接受 INDEX 或 INDEXES
+        if self._match(TokenType.INDEX):
+            pass  # 已经消费了 INDEX token
+        elif self._match(TokenType.INDEXES):
+            pass  # 已经消费了 INDEXES token
+
         table_name = None
         if self._match(TokenType.FROM):
             table_name = self._expect(TokenType.IDENTIFIER).lexeme
