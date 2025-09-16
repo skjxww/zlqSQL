@@ -91,36 +91,80 @@ class DatabaseInfoPanel:
     def refresh_info(self):
         """刷新数据库信息"""
         try:
-            # 获取表信息字典
-            tables_dict = {}
-            try:
-                if hasattr(self.db_manager, 'get_all_tables'):
-                    tables_dict = self.db_manager.get_all_tables()
-            except Exception as e:
-                self._log(f"获取表信息时出错: {str(e)}")
-                raise e
+            print("DatabaseInfoPanel.refresh_info() 开始执行...")
 
-            # 清空表列表
+            # 清空现有数据
             self.tables_listbox.delete(0, tk.END)
+            self.tables_dict = {}
 
-            if tables_dict and isinstance(tables_dict, dict):
-                # 获取表名列表
-                table_names = list(tables_dict.keys())
+            # 检查 db_manager 是否存在
+            if not hasattr(self, 'db_manager') or self.db_manager is None:
+                self._log("错误: db_manager 不存在")
+                self.status_label.configure(text="状态: db_manager 不存在", foreground="red")
+                return
 
-                # 添加到列表框中
-                for table_name in table_names:
-                    self.tables_listbox.insert(tk.END, table_name)
+            # 检查 get_all_tables 方法是否存在
+            if not hasattr(self.db_manager, 'get_all_tables'):
+                self._log("错误: db_manager 没有 get_all_tables 方法")
+                self.status_label.configure(text="状态: 方法不存在", foreground="red")
+                return
 
-                self._log(f"成功获取 {len(table_names)} 张表")
+            # 获取表信息字典
+            print("正在调用 db_manager.get_all_tables()...")
+            tables_dict = self.db_manager.get_all_tables()
+            print(f"获取到的表字典类型: {type(tables_dict)}")
+            print(f"获取到的表字典内容: {tables_dict}")
 
-            else:
-                self._log("未找到表信息")
+            if not tables_dict:
+                self._log("警告: 获取到空的表字典")
+                self.status_label.configure(text="状态: 无表数据", foreground="orange")
+                # 更新统计信息
+                self.table_count_label.configure(text="表数量: 0")
+                self.total_rows_label.configure(text="总行数: 0")
+                return
 
+            if not isinstance(tables_dict, dict):
+                self._log(f"错误: 期望字典类型，但得到了 {type(tables_dict)}")
+                self.status_label.configure(text="状态: 数据格式错误", foreground="red")
+                return
+
+            # 保存表字典
+            self.tables_dict = tables_dict
+
+            # 添加到列表框中
+            table_names = list(tables_dict.keys())
+            total_rows = 0
+
+            for table_name in table_names:
+                table_info = tables_dict[table_name]
+
+                # 获取行数
+                row_count = 0
+                if isinstance(table_info, dict):
+                    row_count = table_info.get('rows', 0)
+
+                # 显示格式: "表名 (行数: N)"
+                display_text = f"{table_name} (行数: {row_count})"
+                self.tables_listbox.insert(tk.END, display_text)
+                total_rows += row_count
+
+            # 更新统计信息
+            self.table_count_label.configure(text=f"表数量: {len(table_names)}")
+            self.total_rows_label.configure(text=f"总行数: {total_rows}")
+
+            # 更新状态
             self.status_label.configure(text="状态: 就绪", foreground="green")
-            self._log("数据库信息已刷新")
+            self._log(f"成功获取 {len(table_names)} 张表")
 
         except Exception as e:
-            self._log(f"刷新信息失败: {str(e)}")
+            error_msg = f"刷新信息失败: {str(e)}"
+            self._log(error_msg)
+            print(f"DatabaseInfoPanel.refresh_info() 异常: {e}")
+            import traceback
+            traceback.print_exc()
+
+            # 显示错误状态
+            self.status_label.configure(text="状态: 刷新失败", foreground="red")
             messagebox.showerror("错误", f"刷新数据库信息失败: {str(e)}")
 
     def _on_table_select(self, event):

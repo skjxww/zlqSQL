@@ -339,7 +339,11 @@ class StorageEngine:
             # 遍历所有页查找要更新的行
             for page_index in range(page_count):
                 # 准备读操作（获取锁）
-                page_id = self.table_storage.get_table_page_id(table_name, page_index)
+                # 使用已有的方法获取页面ID列表，然后通过索引获取
+                page_ids = self.table_storage.get_table_pages(table_name)
+                if page_index >= len(page_ids):
+                    raise StorageException(f"Page index {page_index} out of range for table '{table_name}'")
+                page_id = page_ids[page_index]
                 if not self.transaction_manager.prepare_read(txn_id, page_id):
                     self.logger.error(f"Failed to acquire read lock on page {page_id}")
                     continue
@@ -407,7 +411,10 @@ class StorageEngine:
             # 遍历所有页查找要删除的行
             for page_index in range(page_count):
                 # 准备读操作（获取锁）
-                page_id = self.table_storage.get_table_page_id(table_name, page_index)
+                page_ids = self.table_storage.get_table_pages(table_name)
+                if page_index >= len(page_ids):
+                    raise StorageException(f"Page index {page_index} out of range for table '{table_name}'")
+                page_id = page_ids[page_index]
                 if not self.transaction_manager.prepare_read(txn_id, page_id):
                     raise StorageException(f"Failed to acquire read lock on page {page_id}")
 
