@@ -226,7 +226,7 @@ class SyntaxAnalyzer:
             return self._parse_drop_view(materialized)
         elif self._match(TokenType.TABLE):
             return self._parse_drop_table()
-        elif self._match(TokenType.INDEX):
+        elif self._check(TokenType.INDEX):
             return self._parse_drop_index()
         else:
             raise SyntaxErr("期望 VIEW, TABLE 或 INDEX",

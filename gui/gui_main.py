@@ -35,7 +35,7 @@ class SimpleDBGUI:
 
         # 创建GUI
         self.root = tk.Tk()
-        self.root.title("SimpleDB - SQL Database Management System")
+        self.root.title("ZLQ - SQL Database Management System")
         self.root.geometry("1400x900")
         self.root.configure(bg="#f0f0f0")
 
@@ -184,7 +184,7 @@ class SimpleDBGUI:
         # 标题
         title_label = ttk.Label(
             main_frame,
-            text="SimpleDB - SQL Database Management System",
+            text="ZLQ - SQL Database Management System",
             font=("Arial", 16, "bold")
         )
         title_label.grid(row=0, column=0, columnspan=2, pady=(0, 20))
