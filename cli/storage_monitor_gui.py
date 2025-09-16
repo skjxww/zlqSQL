@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 # 配置matplotlib中文字体支持
 import matplotlib
+
 matplotlib.use('TkAgg')  # 确保使用正确的backend
 matplotlib.rcParams['font.sans-serif'] = ['SimHei', 'Microsoft YaHei', 'Arial Unicode MS', 'DejaVu Sans']
 matplotlib.rcParams['axes.unicode_minus'] = False
@@ -21,12 +22,14 @@ import threading
 import random
 from datetime import datetime
 
+
 def check_available_fonts():
     """检查可用的中文字体"""
     fonts = [f.name for f in fm.fontManager.ttflist]
     chinese_fonts = [f for f in fonts if any(keyword in f for keyword in ['SimHei', 'Microsoft', 'YaHei', 'FangSong'])]
     print("可用中文字体:", chinese_fonts[:5])
     return chinese_fonts
+
 
 class StorageMonitorWindow:
     """存储监控窗口类"""
@@ -41,12 +44,11 @@ class StorageMonitorWindow:
         self.base_read_count = 0
         self.base_write_count = 0
 
-        # 监控数据存储
+        # 监控数据存储（删除transaction_counts）
         self.monitor_data = {
             'timestamps': deque(maxlen=50),
             'hit_rates': deque(maxlen=50),
             'page_allocations': deque(maxlen=50),
-            'transaction_counts': deque(maxlen=50),
             'read_operations': deque(maxlen=50),
             'write_operations': deque(maxlen=50)
         }
@@ -156,20 +158,19 @@ class StorageMonitorWindow:
         self.status_text.pack(side=tk.LEFT, padx=(5, 0))
 
     def _create_stats_panel(self, parent):
-        """创建统计面板"""
+        """创建统计面板（删除活跃事务卡片）"""
         stats_frame = ttk.LabelFrame(parent, text="Real-time Statistics", padding="10")
         stats_frame.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
 
-        # 配置网格
-        for i in range(5):
+        # 配置网格（改为4列）
+        for i in range(4):
             stats_frame.columnconfigure(i, weight=1)
 
-        # 创建统计卡片
+        # 创建统计卡片（删除活跃事务）
         self._create_stat_card(stats_frame, 0, "缓存命中率", "0.0%", "blue")
         self._create_stat_card(stats_frame, 1, "页面分配", "0/0", "green")
-        self._create_stat_card(stats_frame, 2, "活跃事务", "0", "orange")
-        self._create_stat_card(stats_frame, 3, "缓存策略", "LRU", "purple")
-        self._create_stat_card(stats_frame, 4, "系统状态", "运行中", "teal")
+        self._create_stat_card(stats_frame, 2, "缓存策略", "LRU", "purple")
+        self._create_stat_card(stats_frame, 3, "系统状态", "运行中", "teal")
 
     def _create_stat_card(self, parent, column, label_text, value_text, color):
         """创建统计卡片"""
@@ -193,15 +194,15 @@ class StorageMonitorWindow:
         setattr(self, f"{label_text.replace(' ', '_').lower()}_label", value_label)
 
     def _create_chart_panel(self, parent):
-        """创建图表面板"""
+        """创建图表面板（修改为1x3布局，删除事务图表）"""
         chart_frame = ttk.LabelFrame(parent, text="Performance Charts", padding="5")
         chart_frame.grid(row=1, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
         chart_frame.columnconfigure(0, weight=1)
         chart_frame.rowconfigure(0, weight=1)
 
-        # 创建matplotlib图表
+        # 创建matplotlib图表（改为1x3布局）
         plt.style.use('seaborn-v0_8' if 'seaborn-v0_8' in plt.style.available else 'default')
-        self.fig, ((self.ax1, self.ax2), (self.ax3, self.ax4)) = plt.subplots(2, 2, figsize=(10, 8))
+        self.fig, (self.ax1, self.ax2, self.ax3) = plt.subplots(1, 3, figsize=(15, 5))
         self.fig.suptitle('Storage System Performance Monitor', fontsize=14, fontweight='bold')
 
         # 初始化图表
@@ -215,38 +216,153 @@ class StorageMonitorWindow:
         self.fig.tight_layout()
 
     def _init_charts(self):
-        """Initialize charts"""
+        """Initialize charts（删除事务图表）"""
         # Cache hit rate chart
         self.ax1.set_title('Cache Hit Rate Trend', fontsize=12, fontweight='bold')
         self.ax1.set_ylabel('Hit Rate (%)')
+        self.ax1.set_xlabel('Time (minutes)')
         self.ax1.grid(True, alpha=0.3)
         self.ax1.set_ylim(0, 100)
 
         # Page allocation chart
         self.ax2.set_title('Page Allocation Stats', fontsize=12, fontweight='bold')
         self.ax2.set_ylabel('Page Count')
+        self.ax2.set_xlabel('Time (minutes)')
         self.ax2.grid(True, alpha=0.3)
 
-        # Transaction statistics chart
-        self.ax3.set_title('Transaction Activity', fontsize=12, fontweight='bold')
-        self.ax3.set_ylabel('Transaction Count')
+        # I/O operations chart（原来的ax4现在变成ax3）
+        self.ax3.set_title('I/O Operations', fontsize=12, fontweight='bold')
+        self.ax3.set_ylabel('Operation Count')
         self.ax3.set_xlabel('Time (minutes)')
         self.ax3.grid(True, alpha=0.3)
 
-        # I/O operations chart
-        self.ax4.set_title('I/O Operations', fontsize=12, fontweight='bold')
-        self.ax4.set_ylabel('Operation Count')
-        self.ax4.set_xlabel('Time (minutes)')
-        self.ax4.grid(True, alpha=0.3)
-
     def _create_control_panel(self, parent):
-        """创建控制面板"""
-        control_frame = ttk.LabelFrame(parent, text="Control Panel", padding="10")
-        control_frame.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
-        control_frame.columnconfigure(0, weight=1)
+        """创建控制面板 - 修复缩放问题"""
+        # 创建外层框架
+        outer_frame = ttk.LabelFrame(parent, text="Control Panel", padding="5")
+        outer_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(0, 10))
+        outer_frame.columnconfigure(0, weight=1)
+        outer_frame.rowconfigure(0, weight=1)
+
+        # 创建Canvas和滚动条的容器框架
+        canvas_container = ttk.Frame(outer_frame)
+        canvas_container.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        canvas_container.columnconfigure(0, weight=1)
+        canvas_container.rowconfigure(0, weight=1)
+
+        # 创建Canvas和滚动条
+        self.control_canvas = tk.Canvas(
+            canvas_container,
+            highlightthickness=0,
+            bg="#f8f9fa"
+        )
+
+        v_scrollbar = ttk.Scrollbar(
+            canvas_container,
+            orient=tk.VERTICAL,
+            command=self.control_canvas.yview
+        )
+
+        # 创建可滚动的内容框架
+        self.control_content_frame = ttk.Frame(self.control_canvas)
+        self.control_content_frame.columnconfigure(0, weight=1)
+
+        # 布局Canvas和滚动条
+        self.control_canvas.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        v_scrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
+
+        # 配置滚动
+        self.control_canvas.configure(yscrollcommand=v_scrollbar.set)
+
+        # 将内容框架添加到Canvas
+        self.canvas_window = self.control_canvas.create_window(
+            0, 0,
+            window=self.control_content_frame,
+            anchor="nw"
+        )
+
+        # 绑定事件处理函数
+        self._setup_control_panel_events()
+
+        # 创建控制面板内容
+        self._create_control_content()
+
+        # 延迟初始化布局
+        self.window.after(100, self._update_control_scroll_region)
+
+    def _setup_control_panel_events(self):
+        """设置控制面板的事件处理"""
+
+        def on_canvas_configure(event):
+            """Canvas大小改变时的处理"""
+            # 更新内容框架的宽度以匹配Canvas宽度
+            canvas_width = event.width
+            self.control_canvas.itemconfig(self.canvas_window, width=canvas_width)
+
+        def on_content_configure(event):
+            """内容框架大小改变时更新滚动区域"""
+            self.control_canvas.configure(scrollregion=self.control_canvas.bbox("all"))
+
+        def on_mousewheel(event):
+            """鼠标滚轮事件处理"""
+            # 检查Canvas是否有足够的内容需要滚动
+            if self.control_canvas.winfo_reqheight() < self.control_content_frame.winfo_reqheight():
+                self.control_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+
+        # 绑定事件
+        self.control_canvas.bind('<Configure>', on_canvas_configure)
+        self.control_content_frame.bind('<Configure>', on_content_configure)
+
+        # 递归绑定鼠标滚轮事件到所有相关组件
+        def bind_mousewheel_recursive(widget):
+            """递归绑定鼠标滚轮事件"""
+            try:
+                widget.bind("<MouseWheel>", on_mousewheel)
+                widget.bind("<Button-4>", lambda e: on_mousewheel(type('Event', (), {'delta': 120})()))
+                widget.bind("<Button-5>", lambda e: on_mousewheel(type('Event', (), {'delta': -120})()))
+
+                for child in widget.winfo_children():
+                    bind_mousewheel_recursive(child)
+            except tk.TclError:
+                pass  # 忽略绑定失败的情况
+
+        # 延迟绑定鼠标滚轮事件
+        self.window.after(200, lambda: bind_mousewheel_recursive(self.control_content_frame))
+
+        # 绑定窗口大小改变事件
+        def on_window_resize(event):
+            """窗口大小改变时的处理"""
+            if event.widget == self.window:
+                self.window.after_idle(self._update_control_scroll_region)
+
+        self.window.bind('<Configure>', on_window_resize)
+
+    def _update_control_scroll_region(self):
+        """更新控制面板的滚动区域"""
+        try:
+            # 确保所有组件都已经渲染完成
+            self.control_content_frame.update_idletasks()
+
+            # 获取内容的实际大小
+            bbox = self.control_canvas.bbox("all")
+            if bbox:
+                self.control_canvas.configure(scrollregion=bbox)
+
+            # 确保Canvas窗口的宽度正确
+            canvas_width = self.control_canvas.winfo_width()
+            if canvas_width > 1:  # 确保Canvas已经被渲染
+                self.control_canvas.itemconfig(self.canvas_window, width=canvas_width)
+
+        except tk.TclError:
+            # 如果组件还没准备好，稍后再试
+            self.window.after(100, self._update_control_scroll_region)
+
+    def _create_control_content(self):
+        """创建控制面板的具体内容"""
+        content_frame = self.control_content_frame
 
         # 监控控制
-        monitor_frame = ttk.Frame(control_frame)
+        monitor_frame = ttk.Frame(content_frame)
         monitor_frame.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
         monitor_frame.columnconfigure(0, weight=1)
         monitor_frame.columnconfigure(1, weight=1)
@@ -267,7 +383,7 @@ class StorageMonitorWindow:
         self.stop_btn.grid(row=0, column=1, padx=(5, 0), sticky=(tk.W, tk.E))
 
         # 缓存策略控制
-        strategy_frame = ttk.LabelFrame(control_frame, text="Cache Strategy", padding="5")
+        strategy_frame = ttk.LabelFrame(content_frame, text="Cache Strategy", padding="5")
         strategy_frame.grid(row=1, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
 
         self.strategy_var = tk.StringVar(value="adaptive")
@@ -287,26 +403,26 @@ class StorageMonitorWindow:
             ).grid(row=i, column=0, sticky=tk.W, pady=2)
 
         # 缓存可视化
-        cache_viz_frame = ttk.LabelFrame(control_frame, text="Cache Visualization", padding="5")
-        cache_viz_frame.grid(row=3, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
+        cache_viz_frame = ttk.LabelFrame(content_frame, text="Cache Visualization", padding="5")
+        cache_viz_frame.grid(row=2, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
         cache_viz_frame.columnconfigure(0, weight=1)
 
         ttk.Button(
             cache_viz_frame,
-            text="🎬 缓存替换动画",
+            text="🎬 缓存替换",
             command=self._open_cache_animation_window
         ).grid(row=0, column=0, sticky=(tk.W, tk.E), pady=2)
 
         # 性能测试
-        test_frame = ttk.LabelFrame(control_frame, text="Performance Tests", padding="5")
-        test_frame.grid(row=4, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
+        test_frame = ttk.LabelFrame(content_frame, text="Performance Tests", padding="5")
+        test_frame.grid(row=3, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
         test_frame.columnconfigure(0, weight=1)
 
         tests = [
-            ("📈 顺序访问测试", "sequential"),
-            ("🔀 随机访问测试", "random"),
-            ("🔄 重复访问测试", "repeat"),
-            ("⚡ 压力测试", "stress")
+            ("顺序访问测试", "sequential"),
+            ("随机访问测试", "random"),
+            ("重复访问测试", "repeat"),
+            ("压力测试", "stress")
         ]
 
         for i, (text, test_type) in enumerate(tests):
@@ -317,15 +433,15 @@ class StorageMonitorWindow:
             ).grid(row=i, column=0, sticky=(tk.W, tk.E), pady=2)
 
         # 系统操作
-        system_frame = ttk.LabelFrame(control_frame, text="System Operations", padding="5")
-        system_frame.grid(row=5, column=0, sticky=(tk.W, tk.E))
+        system_frame = ttk.LabelFrame(content_frame, text="System Operations", padding="5")
+        system_frame.grid(row=4, column=0, sticky=(tk.W, tk.E))
         system_frame.columnconfigure(0, weight=1)
 
         operations = [
-            ("💾 强制刷盘", self._force_flush),
-            ("🗑️ 清理缓存", self._clear_cache),
-            ("📊 导出报告", self._export_report),
-            ("🔄 重置统计", self._reset_statistics)
+            ("强制刷盘", self._force_flush),
+            ("清理缓存", self._clear_cache),
+            ("导出报告", self._export_report),
+            ("重置统计", self._reset_statistics)
         ]
 
         for i, (text, command) in enumerate(operations):
@@ -336,7 +452,7 @@ class StorageMonitorWindow:
             ).grid(row=i, column=0, sticky=(tk.W, tk.E), pady=2)
 
     def _create_details_panel(self, parent):
-        """创建详情面板"""
+        """创建详情面板（删除事务信息标签页）"""
         details_frame = ttk.LabelFrame(parent, text="Detailed Information", padding="5")
         details_frame.grid(row=1, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
         details_frame.columnconfigure(0, weight=1)
@@ -351,9 +467,6 @@ class StorageMonitorWindow:
 
         # 缓存详情
         self._create_cache_tab()
-
-        # 事务信息
-        self._create_transaction_tab()
 
         # 日志信息
         self._create_log_tab()
@@ -426,39 +539,6 @@ class StorageMonitorWindow:
         cache_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.cache_tree.configure(yscrollcommand=cache_scrollbar.set)
 
-    def _create_transaction_tab(self):
-        """创建事务标签页"""
-        self.transaction_frame = ttk.Frame(self.details_notebook)
-        self.details_notebook.add(self.transaction_frame, text="事务状态")
-
-        self.txn_tree = ttk.Treeview(
-            self.transaction_frame,
-            columns=("txn_id", "state", "start_time", "pages", "locks", "isolation"),
-            show="headings",
-            height=10
-        )
-
-        headers = [
-            ("txn_id", "事务ID", 60),
-            ("state", "状态", 80),
-            ("start_time", "开始时间", 100),
-            ("pages", "修改页数", 80),
-            ("locks", "持有锁数", 80),
-            ("isolation", "隔离级别", 100)
-        ]
-
-        for col, text, width in headers:
-            self.txn_tree.heading(col, text=text)
-            self.txn_tree.column(col, width=width)
-
-        self.txn_tree.pack(fill=tk.BOTH, expand=True)
-
-        # 添加滚动条
-        txn_scrollbar = ttk.Scrollbar(self.transaction_frame, orient=tk.VERTICAL,
-                                      command=self.txn_tree.yview)
-        txn_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-        self.txn_tree.configure(yscrollcommand=txn_scrollbar.set)
-
     def _create_log_tab(self):
         """创建日志标签页"""
         self.log_frame = ttk.Frame(self.details_notebook)
@@ -491,7 +571,7 @@ class StorageMonitorWindow:
         # 添加打开地图按钮
         ttk.Button(
             container,
-            text="🗺️ 打开页面分配地图",
+            text="打开页面分配地图",
             command=self._open_page_allocation_window
         ).pack(pady=5)
 
@@ -585,12 +665,12 @@ class StorageMonitorWindow:
         ttk.Label(legend_frame, text="图例：", font=("Arial", 10, "bold")).pack(side=tk.LEFT, padx=5)
 
         legends = [
-            ("■", "#ff6b6b", "脏页"),
-            ("■", "#4ecdc4", "缓存中"),
-            ("■", "#95e1d3", "系统表空间"),
-            ("■", "#f3a683", "临时表空间"),
-            ("■", "#c7ecee", "日志表空间"),
-            ("■", "#dfe6e9", "普通页面")
+            ("■ ", "#ff6b6b", "脏页"),
+            ("■ ", "#4ecdc4", "缓存中"),
+            ("■ ", "#95e1d3", "系统表空间"),
+            ("■ ", "#f3a683", "临时表空间"),
+            ("■ ", "#c7ecee", "日志表空间"),
+            ("■ ", "#dfe6e9", "普通页面")
         ]
 
         for symbol, color, desc in legends:
@@ -1131,7 +1211,7 @@ class StorageMonitorWindow:
                 # 计算实际需要的画布大小
                 max_x = start_x + len(lru_order) * (block_width + spacing) + 20
                 max_y = start_y + ((len(lru_order) - 1) // ((canvas_width - 40) // (block_width + spacing)) + 1) * (
-                            block_height + spacing + 30) + 50
+                        block_height + spacing + 30) + 50
                 self.cache_canvas.configure(scrollregion=(0, 0, max_x, max_y))
 
             # 更新信息标签
@@ -1260,7 +1340,7 @@ class StorageMonitorWindow:
                     time.sleep(0.1)
             else:
                 # 缓存已满，添加新页面触发替换
-                self._cache_log("缓存已满，添加新页面将触发替换...")
+                self._cache_log("缓存已满！添加新页面将触发替换...")
 
                 # 记录LRU页面（将被替换）
                 lru_order = cache_info['lru_order']
@@ -1412,7 +1492,6 @@ class StorageMonitorWindow:
             self.monitor_data['timestamps'].append(current_time)
             self.monitor_data['hit_rates'].append(self.storage_manager.get_cache_stats().get('hit_rate', 0))
             self.monitor_data['page_allocations'].append(self.storage_manager.get_page_stats()['pages']['allocated'])
-            self.monitor_data['transaction_counts'].append(0)
             self.monitor_data['read_operations'].append(0)  # 从0开始
             self.monitor_data['write_operations'].append(0)  # 从0开始
 
@@ -1441,7 +1520,6 @@ class StorageMonitorWindow:
             self.monitor_data['timestamps'].append(current_time)
             self.monitor_data['hit_rates'].append(cache_stats.get('hit_rate', 0))
             self.monitor_data['page_allocations'].append(page_stats['pages']['allocated'])
-            self.monitor_data['transaction_counts'].append(0)
             self.monitor_data['read_operations'].append(page_stats['operations']['reads'])
             self.monitor_data['write_operations'].append(page_stats['operations']['writes'])
             # 初始绘制页面地图
@@ -1451,7 +1529,7 @@ class StorageMonitorWindow:
             self._log(f"初始化数据失败: {e}")
 
     def _update_monitoring_data(self):
-        """更新监控数据"""
+        """更新监控数据（删除事务相关代码）"""
         if not self.monitoring_active:
             return
 
@@ -1460,18 +1538,11 @@ class StorageMonitorWindow:
             cache_stats = self.storage_manager.get_cache_stats()
             page_stats = self.storage_manager.get_page_stats()
 
-            # 获取事务统计
-            txn_count = 0
-            if hasattr(self.storage_manager, 'transaction_manager'):
-                active_txns = self.storage_manager.get_active_transactions()
-                txn_count = len(active_txns)
-
             # 添加数据点
             current_time = time.time()
             self.monitor_data['timestamps'].append(current_time)
             self.monitor_data['hit_rates'].append(cache_stats.get('hit_rate', 0))
             self.monitor_data['page_allocations'].append(page_stats['pages']['allocated'])
-            self.monitor_data['transaction_counts'].append(txn_count)
 
             # 使用相对值（当前值 - 基准值）
             current_read_count = getattr(self.storage_manager, 'read_count', 0)
@@ -1483,8 +1554,8 @@ class StorageMonitorWindow:
             self.monitor_data['read_operations'].append(relative_read_ops)
             self.monitor_data['write_operations'].append(relative_write_ops)
 
-            # 更新界面显示
-            self._update_stats_display(cache_stats, page_stats, txn_count)
+            # 更新界面显示（删除txn_count参数）
+            self._update_stats_display(cache_stats, page_stats)
             self._update_charts()
             self._update_detail_panels()
 
@@ -1495,8 +1566,8 @@ class StorageMonitorWindow:
         if self.monitoring_active:
             self.monitor_timer = self.window.after(2000, self._update_monitoring_data)
 
-    def _update_stats_display(self, cache_stats, page_stats, txn_count):
-        """更新统计显示"""
+    def _update_stats_display(self, cache_stats, page_stats):
+        """更新统计显示（删除事务相关显示）"""
         try:
             # 更新缓存命中率
             hit_rate = cache_stats.get('hit_rate', 0)
@@ -1506,9 +1577,6 @@ class StorageMonitorWindow:
             allocated = page_stats['pages']['allocated']
             max_pages = page_stats['pages'].get('max_pages', allocated)
             self.页面分配_label.configure(text=f"{allocated}/{max_pages}")
-
-            # 更新活跃事务
-            self.活跃事务_label.configure(text=str(txn_count))
 
             # 更新缓存策略
             strategy = self._get_current_strategy()
@@ -1537,13 +1605,13 @@ class StorageMonitorWindow:
             return "未知"
 
     def _update_charts(self):
-        """更新图表"""
+        """更新图表（修改为3个图表布局）"""
         try:
             if len(self.monitor_data['timestamps']) < 2:
                 return
 
             # 清除旧图表
-            for ax in [self.ax1, self.ax2, self.ax3, self.ax4]:
+            for ax in [self.ax1, self.ax2, self.ax3]:
                 ax.clear()
 
             # 重新初始化图表
@@ -1562,20 +1630,12 @@ class StorageMonitorWindow:
             self.ax2.plot(relative_times, list(self.monitor_data['page_allocations']),
                           'g-', linewidth=2, marker='s', markersize=3, alpha=0.8)
 
-            # 绘制事务统计
-            self.ax3.plot(relative_times, list(self.monitor_data['transaction_counts']),
-                          'orange', linewidth=2, marker='^', markersize=3, alpha=0.8)
-
-            # 绘制I/O操作
+            # 绘制I/O操作（原来的ax4现在是ax3）
             reads = list(self.monitor_data['read_operations'])
             writes = list(self.monitor_data['write_operations'])
-            self.ax4.plot(relative_times, reads, 'r-', linewidth=2, label='Read Ops', alpha=0.8)
-            self.ax4.plot(relative_times, writes, 'purple', linewidth=2, label='Write Ops', alpha=0.8)
-            self.ax4.legend()
-
-            # 设置x轴标签
-            for ax in [self.ax3, self.ax4]:
-                ax.set_xlabel('Time (minutes)')
+            self.ax3.plot(relative_times, reads, 'r-', linewidth=2, label='Read Ops', alpha=0.8)
+            self.ax3.plot(relative_times, writes, 'purple', linewidth=2, label='Write Ops', alpha=0.8)
+            self.ax3.legend()
 
             # 刷新图表
             self.canvas.draw()
@@ -1584,12 +1644,11 @@ class StorageMonitorWindow:
             self._log(f"图表更新失败: {e}")
 
     def _update_detail_panels(self):
-        """更新详细信息面板"""
+        """更新详细信息面板（删除事务面板更新）"""
         try:
             self._update_tablespace_panel()
             self._update_cache_panel()
-            self._update_transaction_panel()
-            # 移除 self._draw_page_allocation_map() 这一行
+            # 删除 self._update_transaction_panel()
 
             # 添加：更新页面分配统计
             if hasattr(self, 'page_stats_label'):
@@ -1649,32 +1708,6 @@ class StorageMonitorWindow:
                 ))
         except Exception as e:
             self._log(f"缓存信息更新失败: {e}")
-
-    def _update_transaction_panel(self):
-        """更新事务面板"""
-        # 清空现有数据
-        for item in self.txn_tree.get_children():
-            self.txn_tree.delete(item)
-
-        try:
-            if hasattr(self.storage_manager, 'transaction_manager'):
-                active_txns = self.storage_manager.get_active_transactions()
-
-                for txn_id in active_txns:
-                    txn_info = self.storage_manager.get_transaction_info(txn_id)
-                    if txn_info and not txn_info.get('error'):
-                        state = txn_info.get('state', 'UNKNOWN')
-                        start_time = txn_info.get('start_time', 0)
-                        modified_pages = len(txn_info.get('modified_pages', []))
-                        isolation = txn_info.get('isolation_level', 'Unknown')
-
-                        time_str = time.strftime("%H:%M:%S", time.localtime(start_time))
-
-                        self.txn_tree.insert("", tk.END, values=(
-                            txn_id, state, time_str, modified_pages, "N/A", isolation
-                        ))
-        except Exception as e:
-            self._log(f"事务信息更新失败: {e}")
 
     # 控制操作方法
     def _change_strategy(self):
@@ -1892,7 +1925,6 @@ class StorageMonitorWindow:
             self.monitor_data['timestamps'].append(current_time)
             self.monitor_data['hit_rates'].append(self.storage_manager.get_cache_stats().get('hit_rate', 0))
             self.monitor_data['page_allocations'].append(self.storage_manager.get_page_stats()['pages']['allocated'])
-            self.monitor_data['transaction_counts'].append(0)
             self.monitor_data['read_operations'].append(0)  # 从0开始
             self.monitor_data['write_operations'].append(0)  # 从0开始
 
@@ -1938,9 +1970,6 @@ def test_monitor_window():
         def get_page_stats(self):
             return {'pages': {'allocated': random.randint(10, 50), 'free': 5},
                     'operations': {'reads': 500, 'writes': 300, 'allocations': 50, 'deallocations': 5}}
-
-        def get_active_transactions(self):
-            return []
 
         def list_tablespaces(self):
             return [{'name': 'default', 'size_mb': 100, 'used_mb': 30, 'status': 'active'}]

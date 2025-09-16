@@ -58,44 +58,122 @@ class SimpleDBGUI:
     def _init_database(self):
         """初始化数据库组件"""
         try:
+            print("=== 开始初始化数据库组件 ===")
+
             # 初始化存储组件
+            print("1. 创建PageManager...")
             self.page_manager = PageManager()
+            print("   ✓ PageManager创建完成")
+
+            print("2. 创建BufferPool...")
             self.buffer_pool = BufferPool()
+            print("   ✓ BufferPool创建完成")
+
+            print("3. 创建StorageManager...")
             self.storage_manager = StorageManager()
+            print("   ✓ StorageManager创建完成")
 
             # 初始化 TableStorage
+            print("4. 创建TableStorage...")
             from storage.core.table_storage import TableStorage
             self.table_storage = TableStorage(self.storage_manager)
+            print("   ✓ TableStorage创建完成")
 
             # 初始化数据库引擎组件
+            print("5. 创建CatalogManager...")
             self.catalog_manager = CatalogManager()
+            print("   ✓ CatalogManager创建完成")
+
+            print("6. 创建StorageEngine...")
             self.storage_engine = StorageEngine(
                 storage_manager=self.storage_manager,
                 table_storage=self.table_storage,
                 catalog_manager=self.catalog_manager
             )
+            print("   ✓ StorageEngine创建完成")
+
+            print("7. 创建ExecutionEngine...")
             self.execution_engine = ExecutionEngine(
                 storage_engine=self.storage_engine,
                 catalog_manager=self.catalog_manager
             )
+            print("   ✓ ExecutionEngine创建完成")
 
-            # 🔧 修复：设置事务管理器
-            # 确保存储引擎有事务管理器，然后设置给执行引擎
-            if hasattr(self.storage_engine, 'transaction_manager'):
-                self.execution_engine.set_transaction_manager(self.storage_engine.transaction_manager)
+            # 8. 设置事务管理器...
+            print("8. 设置事务管理器...")
+            # 先创建DatabaseManager
+            print("   首先创建DatabaseManager...")
+            self.db_manager = DatabaseManager()
+            print("   ✓ DatabaseManager创建完成")
+
+            # 然后使用DatabaseManager的事务管理器
+            if hasattr(self.db_manager, 'storage_manager') and hasattr(self.db_manager.storage_manager,
+                                                                       'transaction_manager'):
+                self.execution_engine.set_transaction_manager(self.db_manager.storage_manager.transaction_manager)
+                print("   ✓ 使用DatabaseManager的事务管理器设置完成")
             else:
-                # 如果存储引擎没有事务管理器，创建一个新的
-                from storage.core.transaction_manager import TransactionManager
-                transaction_manager = TransactionManager(self.storage_manager)
-                self.execution_engine.set_transaction_manager(transaction_manager)
+                print("   ⚠ DatabaseManager没有事务管理器，使用原有方式...")
+                if hasattr(self.storage_engine, 'transaction_manager'):
+                    self.execution_engine.set_transaction_manager(self.storage_engine.transaction_manager)
+                    print("   ✓ 事务管理器设置完成")
+                else:
+                    from storage.core.transaction_manager import TransactionManager
+                    transaction_manager = TransactionManager(self.storage_manager)
+                    self.execution_engine.set_transaction_manager(transaction_manager)
+                    print("   ✓ 新事务管理器创建并设置完成")
 
             # 初始化SQL编译器组件
+            print("9. 初始化SQL编译器...")
             self.lexer = LexicalAnalyzer
-
-            # 初始化智能纠错器
             self.sql_corrector = SmartSQLCorrector(self.catalog_manager)
+            print("   ✓ SQL编译器初始化完成")
+
+            # # 初始化数据库管理器 - 关键步骤
+            # print("10. 创建DatabaseManager...")
+            # self.db_manager = DatabaseManager()
+            # print("   ✓ DatabaseManager创建完成")
+            #
+            # print("=== 数据库组件初始化完成 ===")
+
+            # 添加以下调试代码：
+            print("\n=== 检查事务管理器连接 ===")
+
+            # 检查DatabaseManager的存储管理器
+            if hasattr(self.db_manager, 'storage_manager'):
+                print(f"DatabaseManager.storage_manager ID: {id(self.db_manager.storage_manager)}")
+                if hasattr(self.db_manager.storage_manager, 'transaction_manager'):
+                    print(
+                        f"DatabaseManager.transaction_manager ID: {id(self.db_manager.storage_manager.transaction_manager)}")
+                else:
+                    print("DatabaseManager.storage_manager 没有 transaction_manager")
+            else:
+                print("DatabaseManager 没有 storage_manager 属性")
+
+            # 检查ExecutionEngine的事务管理器
+            if hasattr(self.execution_engine, 'transaction_manager'):
+                print(f"ExecutionEngine.transaction_manager ID: {id(self.execution_engine.transaction_manager)}")
+            else:
+                print("ExecutionEngine 没有 transaction_manager")
+
+            # 检查主GUI的存储管理器
+            print(f"主GUI.storage_manager ID: {id(self.storage_manager)}")
+
+            # 检查是否是同一个事务管理器
+            if (hasattr(self.db_manager, 'storage_manager') and
+                    hasattr(self.db_manager.storage_manager, 'transaction_manager') and
+                    hasattr(self.execution_engine, 'transaction_manager')):
+
+                if (self.execution_engine.transaction_manager ==
+                        self.db_manager.storage_manager.transaction_manager):
+                    print("✅ 事务管理器连接正确")
+                else:
+                    print("❌ 事务管理器连接错误 - 这就是问题所在！")
+
+            print("=== 事务管理器检查完成 ===\n")
 
         except Exception as e:
+            print(f"❌ 初始化失败，错误位置: {e}")
+            print(f"详细错误信息: {traceback.format_exc()}")
             messagebox.showerror("初始化错误", f"数据库初始化失败: {str(e)}")
 
     def _create_main_frame(self):
