@@ -127,6 +127,7 @@ def compile_with_alias_tracking(sql: str, catalog: CatalogManager):
 
         plan = plan_generator.generate(ast)
 
+
         # 获取计划生成器的别名信息
         plan_aliases = plan_generator.get_alias_info()['alias_to_real']
 

@@ -232,27 +232,91 @@ class SQLQueryTab:
             print(f"UI更新失败: {e}")
 
     def _execute_single_sql(self, sql):
-        """执行单个SQL语句（修改了错误处理）"""
+        """执行单个SQL语句（添加优化过程捕获）"""
         start_time = time.time()
 
         try:
-            # 执行SQL
-            result = self.db_manager.execute_query(sql)
+            # 【新增】捕获优化过程输出
+            import io
+            import sys
+            from contextlib import redirect_stdout
+
+            # 创建输出缓冲区
+            output_buffer = io.StringIO()
+
+            # 执行SQL并捕获优化输出
+            with redirect_stdout(output_buffer):
+                result = self.db_manager.execute_query(sql)
+
+            # 获取捕获的优化输出
+            optimization_output = output_buffer.getvalue()
+
             execution_time = time.time() - start_time
+
+            # 获取执行计划（如果支持）
+            plan = None
             if hasattr(self.db_manager, 'get_execution_plan'):
-                plan = self.db_manager.get_execution_plan(sql)
-                self.plan_tab.update_plan(plan)
+                try:
+                    plan = self.db_manager.get_execution_plan(sql)
+                    if self.plan_tab:
+                        self.plan_tab.update_plan(plan)
+                except Exception as e:
+                    print(f"⚠️ 获取执行计划失败: {e}")
 
             # 在主线程中更新UI
-            self._safe_ui_update(lambda: self._update_success_ui(sql, result, execution_time))
+            self._safe_ui_update(lambda: self._update_success_ui_with_optimization(
+                sql, result, execution_time, optimization_output, plan
+            ))
 
         except Exception as e:
             execution_time = time.time() - start_time
             error_msg = str(e)
-            print(f"❌ SQL执行失败: {error_msg}")  # 添加调试信息
+            print(f"❌ SQL执行失败: {error_msg}")
 
             # 在主线程中更新错误UI（包含智能分析）
             self._safe_ui_update(lambda: self._update_error_ui_with_smart_analysis(sql, error_msg, execution_time))
+
+    def _update_success_ui_with_optimization(self, sql, result, execution_time, optimization_output, plan):
+        """更新成功结果UI并显示优化过程"""
+        print(f"✅ 更新成功UI，执行时间: {execution_time:.3f}s")
+
+        try:
+            # 重新启用执行按钮
+            self.execute_btn.configure(state=tk.NORMAL, text="🚀 执行SQL")
+
+            # 更新结果显示
+            self.result_display.display_result(result)
+
+            # 【新增】更新优化过程显示
+            if optimization_output and optimization_output.strip():
+                self.result_display.update_optimization_process(optimization_output)
+                print(f"✅ 优化过程已更新: {len(optimization_output)} 字符")
+            else:
+                # 如果没有优化输出，显示简单信息
+                simple_info = f"查询执行完成\n执行时间: {execution_time:.3f}秒\n结果行数: {len(result) if isinstance(result, list) else 1}"
+                self.result_display.update_optimization_process(simple_info)
+
+            # 更新执行计划
+            if plan:
+                self.result_display.update_execution_plan(plan)
+
+            # 进行性能分析
+            try:
+                if hasattr(self.db_manager, 'sql_corrector'):
+                    improvement_analysis = self.db_manager.sql_corrector.analyze_and_suggest(sql)
+                    self.result_display.update_smart_analysis(improvement_analysis, success=True)
+            except Exception as e:
+                print(f"⚠️ 智能分析失败: {e}")
+
+            # 添加到历史
+            self.result_display.add_to_history(sql, execution_time, True)
+
+            # 记录成功日志
+            self.result_display.log(f"✅ 执行成功，耗时: {execution_time:.3f}s")
+
+        except Exception as e:
+            print(f"❌ 更新成功UI失败: {e}")
+            self.result_display.log(f"UI更新错误: {str(e)}")
 
     def _update_error_ui_with_smart_analysis(self, sql, error_msg, execution_time):
         """更新错误UI并进行智能分析"""

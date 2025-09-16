@@ -63,10 +63,10 @@ class DatabaseManager:
             parser = SyntaxAnalyzer(tokens)
             ast = parser.parse()
 
-            # 生成执行计划
+            # 生成执行计划 - 确保显示优化过程
             planner = PlanGenerator(
                 enable_optimization=True,
-                silent_mode=True,
+                silent_mode=False,  # 【关键修改】设置为 False 以显示优化过程
                 catalog_manager=self.catalog_manager
             )
             plan = planner.generate(ast)
@@ -77,6 +77,33 @@ class DatabaseManager:
 
         except Exception as e:
             raise e
+
+    def get_execution_plan(self, sql):
+        try:
+            # 词法分析
+            lexer = self.lexer(sql)
+            tokens = lexer.tokenize()
+
+            # 语法分析
+            parser = SyntaxAnalyzer(tokens)
+            ast = parser.parse()
+
+            # 生成执行计划 - 同样确保显示优化过程
+            planner = PlanGenerator(
+                enable_optimization=True,
+                silent_mode=False,  # 【关键修改】设置为 False
+                catalog_manager=self.catalog_manager
+            )
+            plan = planner.generate(ast)
+
+            # 返回执行计划的字典表示
+            return plan.to_dict()
+
+        except Exception as e:
+            return {
+                'error': str(e),
+                'error_type': type(e).__name__
+            }
 
     def get_tables(self):
         """获取所有表信息"""
@@ -352,31 +379,3 @@ class DatabaseManager:
     def refresh_info(self):
         """刷新数据库信息"""
         return self.get_all_tables()
-
-    def get_execution_plan(self, sql):
-        try:
-            # 词法分析
-            lexer = self.lexer(sql)
-            tokens = lexer.tokenize()
-
-            # 语法分析
-            parser = SyntaxAnalyzer(tokens)
-            ast = parser.parse()
-
-            # 生成执行计划
-            planner = PlanGenerator(
-                enable_optimization=True,
-                silent_mode=True,
-                catalog_manager=self.catalog_manager
-            )
-            plan = planner.generate(ast)
-
-            # 返回执行计划的字典表示
-            return plan.to_dict()
-
-        except Exception as e:
-            # 返回错误信息
-            return {
-                'error': str(e),
-                'error_type': type(e).__name__
-            }

@@ -107,8 +107,26 @@ class ResultDisplay:
         )
         self.log_text.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
 
+        # 优化过程标签页
+        self.optimization_frame = ttk.Frame(self.result_notebook)
+        self.result_notebook.add(self.optimization_frame, text="优化过程")
+        self.optimization_frame.columnconfigure(0, weight=1)
+        self.optimization_frame.rowconfigure(0, weight=1)
+
+        # 优化过程文本框
+        self.optimization_text = scrolledtext.ScrolledText(
+            self.optimization_frame,
+            font=("Consolas", 10),
+            wrap=tk.WORD,
+            background="#f8f9fa"
+        )
+        self.optimization_text.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+
         # 查询历史区域
         self._create_history_area()
+
+        # 配置文本样式
+        self._configure_text_styles()
 
     def set_sql_corrector(self, corrector):
         """设置智能纠错器"""
@@ -309,8 +327,6 @@ class ResultDisplay:
                 self.analysis_text.insert(tk.END, f"错误信息: {error}\n")
             self.apply_correction_btn.configure(state=tk.DISABLED)
 
-        # 配置文本标签样式
-        self._configure_text_styles()
         self.analysis_text.configure(state=tk.DISABLED)
 
     def _display_suggestion(self, suggestion, index, is_improvement=False):
@@ -359,64 +375,6 @@ class ResultDisplay:
         self.analysis_text.tag_configure("error", font=("Consolas", 11, "bold"), foreground="red")
         self.analysis_text.tag_configure("info", font=("Consolas", 11, "bold"), foreground="blue")
 
-    def _update_analysis_text(self, analysis):
-        """更新智能分析文本框内容"""
-        self.analysis_text.delete(1.0, tk.END)
-
-        content = "🧠 智能SQL分析报告\n" + "=" * 50 + "\n\n"
-
-        # 基本信息
-        content += f"分析时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
-        content += f"SQL语句: {analysis.get('original_sql', '').strip()}\n"
-
-        # 检查是否为批量执行
-        if analysis.get('batch_details'):
-            batch_info = analysis['batch_details']
-            content += f"执行类型: 批量执行\n"
-            content += f"执行状态: {batch_info['successful']}/{batch_info['total']} 成功\n\n"
-
-            # 显示失败语句详情
-            if batch_info['failed_statements']:
-                content += "❌ 失败语句详情:\n"
-                for failed_stmt in batch_info['failed_statements']:
-                    content += f"   语句 #{failed_stmt['index']}: {failed_stmt['sql'][:50]}...\n"
-                    content += f"   错误: {failed_stmt['error']}\n\n"
-        else:
-            content += f"执行状态: {'成功' if not analysis.get('has_error') else '失败'}\n\n"
-
-        # 错误分析
-        if analysis.get('has_error') and analysis.get('error_message'):
-            content += "❌ 错误信息:\n"
-            content += f"   {analysis['error_message']}\n\n"
-
-        # 错误建议
-        if analysis.get('suggestions'):
-            content += "💡 分析建议:\n"
-            for i, suggestion in enumerate(analysis['suggestions'], 1):
-                confidence_bar = "█" * int(suggestion['confidence'] * 10)
-                content += f"{i}. {suggestion['description']}\n"
-                content += f"   建议: {suggestion['suggestion']}\n"
-                content += f"   置信度: {confidence_bar} ({suggestion['confidence']:.1%})\n\n"
-
-        # 修正建议
-        if analysis.get('corrected_sql_options'):
-            content += "🔧 建议的修正版本:\n"
-            for i, option in enumerate(analysis['corrected_sql_options'], 1):
-                content += f"{i}. {option['description']} (置信度: {option['confidence']:.1%})\n"
-                content += f"   修正SQL: {option['sql']}\n\n"
-
-        # 改进建议
-        if analysis.get('improvement_tips'):
-            content += "💡 SQL 优化建议:\n"
-            for i, tip in enumerate(analysis['improvement_tips'], 1):
-                content += f"{i}. {tip['suggestion']}\n"
-
-        if not any([analysis.get('suggestions'), analysis.get('corrected_sql_options'),
-                    analysis.get('improvement_tips'), analysis.get('batch_details', {}).get('failed_statements')]):
-            content += "✅ 未发现明显问题，SQL看起来不错！"
-
-        self.analysis_text.insert(1.0, content)
-
     def _apply_correction_from_analysis(self):
         """从分析结果应用修正"""
         if not self.current_error_analysis:
@@ -431,12 +389,8 @@ class ResultDisplay:
         for suggestion in suggestions:
             corrected_sql = self._get_corrected_sql(suggestion)
             if corrected_sql:
-                description = suggestion.get('description', '') if isinstance(suggestion, dict) else getattr(suggestion,
-                                                                                                             'description',
-                                                                                                             '')
-                confidence = suggestion.get('confidence', 0.0) if isinstance(suggestion, dict) else getattr(suggestion,
-                                                                                                            'confidence',
-                                                                                                            0.0)
+                description = suggestion.get('description', '') if isinstance(suggestion, dict) else getattr(suggestion, 'description', '')
+                confidence = suggestion.get('confidence', 0.0) if isinstance(suggestion, dict) else getattr(suggestion, 'confidence', 0.0)
                 all_corrections.append({
                     'sql': corrected_sql,
                     'description': description,
@@ -471,7 +425,7 @@ class ResultDisplay:
             # 多个选项，显示选择对话框
             self._show_correction_dialog(all_corrections)
 
-    def _show_correction_dialog(self):
+    def _show_correction_dialog(self, corrections):
         """显示修正选择对话框"""
         dialog = tk.Toplevel(self.frame)
         dialog.title("选择修正方案")
@@ -497,7 +451,7 @@ class ResultDisplay:
         correction_choice = tk.StringVar(value="0")
 
         # 修正选项
-        for i, option in enumerate(self.current_error_analysis['corrected_sql_options']):
+        for i, option in enumerate(corrections):
             option_frame = ttk.LabelFrame(options_frame, text=f"选项 {i + 1}", padding="5")
             option_frame.pack(fill=tk.X, pady=2)
 
@@ -520,7 +474,7 @@ class ResultDisplay:
 
         def apply_selected_correction():
             choice_idx = int(correction_choice.get())
-            corrected_sql = self.current_error_analysis['corrected_sql_options'][choice_idx]['sql']
+            corrected_sql = corrections[choice_idx]['sql']
             dialog.destroy()
             self._apply_corrected_sql(corrected_sql)
 
@@ -528,74 +482,6 @@ class ResultDisplay:
             button_frame,
             text="🚀 应用并执行",
             command=apply_selected_correction
-        ).pack(side=tk.RIGHT, padx=(5, 0))
-
-        ttk.Button(button_frame, text="取消", command=dialog.destroy).pack(side=tk.RIGHT)
-
-    def _show_correction_options_dialog(self):
-        """显示修正选项对话框"""
-        dialog = tk.Toplevel(self.parent)
-        dialog.title("🔧 选择修正选项")
-        dialog.geometry("700x400")
-        dialog.transient(self.parent)
-        dialog.grab_set()
-
-        main_frame = ttk.Frame(dialog, padding="10")
-        main_frame.pack(fill=tk.BOTH, expand=True)
-
-        # 说明标签
-        ttk.Label(
-            main_frame,
-            text="请选择要应用的修正版本:",
-            font=("Arial", 12, "bold")
-        ).pack(pady=(0, 15))
-
-        # 选项框架
-        options_frame = ttk.Frame(main_frame)
-        options_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 15))
-
-        # 单选按钮变量
-        correction_choice = tk.StringVar(value="0")
-
-        # 修正选项
-        for i, option in enumerate(self.current_error_analysis['corrected_sql_options']):
-            option_frame = ttk.LabelFrame(options_frame, text=f"选项 {i + 1}", padding="5")
-            option_frame.pack(fill=tk.X, pady=2)
-
-            ttk.Radiobutton(
-                option_frame,
-                text=f"{option['description']} (置信度: {option['confidence']:.1%})",
-                variable=correction_choice,
-                value=str(i)
-            ).pack(anchor=tk.W)
-
-            # 显示SQL预览
-            sql_preview = tk.Text(
-                option_frame,
-                height=2,
-                wrap=tk.WORD,
-                font=("Consolas", 8),
-                bg="#f8f8f8"
-            )
-            sql_preview.pack(fill=tk.X, pady=(2, 0))
-            sql_preview.insert(1.0, option['sql'])
-            sql_preview.configure(state=tk.DISABLED)
-
-        # 按钮框架
-        button_frame = ttk.Frame(main_frame)
-        button_frame.pack(fill=tk.X)
-
-        def apply_selected_correction():
-            choice_idx = int(correction_choice.get())
-            corrected_sql = self.current_error_analysis['corrected_sql_options'][choice_idx]['sql']
-            dialog.destroy()
-            self._apply_corrected_sql(corrected_sql)
-
-        ttk.Button(
-            button_frame,
-            text="🚀 应用并执行",
-            command=apply_selected_correction,
-            style="Execute.TButton"
         ).pack(side=tk.RIGHT, padx=(5, 0))
 
         ttk.Button(button_frame, text="取消", command=dialog.destroy).pack(side=tk.RIGHT)
@@ -691,7 +577,9 @@ class ResultDisplay:
     def clear_analysis(self):
         """清除分析内容"""
         self.current_error_analysis = None
+        self.analysis_text.configure(state=tk.NORMAL)
         self.analysis_text.delete(1.0, tk.END)
+        self.analysis_text.configure(state=tk.DISABLED)
         self.apply_correction_btn.configure(state=tk.DISABLED)
 
     def show_analysis_tab(self):
@@ -709,3 +597,26 @@ class ResultDisplay:
     def show_log_tab(self):
         """显示日志标签页"""
         self.result_notebook.select(self.log_frame)
+
+    def clear_optimization_process(self):
+        """清除优化过程显示"""
+        self.optimization_text.configure(state=tk.NORMAL)
+        self.optimization_text.delete(1.0, tk.END)
+        self.optimization_text.configure(state=tk.DISABLED)
+
+    def update_optimization_process(self, optimization_output):
+        """更新优化过程显示"""
+        self.optimization_text.configure(state=tk.NORMAL)
+        self.optimization_text.delete(1.0, tk.END)
+
+        if optimization_output:
+            # 直接显示捕获的输出
+            self.optimization_text.insert(tk.END, optimization_output)
+        else:
+            self.optimization_text.insert(tk.END, "暂无优化过程信息")
+
+        self.optimization_text.configure(state=tk.DISABLED)
+
+    def show_optimization_tab(self):
+        """显示优化过程标签页"""
+        self.result_notebook.select(self.optimization_frame)

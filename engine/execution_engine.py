@@ -1819,6 +1819,7 @@ class ExecutionEngine:
             plan_generator = PlanGenerator(enable_optimization=False, silent_mode=True)
             subquery_plan = plan_generator.generate(select_stmt)
 
+
             # 执行子查询
             subquery_results = list(self.execute_plan(subquery_plan))
 

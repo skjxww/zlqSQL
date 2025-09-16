@@ -28,6 +28,8 @@ class PlanGenerator:
         self.table_aliases = {}  # 别名 -> 真实表名
         self.real_to_alias = {}  # 真实表名 -> 别名
 
+        self.optimization_output = ""
+
         if self.enable_optimization:
             if ADVANCED_OPTIMIZER_AVAILABLE:
                 # 使用高级优化流水线
@@ -93,6 +95,13 @@ class PlanGenerator:
                 self.enable_optimization and
                 isinstance(stmt, SelectStmt)):
             try:
+                # 捕获优化器的输出
+                import io
+                import sys
+                from contextlib import redirect_stdout
+
+                output_buffer = io.StringIO()
+
                 if hasattr(self, 'optimization_pipeline'):
                     # 使用高级优化流水线
                     query_context = {
@@ -103,16 +112,23 @@ class PlanGenerator:
                         'has_subqueries': self._has_subqueries(stmt),
                         'table_aliases': self.table_aliases.copy()
                     }
-                    optimized_plan = self.optimization_pipeline.optimize(plan, query_context)
+
+                    with redirect_stdout(output_buffer):
+                        optimized_plan = self.optimization_pipeline.optimize(plan, query_context)
                 else:
                     # 使用简单优化器
-                    optimized_plan = self.optimizer.optimize(plan)
+                    with redirect_stdout(output_buffer):
+                        optimized_plan = self.optimizer.optimize(plan)
+
+                # 保存捕获的输出
+                self.optimization_output = output_buffer.getvalue()
 
                 return optimized_plan
 
             except Exception as e:
                 if not self.silent_mode:
                     print(f"⚠️ 查询优化失败: {e}，使用原始计划")
+                self.optimization_output = f"优化失败: {e}\n使用原始执行计划"
 
         return plan
 
