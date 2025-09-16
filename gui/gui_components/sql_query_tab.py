@@ -85,7 +85,7 @@ class SQLQueryTab:
         example_frame.pack(fill=tk.X, pady=(5, 0))
 
         examples = [
-            ("创建表", "CREATE TABLE users (id INT PRIMARY KEY, name VARCHAR(50), email VARCHAR(100));"),
+            ("创建表", "CREATE TABLE users (id INT, name VARCHAR(50), email VARCHAR(100));"),
             ("插入数据", "INSERT INTO users VALUES (1, 'Alice', 'alice@example.com');"),
             ("查询数据", "SELECT * FROM users;"),
             ("聚合查询", "SELECT city, COUNT(*) FROM customers GROUP BY city HAVING COUNT(*) > 1;"),
