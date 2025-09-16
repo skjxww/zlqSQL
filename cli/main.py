@@ -44,7 +44,7 @@ class SimpleDB:
             ast = parser.parse()
 
             # 3. 生成执行计划
-            planner = PlanGenerator()
+            planner = PlanGenerator(catalog_manager=self.catalog_manager)
             plan = planner.generate(ast)  # 返回操作符对象
 
             # 4. 执行计划

@@ -48,7 +48,7 @@ class SQLCompiler:
 
             # 执行计划生成（包含优化）
             print("\n=== 执行计划生成 ===")
-            codegen = PlanGenerator()
+            codegen = PlanGenerator(catalog_manager=self.catalog)
             plan = codegen.generate(ast)
             print("执行计划:")
             print(format_json(plan.to_dict()))
@@ -79,7 +79,7 @@ class SQLCompiler:
             semantic.analyze(ast)
 
             # 执行计划生成（静默模式）
-            codegen = PlanGenerator(enable_optimization=True, silent_mode=True)
+            codegen = PlanGenerator(enable_optimization=True, silent_mode=True,catalog_manager=self.catalog)
             plan = codegen.generate(ast)
 
             return plan

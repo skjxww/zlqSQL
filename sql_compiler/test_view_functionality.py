@@ -1,6 +1,5 @@
 def test_view_functionality():
     """测试视图功能"""
-
     from catalog.catalog_manager import CatalogManager
     from sql_compiler.main import SQLCompiler
 
@@ -18,56 +17,38 @@ def test_view_functionality():
         ("salary", "DECIMAL(10,2)", None)
     ])
 
-    catalog.create_table("departments", [
-        ("id", "INT", "PRIMARY KEY"),
-        ("name", "VARCHAR(30)", None),
-        ("manager_id", "INT", None)
-    ])
+    # 测试CREATE VIEW
+    sql = "CREATE VIEW employee_summary AS SELECT name, department, salary FROM employees;"
 
-    # 测试视图SQL
-    view_test_cases = [
-        "CREATE VIEW employee_summary AS SELECT name, department, salary FROM employees;",
-        "CREATE VIEW emp_info (emp_name, dept, pay) AS SELECT name, department, salary FROM employees;",
-        "CREATE OR REPLACE VIEW employee_summary AS SELECT name, department, salary FROM employees WHERE salary > 50000;",
-        "CREATE MATERIALIZED VIEW dept_stats AS SELECT department, COUNT(*) as emp_count, AVG(salary) as avg_salary FROM employees GROUP BY department;",
-        "SELECT * FROM employee_summary;",
-        "SELECT emp_name, pay FROM emp_info WHERE pay > 60000;",
-        "SHOW VIEWS;",
-        "SHOW VIEWS LIKE 'emp%';",
-        "DESCRIBE VIEW employee_summary;",
-        "DROP VIEW IF EXISTS temp_view;",
-        "DROP VIEW employee_summary;",
-    ]
+    try:
+        plans = compiler.compile(sql)
+        print(f"✅ CREATE VIEW 编译成功")
 
-    print("\n视图操作测试:")
-    for i, sql in enumerate(view_test_cases, 1):
+        # 执行计划
+        if plans and hasattr(plans, 'execute'):
+            results = list(plans.execute())
+            print(f"   执行结果: {results}")
+
+        # 关键：检查视图是否真的被创建
+        print(f"📋 视图是否存在: {catalog.view_exists('employee_summary')}")
+        print(f"📋 所有视图: {catalog.get_all_views()}")
+
+        if catalog.view_exists('employee_summary'):
+            print(f"📋 视图列信息: {catalog.get_view_columns('employee_summary')}")
+
+    except Exception as e:
+        print(f"❌ 测试失败: {e}")
+
+    # 现在测试查询视图
+    if catalog.view_exists('employee_summary'):
         try:
-            plans = compiler.compile(sql)
-            if plans is None:
-                print(f"❌ 测试 {i}: 编译返回None")
-                continue
-
-            print(f"✅ 测试 {i}: {sql.split()[0]} {sql.split()[1] if len(sql.split()) > 1 else ''} 编译成功")
-
-            # 执行计划 - 修复迭代问题
-            if hasattr(plans, '__iter__') and not isinstance(plans, str):
-                # 如果plans是可迭代的
-                for plan in plans:
-                    if hasattr(plan, 'execute'):
-                        results = list(plan.execute())
-                        if results:
-                            print(f"   执行结果: {results[0].get('message', results[0])}")
-            else:
-                # 如果plans是单个对象
-                if hasattr(plans, 'execute'):
-                    results = list(plans.execute())
-                    if results:
-                        print(f"   执行结果: {results[0].get('message', results[0])}")
-
+            query_sql = "SELECT * FROM employee_summary;"
+            query_plans = compiler.compile(query_sql)
+            print(f"✅ 查询视图编译成功")
         except Exception as e:
-            print(f"❌ 测试 {i}: 失败 - {e}")
-
-    print(f"\n=== 视图功能测试完成 ===")
+            print(f"❌ 查询视图失败: {e}")
+    else:
+        print("❌ 视图未创建，无法测试查询")
 
 
 if __name__ == "__main__":

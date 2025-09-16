@@ -637,7 +637,8 @@ class PlanGenerator:
             columns=stmt.columns,
             or_replace=stmt.or_replace,
             materialized=stmt.materialized,
-            with_check_option=stmt.with_check_option
+            with_check_option=stmt.with_check_option,
+            catalog=self.catalog_manager
         )
 
     def _generate_drop_view_plan(self, stmt: DropViewStmt) -> 'DropViewOp':
@@ -653,7 +654,8 @@ class PlanGenerator:
             view_names=stmt.view_names,
             if_exists=stmt.if_exists,
             cascade=stmt.cascade,
-            materialized=stmt.materialized
+            materialized=stmt.materialized,
+            catalog=self.catalog_manager
         )
 
     def _generate_show_views_plan(self, stmt: ShowViewsStmt) -> 'ShowViewsOp':

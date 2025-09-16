@@ -162,5 +162,21 @@
     "version": "1.0",
     "created_at": null
   },
-  "indexes": {}
+  "indexes": {},
+  "views": {
+    "employee_summary": {
+      "definition": "SELECT name, department, salary FROM employees",
+      "columns": [
+        "name",
+        "department",
+        "salary"
+      ],
+      "is_materialized": false,
+      "created_at": "2025-09-16T09:30:18.096115",
+      "with_check_option": false,
+      "dependencies": [
+        "employees"
+      ]
+    }
+  }
 }

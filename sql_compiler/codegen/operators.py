@@ -1837,7 +1837,8 @@ class CreateViewOp(Operator):
 
     def __init__(self, view_name: str, select_plan: Operator,
                  columns: Optional[List[str]] = None, or_replace: bool = False,
-                 materialized: bool = False, with_check_option: bool = False):
+                 materialized: bool = False, with_check_option: bool = False,
+                 catalog=None):  # 添加catalog参数
         super().__init__([select_plan])
         self.view_name = view_name
         self.select_plan = select_plan
@@ -1845,6 +1846,7 @@ class CreateViewOp(Operator):
         self.or_replace = or_replace
         self.materialized = materialized
         self.with_check_option = with_check_option
+        self.catalog = catalog  # 保存catalog引用
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -1857,48 +1859,247 @@ class CreateViewOp(Operator):
             "select_plan": self.select_plan.to_dict()
         }
 
+    def _get_view_definition(self, view_name: str):
+        """获取视图定义"""
+        if hasattr(self.catalog, 'get_view_definition'):
+            definition = self.catalog.get_view_definition(view_name)
+            # 这里需要重新解析视图的SELECT语句
+            from sql_compiler.lexer.lexical_analyzer import LexicalAnalyzer
+            from sql_compiler.parser.syntax_analyzer import SyntaxAnalyzer
+
+            lexer = LexicalAnalyzer(definition)
+            tokens = lexer.tokenize()
+            parser = SyntaxAnalyzer(tokens)
+            return parser.parse()
+
+        # 简化实现
+        from sql_compiler.parser.ast_nodes import SelectStmt, TableRef
+        return SelectStmt(columns=["*"], from_clause=TableRef("dummy"))
+
     def execute(self) -> Iterator[Dict[str, Any]]:
         """执行创建视图操作"""
-        yield {
-            "operation": "create_view",
-            "view_name": self.view_name,
-            "materialized": self.materialized,
-            "or_replace": self.or_replace,
-            "status": "success",
-            "message": f"视图 {self.view_name} 创建成功"
-        }
+        try:
+            # 从select_plan构造视图定义字符串
+            definition = self._construct_view_definition_from_plan()
+
+            # 实际调用catalog的create_view方法
+            success = self.catalog.create_view(
+                view_name=self.view_name,
+                definition=definition,
+                columns=self.columns,
+                is_materialized=self.materialized,
+                or_replace=self.or_replace,
+                with_check_option=self.with_check_option
+            )
+
+            if success:
+                yield {
+                    "operation": "create_view",
+                    "view_name": self.view_name,
+                    "materialized": self.materialized,
+                    "or_replace": self.or_replace,
+                    "status": "success",
+                    "message": f"视图 {self.view_name} 创建成功"
+                }
+            else:
+                yield {
+                    "operation": "create_view",
+                    "view_name": self.view_name,
+                    "status": "failed",
+                    "message": f"视图 {self.view_name} 创建失败"
+                }
+
+        except Exception as e:
+            yield {
+                "operation": "create_view",
+                "view_name": self.view_name,
+                "status": "error",
+                "message": f"视图 {self.view_name} 创建错误: {str(e)}"
+            }
+
+    def _construct_view_definition_from_plan(self) -> str:
+        """从执行计划构造视图定义字符串"""
+        try:
+            # 从执行计划中重构SELECT语句
+            return self._reconstruct_select_sql(self.select_plan)
+        except Exception as e:
+            # 如果重构失败，使用简化版本
+            return self._simple_reconstruct()
+
+    def _reconstruct_select_sql(self, plan) -> str:
+        """递归重构SELECT语句"""
+        if hasattr(plan, 'type'):
+            plan_type = getattr(plan, 'type', plan.__class__.__name__)
+        else:
+            plan_type = plan.__class__.__name__
+
+        if plan_type == "ProjectOp":
+            # 处理SELECT子句
+            columns = getattr(plan, 'columns', ['*'])
+            columns_str = ', '.join(columns)
+
+            # 递归处理子计划
+            if hasattr(plan, 'children') and plan.children:
+                from_part = self._reconstruct_from_clause(plan.children[0])
+                return f"SELECT {columns_str} FROM {from_part}"
+            else:
+                return f"SELECT {columns_str}"
+
+        elif plan_type == "FilterOp":
+            # 处理WHERE子句
+            base_sql = self._reconstruct_select_sql(plan.children[0]) if plan.children else "SELECT *"
+            where_clause = self._reconstruct_expression(getattr(plan, 'condition', None))
+            return f"{base_sql} WHERE {where_clause}"
+
+        elif plan_type == "GroupByOp":
+            # 处理GROUP BY子句
+            base_sql = self._reconstruct_select_sql(plan.children[0]) if plan.children else "SELECT *"
+            group_columns = getattr(plan, 'group_columns', [])
+            if group_columns:
+                group_by_str = ', '.join(group_columns)
+                base_sql += f" GROUP BY {group_by_str}"
+
+            # 处理HAVING子句
+            having_condition = getattr(plan, 'having_condition', None)
+            if having_condition:
+                having_clause = self._reconstruct_expression(having_condition)
+                base_sql += f" HAVING {having_clause}"
+
+            return base_sql
+
+        elif plan_type == "SeqScanOp":
+            # 基础表扫描
+            table_name = getattr(plan, 'table_name', 'unknown_table')
+            return table_name
+
+        else:
+            # 其他类型的计划，返回简化版本
+            return self._simple_reconstruct()
+
+    def _reconstruct_from_clause(self, plan) -> str:
+        """重构FROM子句"""
+        plan_type = getattr(plan, 'type', plan.__class__.__name__)
+
+        if plan_type == "SeqScanOp":
+            return getattr(plan, 'table_name', 'unknown_table')
+        elif plan_type == "JoinOp":
+            # 处理JOIN
+            left_table = self._reconstruct_from_clause(plan.left_child) if hasattr(plan, 'left_child') else 'table1'
+            right_table = self._reconstruct_from_clause(plan.right_child) if hasattr(plan, 'right_child') else 'table2'
+            join_type = getattr(plan, 'join_type', 'INNER')
+
+            result = f"{left_table} {join_type} JOIN {right_table}"
+
+            # 添加ON条件
+            on_condition = getattr(plan, 'on_condition', None)
+            if on_condition:
+                on_clause = self._reconstruct_expression(on_condition)
+                result += f" ON {on_clause}"
+
+            return result
+        else:
+            return 'unknown_table'
+
+    def _reconstruct_expression(self, expr) -> str:
+        """重构表达式"""
+        if expr is None:
+            return "TRUE"
+
+        # 如果是字典形式的表达式
+        if isinstance(expr, dict):
+            expr_type = expr.get('type', '')
+
+            if expr_type == "BinaryExpr":
+                left = self._reconstruct_expression(expr.get('left'))
+                operator = expr.get('operator', '=')
+                right = self._reconstruct_expression(expr.get('right'))
+                return f"{left} {operator} {right}"
+
+            elif expr_type == "IdentifierExpr":
+                table_name = expr.get('table_name')
+                column_name = expr.get('name', 'unknown')
+                if table_name:
+                    return f"{table_name}.{column_name}"
+                return column_name
+
+            elif expr_type == "LiteralExpr":
+                value = expr.get('value')
+                if isinstance(value, str):
+                    return f"'{value}'"
+                return str(value)
+
+            elif expr_type == "FunctionExpr":
+                func_name = expr.get('function_name', 'UNKNOWN')
+                args = expr.get('arguments', [])
+                args_str = ', '.join([self._reconstruct_expression(arg) for arg in args])
+                return f"{func_name}({args_str})"
+
+        # 如果是对象形式的表达式
+        elif hasattr(expr, 'to_dict'):
+            return self._reconstruct_expression(expr.to_dict())
+
+        # 如果是简单的字符串或数值
+        else:
+            return str(expr)
+
+    def _simple_reconstruct(self) -> str:
+        """简化版本的SQL重构"""
+        # 尝试从select_plan获取基本信息
+        table_name = "unknown_table"
+        columns = "*"
+
+        if hasattr(self.select_plan, 'children') and self.select_plan.children:
+            first_child = self.select_plan.children[0]
+            if hasattr(first_child, 'table_name'):
+                table_name = first_child.table_name
+
+        if hasattr(self.select_plan, 'columns'):
+            columns = ', '.join(self.select_plan.columns)
+
+        return f"SELECT {columns} FROM {table_name}"
 
 
 class DropViewOp(Operator):
-    """DROP VIEW 操作符"""
-
     def __init__(self, view_names: List[str], if_exists: bool = False,
-                 cascade: bool = False, materialized: bool = False):
+                 cascade: bool = False, materialized: bool = False, catalog=None):
         super().__init__()
         self.view_names = view_names
         self.if_exists = if_exists
         self.cascade = cascade
         self.materialized = materialized
-
-    def to_dict(self) -> Dict[str, Any]:
-        return {
-            "type": "DropViewOp",
-            "view_names": self.view_names,
-            "if_exists": self.if_exists,
-            "cascade": self.cascade,
-            "materialized": self.materialized
-        }
+        self.catalog = catalog
 
     def execute(self) -> Iterator[Dict[str, Any]]:
         """执行删除视图操作"""
         for view_name in self.view_names:
-            yield {
-                "operation": "drop_view",
-                "view_name": view_name,
-                "materialized": self.materialized,
-                "status": "success",
-                "message": f"视图 {view_name} 删除成功"
-            }
+            try:
+                success = self.catalog.drop_view(
+                    view_name=view_name,
+                    if_exists=self.if_exists,
+                    cascade=self.cascade
+                )
+
+                if success:
+                    yield {
+                        "operation": "drop_view",
+                        "view_name": view_name,
+                        "status": "success",
+                        "message": f"视图 {view_name} 删除成功"
+                    }
+                else:
+                    yield {
+                        "operation": "drop_view",
+                        "view_name": view_name,
+                        "status": "failed",
+                        "message": f"视图 {view_name} 删除失败"
+                    }
+            except Exception as e:
+                yield {
+                    "operation": "drop_view",
+                    "view_name": view_name,
+                    "status": "error",
+                    "message": f"视图 {view_name} 删除错误: {str(e)}"
+                }
 
 
 class ShowViewsOp(Operator):
@@ -1971,3 +2172,4 @@ class ViewScanOp(Operator):
             # 为结果添加视图信息
             result["_view_source"] = self.view_name
             yield result
+

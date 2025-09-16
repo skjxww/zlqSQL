@@ -187,14 +187,24 @@ class SemanticAnalyzer:
     def _analyze_from_clause(self, from_clause: FromClause) -> Dict[str, List[str]]:
         """分析FROM子句，返回可用的表和列 - 增强别名支持"""
         if isinstance(from_clause, TableRef):
-            if not self.catalog.table_exists(from_clause.table_name):
-                raise SemanticError(f"表 '{from_clause.table_name}' 不存在")
+            # 修改：同时检查表和视图
+            if not (self.catalog.table_exists(from_clause.table_name) or self.catalog.view_exists(
+                    from_clause.table_name)):
+                raise SemanticError(f"表或视图 '{from_clause.table_name}' 不存在")
 
-            table_info = self.catalog.get_table(from_clause.table_name)
-            if not table_info:
-                raise SemanticError(f"无法获取表 '{from_clause.table_name}' 的信息")
+            # 获取列信息
+            if self.catalog.table_exists(from_clause.table_name):
+                # 处理物理表
+                table_info = self.catalog.get_table(from_clause.table_name)
+                if not table_info:
+                    raise SemanticError(f"无法获取表 '{from_clause.table_name}' 的信息")
+                table_columns = [col["name"] for col in table_info["columns"]]
+            else:
+                # 处理视图
+                table_columns = self.catalog.get_view_columns(from_clause.table_name)
+                if not table_columns:
+                    raise SemanticError(f"无法获取视图 '{from_clause.table_name}' 的列信息")
 
-            table_columns = [col["name"] for col in table_info["columns"]]
             real_table_name = from_clause.table_name
 
             # 构建结果字典
