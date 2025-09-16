@@ -322,8 +322,13 @@ class StorageEngine:
     def update_row_transactional(self, table_name: str, old_row: Dict, new_data: Dict, txn_id: int) -> bool:
         """在事务中更新一行数据"""
         try:
-            # 添加事务状态检查
-            if not self.transaction_manager or not self.transaction_manager.is_transaction_active(txn_id):
+            # 添加事务状态检查 - 使用已有的方法
+            if not self.transaction_manager:
+                self.logger.error(f"Transaction manager not available")
+                return False
+
+            txn = self.transaction_manager.get_transaction(txn_id)
+            if not txn or txn.state != TransactionState.ACTIVE:
                 self.logger.error(f"Transaction {txn_id} is not active or doesn't exist")
                 return False
 
