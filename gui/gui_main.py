@@ -240,8 +240,8 @@ class SimpleDBGUI:
         self.nl_tab.set_sql_tab_instance(self.sql_tab)
 
         # 执行计划可视化标签页
-        self.plan_tab = PlanVisualizationTab(self.input_notebook, ai_manager=self.ai_manager)
-        self.input_notebook.add(self.plan_tab.frame, text="📊 执行计划可视化")
+        # self.plan_tab = PlanVisualizationTab(self.input_notebook, ai_manager=self.ai_manager)
+        # self.input_notebook.add(self.plan_tab.frame, text="📊 执行计划可视化")
 
         # 数据库信息面板 (放在左侧面板顶部)
         self.db_info = DatabaseInfoPanel(self.left_panel, self.db_manager)
@@ -255,6 +255,7 @@ class SimpleDBGUI:
 
         # 更新SQL查询标签页的结果显示引用
         self.sql_tab.result_display = self.result_display
+        # self.sql_tab.set_plan_tab_instance(self.plan_tab)
 
     def run(self):
         """启动GUI"""

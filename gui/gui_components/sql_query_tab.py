@@ -27,6 +27,12 @@ class SQLQueryTab:
             result_display.set_sql_corrector(db_manager.sql_corrector)
             result_display.set_sql_query_callback(self._handle_result_display_callback)
 
+        self.plan_tab = None  # 添加执行计划标签页的引用
+
+    def set_plan_tab_instance(self, plan_tab):
+        """设置执行计划标签页实例的引用"""
+        self.plan_tab = plan_tab
+
     def _get_root_window(self, widget):
         """获取根窗口"""
         try:
@@ -233,6 +239,9 @@ class SQLQueryTab:
             # 执行SQL
             result = self.db_manager.execute_query(sql)
             execution_time = time.time() - start_time
+            if hasattr(self.db_manager, 'get_execution_plan'):
+                plan = self.db_manager.get_execution_plan(sql)
+                self.plan_tab.update_plan(plan)
 
             # 在主线程中更新UI
             self._safe_ui_update(lambda: self._update_success_ui(sql, result, execution_time))
@@ -287,6 +296,8 @@ class SQLQueryTab:
                 try:
                     if hasattr(self.db_manager, 'get_execution_plan'):
                         plan = self.db_manager.get_execution_plan(sql)
+                        self.plan_tab.update_plan(plan)
+
                 except:
                     pass
 
@@ -325,6 +336,17 @@ class SQLQueryTab:
 
         # 在主线程中更新UI
         self._safe_ui_update(lambda: self._update_batch_result_ui(all_results, execution_summary, execution_time))
+
+    def _switch_to_plan_tab(self):
+        """切换到执行计划标签页"""
+        # 获取父notebook的引用并切换标签页
+        parent_notebook = self.frame.master
+        if hasattr(parent_notebook, 'select'):
+            # 找到执行计划标签页的索引
+            for i in range(parent_notebook.index("end")):
+                if parent_notebook.tab(i, "text") == "📊 执行计划可视化":
+                    parent_notebook.select(i)
+                    break
 
     def _update_success_ui(self, sql, result, execution_time):
         """更新成功结果UI"""

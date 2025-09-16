@@ -6,14 +6,18 @@ from tkinter import ttk, messagebox
 class PlanVisualizationTab:
     def __init__(self, parent_notebook, ai_manager):
         self.ai_manager = ai_manager
+        self.last_execution_plan = None  # 初始化执行计划数据
 
         # 创建执行计划可视化标签页
         self.plan_frame = ttk.Frame(parent_notebook)
-        self.frame = self.plan_frame  # Add this line as an alias
+        self.frame = self.plan_frame
         parent_notebook.add(self.plan_frame, text="执行计划")
 
         # 创建界面组件
         self._create_plan_visualization_interface()
+
+        # 初始化时尝试获取数据
+        self._refresh_plan()
 
     def _create_plan_visualization_interface(self):
         """创建执行计划可视化界面"""
@@ -55,6 +59,7 @@ class PlanVisualizationTab:
 
     def _show_placeholder(self):
         """显示占位提示"""
+        self.plan_canvas.delete("all")  # 清空现有内容
         self.plan_canvas.create_text(
             400, 300,
             text="执行计划可视化\n\n请先在SQL查询标签页执行一条SQL语句\n然后返回此处查看执行计划",
@@ -182,12 +187,19 @@ class PlanVisualizationTab:
 
     def _refresh_plan(self):
         """刷新执行计划"""
-        if hasattr(self.ai_manager, 'last_execution_plan') and self.ai_manager.last_execution_plan:
-            self.last_execution_plan = self.ai_manager.last_execution_plan
-            self._draw_plan_visualization()
-        else:
+        try:
+            # 从ai_manager获取最新的执行计划数据
+            if hasattr(self.ai_manager, 'last_execution_plan') and self.ai_manager.last_execution_plan:
+                self.last_execution_plan = self.ai_manager.last_execution_plan
+                print(f"获取到执行计划数据: {type(self.last_execution_plan)}")  # 调试信息
+                self._draw_plan_visualization()
+            else:
+                print("未找到执行计划数据")  # 调试信息
+                self._show_placeholder()
+        except Exception as e:
+            print(f"刷新执行计划时出错: {e}")  # 调试信息
             self._show_placeholder()
-            messagebox.showinfo("提示", "没有可用的执行计划数据。请先在SQL查询标签页执行一条SQL语句。")
+            messagebox.showerror("错误", f"刷新执行计划失败: {e}")
 
     def _save_plan(self):
         """保存执行计划图片"""
@@ -212,7 +224,7 @@ class PlanVisualizationTab:
 
     def _draw_plan_visualization(self):
         """绘制执行计划可视化"""
-        if not hasattr(self, 'last_execution_plan') or not self.last_execution_plan:
+        if not self.last_execution_plan:
             self._show_placeholder()
             return
 
@@ -220,6 +232,8 @@ class PlanVisualizationTab:
         self.plan_canvas.delete("all")
 
         try:
+            print(f"开始绘制执行计划: {json.dumps(self.last_execution_plan, indent=2, default=str)[:200]}...")  # 调试信息
+
             # 绘制执行计划树形结构
             self._draw_plan_node(self.last_execution_plan, 400, 50, 0)
 
@@ -227,6 +241,7 @@ class PlanVisualizationTab:
             self.plan_canvas.configure(scrollregion=self.plan_canvas.bbox("all"))
 
         except Exception as e:
+            print(f"绘制执行计划时出错: {e}")  # 调试信息
             self.plan_canvas.create_text(
                 400, 300,
                 text=f"绘制执行计划失败: {str(e)}",
@@ -238,18 +253,24 @@ class PlanVisualizationTab:
     def _draw_plan_node(self, node, x, y, level, parent_x=None, parent_y=None):
         """递归绘制执行计划节点"""
         if not isinstance(node, dict):
+            print(f"节点不是字典类型: {type(node)}")  # 调试信息
             return y
 
-        # 节点信息
-        node_type = node.get('Node Type', node.get('type', 'Unknown'))
-        relation_name = node.get('Relation Name', '')
-        cost = node.get('Total Cost', node.get('cost', 0))
+        # 节点信息 - 兼容不同的执行计划格式
+        node_type = node.get('Node Type', node.get('type', node.get('operation', 'Unknown')))
+        relation_name = node.get('Relation Name', node.get('relation', node.get('table', '')))
+        cost = node.get('Total Cost', node.get('cost', node.get('estimated_cost', 0)))
 
         # 节点文本
         node_text = f"{node_type}"
         if relation_name:
             node_text += f"\n({relation_name})"
-        node_text += f"\nCost: {cost:.2f}" if isinstance(cost, (int, float)) else f"\nCost: {cost}"
+
+        # 处理成本显示
+        if isinstance(cost, (int, float)):
+            node_text += f"\nCost: {cost:.2f}"
+        elif cost:
+            node_text += f"\nCost: {cost}"
 
         # 绘制节点矩形
         rect_width = 120
@@ -273,9 +294,9 @@ class PlanVisualizationTab:
                 fill="gray", width=2, arrow=tk.LAST
             )
 
-        # 处理子节点
-        children = node.get('Plans', node.get('children', []))
-        if children:
+        # 处理子节点 - 兼容不同的子节点字段名
+        children = node.get('Plans', node.get('children', node.get('inputs', [])))
+        if children and isinstance(children, list):
             child_y = y + 120
             child_count = len(children)
             if child_count == 1:
@@ -295,3 +316,8 @@ class PlanVisualizationTab:
             return max_y
 
         return y + 60
+
+    def update_plan(self, execution_plan):
+        """外部调用此方法来更新执行计划数据"""
+        self.last_execution_plan = execution_plan
+        self._draw_plan_visualization()
