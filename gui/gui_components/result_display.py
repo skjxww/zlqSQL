@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk, scrolledtext, messagebox
 from datetime import datetime
 import json
+from sql_compiler.diagnostics.error_analyzer import SmartSQLCorrector
 
 
 class ResultDisplay:
@@ -12,8 +13,10 @@ class ResultDisplay:
         self.frame.columnconfigure(0, weight=1)
         self.frame.rowconfigure(0, weight=1)
 
-        # 当前错误分析
+        # 添加智能纠错器引用
+        self.sql_corrector = None
         self.current_error_analysis = None
+        self.sql_query_callback = None  # 用于回调到SQL查询标签页
 
         self._create_widgets()
 
@@ -106,6 +109,14 @@ class ResultDisplay:
 
         # 查询历史区域
         self._create_history_area()
+
+    def set_sql_corrector(self, corrector):
+        """设置智能纠错器"""
+        self.sql_corrector = corrector
+
+    def set_sql_query_callback(self, callback):
+        """设置SQL查询回调函数"""
+        self.sql_query_callback = callback
 
     def _create_result_table(self, parent):
         """创建结果表格"""
@@ -228,16 +239,125 @@ class ResultDisplay:
         else:
             self.plan_text.insert(1.0, str(plan))
 
-    def update_smart_analysis(self, analysis, success=None):
+    def update_smart_analysis(self, analysis, success=None, original_sql=None, error=None):
         """更新智能分析显示"""
-        self.current_error_analysis = analysis
-        self._update_analysis_text(analysis)
+        self.analysis_text.configure(state=tk.NORMAL)
+        self.analysis_text.delete(1.0, tk.END)
 
-        # 控制应用修正按钮状态
-        if analysis.get('corrected_sql_options'):
-            self.apply_correction_btn.configure(state=tk.NORMAL)
-        else:
+        if analysis:
+            # 检查分析结果的结构
+            suggestions = None
+            corrected_options = None
+            improvement_tips = None
+
+            if isinstance(analysis, dict):
+                suggestions = analysis.get('suggestions', [])
+                corrected_options = analysis.get('corrected_sql_options', [])
+                improvement_tips = analysis.get('improvement_tips', [])
+            else:
+                suggestions = getattr(analysis, 'suggestions', [])
+                corrected_options = getattr(analysis, 'corrected_sql_options', [])
+                improvement_tips = getattr(analysis, 'improvement_tips', [])
+
+            # 如果有错误建议或改进建议，显示分析结果
+            if suggestions or improvement_tips:
+                self.current_error_analysis = {
+                    'original_sql': original_sql,
+                    'error': error,
+                    'suggestions': suggestions,
+                    'corrected_sql_options': corrected_options,
+                    'improvement_tips': improvement_tips
+                }
+
+                # 显示分析结果
+                self.analysis_text.insert(tk.END, "🔍 智能分析结果\n", "header")
+                self.analysis_text.insert(tk.END, "=" * 50 + "\n\n")
+
+                # 显示错误分析建议
+                if suggestions:
+                    self.analysis_text.insert(tk.END, "❌ 错误分析:\n", "section_header")
+                    for i, suggestion in enumerate(suggestions, 1):
+                        self._display_suggestion(suggestion, i)
+
+                # 显示改进建议
+                if improvement_tips:
+                    if suggestions:  # 如果前面有错误分析，添加分隔符
+                        self.analysis_text.insert(tk.END, "\n" + "=" * 30 + "\n\n")
+
+                    self.analysis_text.insert(tk.END, "💡 性能优化建议:\n", "section_header")
+                    for i, tip in enumerate(improvement_tips, 1):
+                        self._display_suggestion(tip, i, is_improvement=True)
+
+                # 启用或禁用应用修正按钮
+                if corrected_options or any(self._get_corrected_sql(s) for s in suggestions + improvement_tips):
+                    self.apply_correction_btn.configure(state=tk.NORMAL)
+                else:
+                    self.apply_correction_btn.configure(state=tk.DISABLED)
+            else:
+                self.analysis_text.insert(tk.END, "✅ 智能分析完成\n", "info")
+                self.analysis_text.insert(tk.END, "未发现明显的问题或可优化的地方。\n")
+                self.apply_correction_btn.configure(state=tk.DISABLED)
+
+        elif success is True:
+            self.analysis_text.insert(tk.END, "✅ SQL语句检查通过\n", "success")
+            self.analysis_text.insert(tk.END, "未发现明显的语法或逻辑错误。\n")
             self.apply_correction_btn.configure(state=tk.DISABLED)
+
+        else:
+            self.analysis_text.insert(tk.END, "❌ 无法进行智能分析\n", "error")
+            if error:
+                self.analysis_text.insert(tk.END, f"错误信息: {error}\n")
+            self.apply_correction_btn.configure(state=tk.DISABLED)
+
+        # 配置文本标签样式
+        self._configure_text_styles()
+        self.analysis_text.configure(state=tk.DISABLED)
+
+    def _display_suggestion(self, suggestion, index, is_improvement=False):
+        """显示单个建议"""
+        # 处理建议项
+        if isinstance(suggestion, dict):
+            suggestion_type = suggestion.get('type', suggestion.get('error_type', '未知'))
+            description = suggestion.get('description', '')
+            suggestion_text = suggestion.get('suggestion', '')
+            confidence = suggestion.get('confidence', 0.0)
+            corrected_sql = suggestion.get('corrected_sql', '')
+        else:
+            suggestion_type = getattr(suggestion, 'type', getattr(suggestion, 'error_type', '未知'))
+            description = getattr(suggestion, 'description', '')
+            suggestion_text = getattr(suggestion, 'suggestion', '')
+            confidence = getattr(suggestion, 'confidence', 0.0)
+            corrected_sql = getattr(suggestion, 'corrected_sql', '')
+
+        icon = "💡" if is_improvement else "📋"
+        self.analysis_text.insert(tk.END, f"{icon} 建议 {index}: {description}\n", "suggestion_title")
+        self.analysis_text.insert(tk.END, f"   类型: {suggestion_type}\n")
+        self.analysis_text.insert(tk.END, f"   建议: {suggestion_text}\n")
+        self.analysis_text.insert(tk.END, f"   置信度: {'█' * int(confidence * 10)} ({confidence:.1%})\n")
+
+        if corrected_sql:
+            self.analysis_text.insert(tk.END, "   🔧 修正SQL:\n", "corrected_sql")
+            self.analysis_text.insert(tk.END, f"   {corrected_sql}\n", "sql_code")
+
+        self.analysis_text.insert(tk.END, "\n")
+
+    def _get_corrected_sql(self, suggestion):
+        """获取建议中的修正SQL"""
+        if isinstance(suggestion, dict):
+            return suggestion.get('corrected_sql', '')
+        else:
+            return getattr(suggestion, 'corrected_sql', '')
+
+    def _configure_text_styles(self):
+        """配置文本样式"""
+        self.analysis_text.tag_configure("header", font=("Consolas", 12, "bold"), foreground="blue")
+        self.analysis_text.tag_configure("section_header", font=("Consolas", 11, "bold"), foreground="purple")
+        self.analysis_text.tag_configure("suggestion_title", font=("Consolas", 10, "bold"), foreground="darkgreen")
+        self.analysis_text.tag_configure("corrected_sql", font=("Consolas", 10, "bold"), foreground="green")
+        self.analysis_text.tag_configure("sql_code", font=("Consolas", 9), background="#f0f0f0")
+        self.analysis_text.tag_configure("success", font=("Consolas", 11, "bold"), foreground="green")
+        self.analysis_text.tag_configure("error", font=("Consolas", 11, "bold"), foreground="red")
+        self.analysis_text.tag_configure("info", font=("Consolas", 11, "bold"), foreground="blue")
 
     def _update_analysis_text(self, analysis):
         """更新智能分析文本框内容"""
@@ -299,17 +419,118 @@ class ResultDisplay:
 
     def _apply_correction_from_analysis(self):
         """从分析结果应用修正"""
-        if not self.current_error_analysis or not self.current_error_analysis.get('corrected_sql_options'):
-            messagebox.showinfo("提示", "没有可用的修正选项")
+        if not self.current_error_analysis:
+            messagebox.showwarning("无修正选项", "当前没有可用的修正选项")
             return
 
-        # 如果有多个修正选项，显示选择对话框
-        if len(self.current_error_analysis['corrected_sql_options']) > 1:
-            self._show_correction_options_dialog()
+        # 收集所有有修正SQL的建议
+        all_corrections = []
+
+        # 从错误建议中收集
+        suggestions = self.current_error_analysis.get('suggestions', [])
+        for suggestion in suggestions:
+            corrected_sql = self._get_corrected_sql(suggestion)
+            if corrected_sql:
+                description = suggestion.get('description', '') if isinstance(suggestion, dict) else getattr(suggestion,
+                                                                                                             'description',
+                                                                                                             '')
+                confidence = suggestion.get('confidence', 0.0) if isinstance(suggestion, dict) else getattr(suggestion,
+                                                                                                            'confidence',
+                                                                                                            0.0)
+                all_corrections.append({
+                    'sql': corrected_sql,
+                    'description': description,
+                    'confidence': confidence
+                })
+
+        # 从改进建议中收集
+        improvement_tips = self.current_error_analysis.get('improvement_tips', [])
+        for tip in improvement_tips:
+            corrected_sql = self._get_corrected_sql(tip)
+            if corrected_sql:
+                description = tip.get('description', '') if isinstance(tip, dict) else getattr(tip, 'description', '')
+                confidence = tip.get('confidence', 0.0) if isinstance(tip, dict) else getattr(tip, 'confidence', 0.0)
+                all_corrections.append({
+                    'sql': corrected_sql,
+                    'description': description,
+                    'confidence': confidence
+                })
+
+        # 从预设的修正选项中收集
+        corrected_options = self.current_error_analysis.get('corrected_sql_options', [])
+        all_corrections.extend(corrected_options)
+
+        if not all_corrections:
+            messagebox.showwarning("无修正选项", "当前没有可用的修正选项")
+            return
+
+        if len(all_corrections) == 1:
+            # 只有一个选项，直接应用
+            self._apply_corrected_sql(all_corrections[0]['sql'])
         else:
-            # 只有一个修正选项，直接应用
-            corrected_sql = self.current_error_analysis['corrected_sql_options'][0]['sql']
+            # 多个选项，显示选择对话框
+            self._show_correction_dialog(all_corrections)
+
+    def _show_correction_dialog(self):
+        """显示修正选择对话框"""
+        dialog = tk.Toplevel(self.frame)
+        dialog.title("选择修正方案")
+        dialog.geometry("800x600")
+        dialog.transient(self.frame.winfo_toplevel())
+        dialog.grab_set()
+
+        main_frame = ttk.Frame(dialog, padding="10")
+        main_frame.pack(fill=tk.BOTH, expand=True)
+
+        # 说明标签
+        ttk.Label(
+            main_frame,
+            text="请选择要应用的修正版本:",
+            font=("Arial", 12, "bold")
+        ).pack(pady=(0, 15))
+
+        # 选项框架
+        options_frame = ttk.Frame(main_frame)
+        options_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 15))
+
+        # 单选按钮变量
+        correction_choice = tk.StringVar(value="0")
+
+        # 修正选项
+        for i, option in enumerate(self.current_error_analysis['corrected_sql_options']):
+            option_frame = ttk.LabelFrame(options_frame, text=f"选项 {i + 1}", padding="5")
+            option_frame.pack(fill=tk.X, pady=2)
+
+            ttk.Radiobutton(
+                option_frame,
+                text=f"{option['description']} (置信度: {option['confidence']:.1%})",
+                variable=correction_choice,
+                value=str(i)
+            ).pack(anchor=tk.W)
+
+            # SQL预览
+            sql_text = tk.Text(option_frame, height=3, font=("Consolas", 9), wrap=tk.WORD)
+            sql_text.pack(fill=tk.X, pady=(5, 0))
+            sql_text.insert(1.0, option['sql'])
+            sql_text.configure(state=tk.DISABLED)
+
+        # 按钮框架
+        button_frame = ttk.Frame(main_frame)
+        button_frame.pack(fill=tk.X)
+
+        def apply_selected_correction():
+            choice_idx = int(correction_choice.get())
+            corrected_sql = self.current_error_analysis['corrected_sql_options'][choice_idx]['sql']
+            dialog.destroy()
             self._apply_corrected_sql(corrected_sql)
+
+        ttk.Button(
+            button_frame,
+            text="🚀 应用并执行",
+            command=apply_selected_correction
+        ).pack(side=tk.RIGHT, padx=(5, 0))
+
+        ttk.Button(button_frame, text="取消", command=dialog.destroy).pack(side=tk.RIGHT)
 
     def _show_correction_options_dialog(self):
         """显示修正选项对话框"""
@@ -381,14 +602,37 @@ class ResultDisplay:
 
     def _apply_corrected_sql(self, corrected_sql):
         """应用修正后的SQL"""
-        # 这里需要回调到SQL查询标签页来应用修正
-        # 在实际实现中，应该通过回调函数或事件机制来处理
-        messagebox.showinfo("应用修正", f"修正已准备好应用:\n\n{corrected_sql}")
+        if self.sql_query_callback:
+            # 回调到SQL查询标签页应用修正
+            self.sql_query_callback('apply_correction', corrected_sql)
+        else:
+            messagebox.showinfo("应用修正", f"修正已准备好应用:\n\n{corrected_sql}")
 
     def _recheck_sql(self):
         """重新检查SQL"""
-        # 这里需要回调到SQL查询标签页来重新检查
-        pass
+        if self.sql_query_callback:
+            # 回调到SQL查询标签页重新检查
+            self.sql_query_callback('recheck', None)
+        else:
+            messagebox.showinfo("提示", "无法重新检查，请在SQL查询标签页中手动检查")
+
+    def display_error_with_analysis(self, error_msg, sql=None):
+        """显示错误并进行智能分析"""
+        # 显示错误
+        self.log(f"❌ 执行错误: {error_msg}")
+
+        # 如果有SQL和纠错器，进行智能分析
+        if sql and self.sql_corrector:
+            try:
+                analysis = self.sql_corrector.analyze_and_suggest(sql, Exception(error_msg))
+                self.update_smart_analysis(analysis, success=False, original_sql=sql, error=error_msg)
+
+                # 切换到智能分析标签页
+                self.result_notebook.select(2)  # 智能分析是第3个标签页（索引2）
+
+            except Exception as e:
+                self.log(f"智能分析失败: {str(e)}")
+                self.update_smart_analysis(None, success=False, error=f"分析失败: {str(e)}")
 
     def log(self, message):
         """记录日志"""

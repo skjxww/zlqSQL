@@ -405,7 +405,6 @@ class PlanGenerator:
 
         return delete_op
 
-    # 在 PlanGenerator 类中添加以下缺失的方法：
 
     def _extract_condition_columns(self, condition) -> List[str]:
         """从条件表达式中提取涉及的列名"""

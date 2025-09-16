@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, scrolledtext, messagebox
 import threading
-from datetime import datetime
+from datetime import datetime, time
 from gui.utils.syntax_highlight import SyntaxHighlighter
 from extensions.smart_completion import CompletionUI
 
@@ -17,6 +17,11 @@ class SQLQueryTab:
 
         # 当前错误分析
         self.current_error_analysis = None
+
+        # 设置结果显示的回调和纠错器
+        if result_display:
+            result_display.set_sql_corrector(db_manager.sql_corrector)
+            result_display.set_sql_query_callback(self._handle_result_display_callback)
 
     def _create_widgets(self):
         """创建SQL查询标签页组件"""
@@ -36,6 +41,7 @@ class SQLQueryTab:
         print(f"AI manager completion engine: {self.ai_manager.completion_engine}")  # 调试
         if self.ai_manager.completion_engine:
             print("正在初始化CompletionUI...")  # 调试
+            from extensions.smart_completion import CompletionUI
             self.completion = CompletionUI(self.sql_text, self.ai_manager.completion_engine)
             print("CompletionUI初始化完成")  # 调试
         else:
@@ -81,6 +87,18 @@ class SQLQueryTab:
         example_frame.columnconfigure(0, weight=1)
         example_frame.columnconfigure(1, weight=1)
 
+    def _handle_result_display_callback(self, action, data):
+        """处理来自结果显示的回调"""
+        if action == 'apply_correction':
+            # 应用修正的SQL
+            self.sql_text.delete(1.0, tk.END)
+            self.sql_text.insert(1.0, data)
+            messagebox.showinfo("修正应用", "SQL已更新，您可以重新执行")
+
+        elif action == 'recheck':
+            # 重新检查当前SQL
+            self._smart_check()
+
     def _setup_bindings(self):
         """设置事件绑定"""
         self.sql_text.bind('<Control-Return>', lambda e: self._execute_sql())
@@ -106,6 +124,25 @@ class SQLQueryTab:
         thread = threading.Thread(target=self._execute_in_thread, args=(sql_statements,))
         thread.daemon = True
         thread.start()
+
+    def _smart_check(self):
+        """智能检查SQL"""
+        sql = self.sql_text.get(1.0, tk.END).strip()
+        if not sql:
+            messagebox.showinfo("提示", "请先输入SQL语句")
+            return
+
+        # 进行智能分析
+        try:
+            analysis = self.db_manager.sql_corrector.analyze_and_suggest(sql)
+            self.result_display.update_smart_analysis(analysis, success=True if not analysis.get('suggestions') else None,
+                                                      original_sql=sql)
+
+            # 切换到智能分析标签页
+            self.result_display.result_notebook.select(2)
+
+        except Exception as e:
+            messagebox.showerror("分析错误", f"智能分析失败: {str(e)}")
 
     def _parse_sql_statements(self, sql_content):
         """解析多个SQL语句"""
@@ -145,107 +182,68 @@ class SQLQueryTab:
         return statements
 
     def _execute_in_thread(self, sql_statements):
-        """在线程中执行SQL语句列表"""
+        """在线程中执行SQL"""
         try:
-            start_time = datetime.now()
-            all_results = []
-            execution_summary = {
-                'total': len(sql_statements),
-                'successful': 0,
-                'failed': 0,
-                'errors': []
-            }
+            if len(sql_statements) == 1:
+                # 单个SQL语句
+                self._execute_single_sql(sql_statements[0])
+            else:
+                # 多个SQL语句
+                self._execute_batch_sql(sql_statements)
+        except Exception as e:
+            # 确保在发生未捕获异常时也能重新启用按钮
+            self.root.after(0, lambda: self.execute_btn.configure(state=tk.NORMAL, text="🚀 执行SQL"))
+            self.result_display.log(f"执行过程中发生未预期错误: {str(e)}")
 
-            # 逐个执行SQL语句
-            for i, sql in enumerate(sql_statements, 1):
-                try:
-                    # 使用局部变量捕获当前的值
-                    current_i = i
-                    total_count = len(sql_statements)
+    def _execute_single_sql(self, sql):
+        """执行单个SQL语句（修改了错误处理）"""
+        start_time = time.time()
 
-                    # 更新按钮状态显示进度
-                    self.frame.after(0, lambda i=current_i, total=total_count:
-                    self.execute_btn.configure(text=f"执行中...({i}/{total})"))
+        try:
+            # 执行SQL
+            result = self.db_manager.execute_sql(sql)
+            execution_time = time.time() - start_time
 
-                    # 执行单个SQL
-                    result, plan = self.db_manager.execute_query(sql)
-
-                    all_results.append({
-                        'index': i,
-                        'sql': sql,
-                        'result': result,
-                        'plan': plan,
-                        'success': True,
-                        'error': None
-                    })
-
-                    execution_summary['successful'] += 1
-
-                except Exception as e:
-                    # 单个SQL执行失败
-                    error_msg = str(e)
-                    all_results.append({
-                        'index': i,
-                        'sql': sql,
-                        'result': None,
-                        'plan': None,
-                        'success': False,
-                        'error': error_msg
-                    })
-
-                    execution_summary['failed'] += 1
-                    execution_summary['errors'].append({
-                        'index': i,
-                        'sql': sql[:50] + '...' if len(sql) > 50 else sql,
-                        'error': error_msg
-                    })
-
-            end_time = datetime.now()
-            execution_time = (end_time - start_time).total_seconds()
-
-            # 更新UI
-            self.frame.after(0, self._update_batch_result_ui, all_results, execution_summary, execution_time)
+            # 在主线程中更新UI
+            self.root.after(0, lambda: self._update_success_ui(sql, result, execution_time))
 
         except Exception as e:
-            self.frame.after(0, self._update_error_ui, f"批量执行错误: {str(e)}")
+            execution_time = time.time() - start_time
+            error_msg = str(e)
 
+            # 在主线程中更新错误UI（包含智能分析）
+            self.root.after(0, lambda: self._update_error_ui_with_smart_analysis(sql, error_msg, execution_time))
+
+    def _update_error_ui_with_smart_analysis(self, sql, error_msg, execution_time):
+        """更新错误UI并进行智能分析"""
+        # 重新启用执行按钮
+        self.execute_btn.configure(state=tk.NORMAL, text="🚀 执行SQL")
+
+        # 使用ResultDisplay的智能分析方法
+        self.result_display.display_error_with_analysis(error_msg, sql)
+
+        # 记录执行时间
+        self.result_display.log(f"执行耗时: {execution_time:.3f}s")
+
+        # 添加到历史
+        self.result_display.add_to_history(sql, execution_time, False, error_msg)
     def _update_batch_result_ui(self, all_results, execution_summary, execution_time):
-        """更新批量执行结果UI（无弹窗版本）"""
+        """更新批量执行结果UI"""
         try:
-            # 显示执行摘要在日志中
-            summary_msg = (f"批量执行完成！总计: {execution_summary['total']} 条语句，"
-                           f"成功: {execution_summary['successful']} 条，"
-                           f"失败: {execution_summary['failed']} 条，"
+            # 显示执行摘要
+            summary_msg = (f"批量执行完成！\n"
+                           f"总计: {execution_summary['total']} 条语句\n"
+                           f"成功: {execution_summary['successful']} 条\n"
+                           f"失败: {execution_summary['failed']} 条\n"
                            f"总耗时: {execution_time:.3f}s")
 
+            # 记录日志
             self.result_display.log(summary_msg)
 
-            # 创建批量结果的汇总数据显示
-            batch_results = []
-            for result_info in all_results:
-                status = "✅ 成功" if result_info['success'] else "❌ 失败"
-                row_info = ""
+            # 显示批量执行结果
+            self._show_batch_results_dialog(all_results, execution_summary, execution_time)
 
-                if result_info['success']:
-                    if isinstance(result_info['result'], list):
-                        row_info = f"返回 {len(result_info['result'])} 行"
-                    else:
-                        row_info = "执行成功"
-                else:
-                    row_info = result_info['error'][:50] + "..." if len(result_info['error']) > 50 else result_info[
-                        'error']
-
-                batch_results.append({
-                    '序号': result_info['index'],
-                    'SQL语句': result_info['sql'][:60] + "..." if len(result_info['sql']) > 60 else result_info['sql'],
-                    '执行状态': status,
-                    '结果信息': row_info
-                })
-
-            # 显示批量结果汇总
-            self.result_display.display_result(batch_results)
-
-            # 显示最后一个成功的详细结果在执行计划中
+            # 更新结果显示 - 显示最后一个成功的结果
             last_successful_result = None
             for result_info in reversed(all_results):
                 if result_info['success'] and result_info['result'] is not None:
@@ -253,30 +251,8 @@ class SQLQueryTab:
                     break
 
             if last_successful_result:
-                plan_info = {
-                    "批量执行汇总": {
-                        "总语句数": execution_summary['total'],
-                        "成功数": execution_summary['successful'],
-                        "失败数": execution_summary['failed'],
-                        "总执行时间": f"{execution_time:.3f}s"
-                    },
-                    "最后成功语句的执行计划": last_successful_result.get('plan', '无执行计划信息')
-                }
-                self.result_display.update_execution_plan(plan_info)
-
-            # 在智能分析中显示失败语句的分析
-            if execution_summary['failed'] > 0:
-                self._show_batch_analysis_in_tab(all_results, execution_summary)
-            else:
-                # 如果全部成功，显示成功信息
-                success_analysis = {
-                    'has_error': False,
-                    'original_sql': f"批量执行 {execution_summary['total']} 条语句",
-                    'improvement_tips': [{
-                        'suggestion': f"所有 {execution_summary['total']} 条SQL语句都执行成功！"
-                    }]
-                }
-                self.result_display.update_smart_analysis(success_analysis, success=True)
+                self.result_display.display_result(last_successful_result['result'])
+                self.result_display.update_execution_plan(last_successful_result['plan'])
 
             # 添加到历史记录
             all_sql = '\n'.join([r['sql'] for r in all_results])
@@ -284,69 +260,15 @@ class SQLQueryTab:
             error_msg = None if success else f"{execution_summary['failed']} 条语句执行失败"
             self.result_display.add_to_history(all_sql, execution_time, success, error_msg)
 
+            # 如果有失败的语句，显示智能分析
+            if execution_summary['failed'] > 0:
+                self._analyze_failed_statements(all_results)
+
         except Exception as e:
             self.result_display.log(f"UI更新错误: {str(e)}")
         finally:
             # 重新启用执行按钮
             self.execute_btn.configure(state=tk.NORMAL, text="🚀 执行SQL")
-
-    def _show_batch_analysis_in_tab(self, all_results, execution_summary):
-        """在智能分析标签页中显示批量分析结果"""
-        failed_results = [r for r in all_results if not r['success']]
-
-        # 构建批量分析内容
-        analysis_content = {
-            'has_error': True,
-            'original_sql': f"批量执行 {execution_summary['total']} 条语句",
-            'error_message': f"批量执行中有 {execution_summary['failed']} 条语句失败",
-            'suggestions': [],
-            'corrected_sql_options': [],
-            'batch_details': {
-                'total': execution_summary['total'],
-                'successful': execution_summary['successful'],
-                'failed': execution_summary['failed'],
-                'failed_statements': []
-            }
-        }
-
-        # 收集失败语句的详细信息
-        for failed_result in failed_results[:5]:  # 最多显示前5个失败的语句
-            analysis_content['batch_details']['failed_statements'].append({
-                'index': failed_result['index'],
-                'sql': failed_result['sql'],
-                'error': failed_result['error']
-            })
-
-            # 添加通用建议
-            analysis_content['suggestions'].append({
-                'type': '语法错误',
-                'description': f"语句 #{failed_result['index']} 执行失败",
-                'suggestion': f"检查SQL语法: {failed_result['error'][:100]}",
-                'confidence': 0.8
-            })
-
-        # 如果失败语句较少，尝试提供修复建议
-        if len(failed_results) <= 3:
-            try:
-                # 对第一个失败的语句进行详细分析
-                first_failed = failed_results[0]
-                error = Exception(first_failed['error'])
-                detailed_analysis = self.db_manager.sql_corrector.analyze_and_suggest(first_failed['sql'], error)
-
-                # 合并详细分析结果
-                if detailed_analysis.get('corrected_sql_options'):
-                    analysis_content['corrected_sql_options'] = detailed_analysis['corrected_sql_options']
-                if detailed_analysis.get('suggestions'):
-                    analysis_content['suggestions'].extend(detailed_analysis['suggestions'])
-
-            except Exception as e:
-                self.result_display.log(f"详细分析失败: {str(e)}")
-
-        # 更新智能分析显示
-        self.result_display.update_smart_analysis(analysis_content, success=False)
-
-        # 自动切换到智能分析标签页
-        self.result_display.show_analysis_tab()
 
     def _update_result_ui(self, result, sql, execution_time, improvement_analysis, plan):
         """更新成功结果UI"""
@@ -393,37 +315,127 @@ class SQLQueryTab:
         # 重新启用执行按钮
         self.execute_btn.configure(state=tk.NORMAL, text="🚀 执行SQL")
 
+    def _show_batch_results_dialog(self, all_results, execution_summary, execution_time):
+        """显示批量执行结果对话框"""
+        dialog = tk.Toplevel(self.frame.master)  # 修复self.root问题
+        dialog.title("📊 批量执行结果")
+        dialog.geometry("900x600")
+        dialog.transient(self.frame.master)
+
+        main_frame = ttk.Frame(dialog, padding="10")
+        main_frame.pack(fill=tk.BOTH, expand=True)
+
+        # 摘要信息
+        summary_frame = ttk.LabelFrame(main_frame, text="执行摘要", padding="10")
+        summary_frame.pack(fill=tk.X, pady=(0, 10))
+
+        summary_text = (f"📈 总计: {execution_summary['total']} 条语句  |  "
+                        f"✅ 成功: {execution_summary['successful']} 条  |  "
+                        f"❌ 失败: {execution_summary['failed']} 条  |  "
+                        f"⏱️ 耗时: {execution_time:.3f}s")
+
+        ttk.Label(summary_frame, text=summary_text, font=("Arial", 10)).pack()
+
+        # 创建Notebook来分类显示结果
+        notebook = ttk.Notebook(main_frame)
+        notebook.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
+
+        # 成功的语句标签页
+        success_frame = ttk.Frame(notebook)
+        notebook.add(success_frame, text=f"✅ 成功 ({execution_summary['successful']})")
+
+        success_tree = self._create_result_treeview(success_frame, "success")
+
+        # 失败的语句标签页
+        if execution_summary['failed'] > 0:
+            fail_frame = ttk.Frame(notebook)
+            notebook.add(fail_frame, text=f"❌ 失败 ({execution_summary['failed']})")
+
+            fail_tree = self._create_result_treeview(fail_frame, "failure")
+
+        # 填充数据
+        for result_info in all_results:
+            if result_info['success']:
+                # 添加到成功列表
+                row_count = "多行" if isinstance(result_info['result'], list) and len(
+                    result_info['result']) > 1 else "1行"
+                if isinstance(result_info['result'], list):
+                    row_count = f"{len(result_info['result'])}行"
+
+                success_tree.insert("", tk.END, values=(
+                    result_info['index'],
+                    result_info['sql'][:60] + "..." if len(result_info['sql']) > 60 else result_info['sql'],
+                    row_count,
+                    "✅ 成功"
+                ))
+            else:
+                # 添加到失败列表
+                if execution_summary['failed'] > 0:
+                    fail_tree.insert("", tk.END, values=(
+                        result_info['index'],
+                        result_info['sql'][:60] + "..." if len(result_info['sql']) > 60 else result_info['sql'],
+                        result_info['error'][:40] + "..." if len(result_info['error']) > 40 else result_info['error'],
+                        "❌ 失败"
+                    ))
+
+        # 按钮框架
+        button_frame = ttk.Frame(main_frame)
+        button_frame.pack(fill=tk.X)
+
+        if execution_summary['failed'] > 0:
+            ttk.Button(
+                button_frame,
+                text="🔧 智能修复失败语句",
+                command=lambda: self._batch_fix_failed_statements(all_results, dialog)
+            ).pack(side=tk.LEFT, padx=(0, 10))
+
+        ttk.Button(
+            button_frame,
+            text="📋 导出结果",
+            command=lambda: self._export_batch_results(all_results)
+        ).pack(side=tk.LEFT, padx=(0, 10))
+
+        ttk.Button(button_frame, text="关闭", command=dialog.destroy).pack(side=tk.RIGHT)
+
+    def _create_result_treeview(self, parent, result_type):
+        """创建结果树视图"""
+        tree_frame = ttk.Frame(parent)
+        tree_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+        if result_type == "success":
+            columns = ("序号", "SQL语句", "影响行数", "状态")
+        else:
+            columns = ("序号", "SQL语句", "错误信息", "状态")
+
+        tree = ttk.Treeview(tree_frame, columns=columns, show="headings", height=15)
+
+        # 设置列标题和宽度
+        tree.heading("序号", text="序号")
+        tree.heading("SQL语句", text="SQL语句")
+        tree.heading(columns[2], text=columns[2])
+        tree.heading("状态", text="状态")
+
+        tree.column("序号", width=50, minwidth=50)
+        tree.column("SQL语句", width=400, minwidth=200)
+        tree.column(columns[2], width=200, minwidth=100)
+        tree.column("状态", width=80, minwidth=80)
+
+        # 添加滚动条
+        scrollbar = ttk.Scrollbar(tree_frame, orient=tk.VERTICAL, command=tree.yview)
+        tree.configure(yscrollcommand=scrollbar.set)
+
+        tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+        return tree
+
+
 
     def _update_error_ui(self, error_msg):
         """更新错误UI（简单版本）"""
         messagebox.showerror("执行错误", error_msg)
         self.result_display.log(error_msg)
         self.execute_btn.configure(state=tk.NORMAL, text="🚀 执行SQL")
-
-    def _smart_check(self):
-        """智能检查SQL"""
-        sql = self.sql_text.get(1.0, tk.END).strip()
-        if not sql:
-            messagebox.showinfo("提示", "请先输入SQL语句")
-            return
-
-        # 进行智能分析
-        try:
-            analysis = self.db_manager.sql_corrector.analyze_and_suggest(sql)
-            self.result_display.update_smart_analysis(analysis, success=None)
-
-            # 切换到智能分析标签页
-            self.result_display.show_analysis_tab()
-
-            # 显示提示信息
-            has_issues = analysis.get('suggestions') or analysis.get('corrected_sql_options')
-            if has_issues:
-                messagebox.showinfo("智能检查", "分析完成！SQL有点问题呢。")
-            else:
-                messagebox.showinfo("智能检查", "✅ 未发现任何问题，SQL看起来很完美！")
-
-        except Exception as e:
-            messagebox.showerror("智能检查失败", f"分析过程出错: {str(e)}")
 
     def _format_sql(self):
         """格式化SQL"""
@@ -518,6 +530,184 @@ class SQLQueryTab:
 
         except Exception as e:
             self.result_display.log(f"智能分析失败: {str(e)}")
+
+    def _batch_fix_failed_statements(self, all_results, parent_dialog):
+        """批量修复失败的语句"""
+        failed_results = [r for r in all_results if not r['success']]
+
+        if not failed_results:
+            messagebox.showinfo("提示", "没有失败的语句需要修复")
+            return
+
+        # 创建修复对话框
+        fix_dialog = tk.Toplevel(parent_dialog)
+        fix_dialog.title("🔧 批量智能修复")
+        fix_dialog.geometry("800x600")
+        fix_dialog.transient(parent_dialog)
+        fix_dialog.grab_set()
+
+        main_frame = ttk.Frame(fix_dialog, padding="10")
+        main_frame.pack(fill=tk.BOTH, expand=True)
+
+        ttk.Label(
+            main_frame,
+            text=f"发现 {len(failed_results)} 条失败的SQL语句，正在进行智能分析...",
+            font=("Arial", 12)
+        ).pack(pady=(0, 10))
+
+        # 进度条
+        progress = ttk.Progressbar(main_frame, mode='indeterminate')
+        progress.pack(fill=tk.X, pady=(0, 10))
+        progress.start()
+
+        # 结果显示区域
+        result_frame = ttk.Frame(main_frame)
+        result_frame.pack(fill=tk.BOTH, expand=True)
+
+        # 在单独线程中进行批量分析
+        def analyze_thread():
+            try:
+                fixed_statements = []
+
+                for i, failed_result in enumerate(failed_results):
+                    try:
+                        error = Exception(failed_result['error'])
+                        analysis = self.db_manager.sql_corrector.analyze_and_suggest(
+                            failed_result['sql'], error
+                        )
+
+                        if analysis.get('corrected_sql_options'):
+                            best_fix = analysis['corrected_sql_options'][0]
+                            fixed_statements.append({
+                                'original_index': failed_result['index'],
+                                'original_sql': failed_result['sql'],
+                                'fixed_sql': best_fix['sql'],
+                                'description': best_fix['description'],
+                                'confidence': best_fix['confidence']
+                            })
+
+                    except Exception as e:
+                        print(f"分析语句 {failed_result['index']} 时出错: {e}")
+
+                # 更新UI
+                fix_dialog.after(0, lambda: self._show_fix_results(
+                    fix_dialog, result_frame, progress, fixed_statements
+                ))
+
+            except Exception as e:
+                fix_dialog.after(0, lambda: messagebox.showerror("分析失败", str(e)))
+
+        thread = threading.Thread(target=analyze_thread)
+        thread.daemon = True
+        thread.start()
+
+    def _show_fix_results(self, dialog, result_frame, progress, fixed_statements):
+        """显示修复结果"""
+        progress.stop()
+        progress.destroy()
+
+        if not fixed_statements:
+            ttk.Label(
+                result_frame,
+                text="😔 未能自动修复任何语句，建议手动检查语法错误",
+                font=("Arial", 10)
+            ).pack(pady=20)
+        else:
+            ttk.Label(
+                result_frame,
+                text=f"🎉 成功分析并提供 {len(fixed_statements)} 条修复建议:",
+                font=("Arial", 10, "bold")
+            ).pack(anchor=tk.W, pady=(0, 10))
+
+            # 创建修复建议列表
+            fix_frame = ttk.Frame(result_frame)
+            fix_frame.pack(fill=tk.BOTH, expand=True)
+
+            fix_text = scrolledtext.ScrolledText(fix_frame, height=15, font=("Consolas", 9))
+            fix_text.pack(fill=tk.BOTH, expand=True)
+
+            content = ""
+            for i, fix in enumerate(fixed_statements, 1):
+                content += f"{i}. 语句 #{fix['original_index']} - {fix['description']}\n"
+                content += f"   置信度: {fix['confidence']:.1%}\n"
+                content += f"   原始: {fix['original_sql']}\n"
+                content += f"   修复: {fix['fixed_sql']}\n"
+                content += "-" * 60 + "\n\n"
+
+            fix_text.insert(1.0, content)
+            fix_text.configure(state=tk.DISABLED)
+
+        # 按钮
+        button_frame = ttk.Frame(result_frame)
+        button_frame.pack(fill=tk.X, pady=(10, 0))
+
+        if fixed_statements:
+            ttk.Button(
+                button_frame,
+                text="✅ 应用所有修复",
+                command=lambda: self._apply_batch_fixes(fixed_statements, dialog)
+            ).pack(side=tk.LEFT, padx=(0, 10))
+
+        ttk.Button(button_frame, text="关闭", command=dialog.destroy).pack(side=tk.RIGHT)
+
+    def _apply_batch_fixes(self, fixed_statements, dialog):
+        """应用批量修复"""
+        if messagebox.askyesno("确认",
+                               f"确定要应用 {len(fixed_statements)} 条修复建议吗？\n修复后的SQL将替换当前输入框内容。"):
+            # 构建修复后的SQL
+            current_sql_lines = self.sql_text.get(1.0, tk.END).strip().split('\n')
+
+            # 简单替换：重新构建所有SQL
+            fixed_sql_list = []
+            original_statements = self._parse_sql_statements(self.sql_text.get(1.0, tk.END).strip())
+
+            for i, original_sql in enumerate(original_statements, 1):
+                # 查找是否有对应的修复
+                fix_found = False
+                for fix in fixed_statements:
+                    if fix['original_index'] == i:
+                        fixed_sql_list.append(fix['fixed_sql'])
+                        fix_found = True
+                        break
+
+                if not fix_found:
+                    fixed_sql_list.append(original_sql)
+
+            # 更新输入框
+            new_content = '\n\n'.join(fixed_sql_list)
+            self.sql_text.delete(1.0, tk.END)
+            self.sql_text.insert(1.0, new_content)
+
+            dialog.destroy()
+            messagebox.showinfo("完成", "批量修复已应用！可以重新执行SQL查看效果。")
+
+    def _export_batch_results(self, all_results):
+        """导出批量执行结果"""
+        try:
+            from tkinter import filedialog
+            import csv
+
+            filename = filedialog.asksaveasfilename(
+                defaultextension=".csv",
+                filetypes=[("CSV文件", "*.csv"), ("所有文件", "*.*")],
+                title="导出批量执行结果"
+            )
+
+            if filename:
+                with open(filename, 'w', newline='', encoding='utf-8') as csvfile:
+                    writer = csv.writer(csvfile)
+                    writer.writerow(["序号", "SQL语句", "执行状态", "结果/错误信息"])
+
+                    for result in all_results:
+                        status = "成功" if result['success'] else "失败"
+                        result_info = f"{len(result['result'])}行数据" if result['success'] and result[
+                            'result'] else result.get('error', '')
+                        writer.writerow([result['index'], result['sql'], status, result_info])
+
+                messagebox.showinfo("导出完成", f"结果已导出到: {filename}")
+
+        except Exception as e:
+            messagebox.showerror("导出失败", f"导出过程中出错: {str(e)}")
 
     def _format_error_analysis(self, analysis):
         """格式化错误分析内容"""

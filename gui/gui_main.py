@@ -3,7 +3,6 @@ from gui_components.nl_query_tab import NLQueryTab
 from gui_components.plan_visualization_tab import PlanVisualizationTab
 from gui_components.database_info import DatabaseInfoPanel
 from gui_components.result_display import ResultDisplay
-from gui_components.smart_diagnosis import SmartDiagnosisPanel
 from core.database_manager import DatabaseManager
 from core.ai_features import AIFeatureManager
 import tkinter as tk
@@ -36,7 +35,7 @@ class SimpleDBGUI:
 
         # 创建GUI
         self.root = tk.Tk()
-        self.root.title("SimpleDB - SQL Database Management System with Smart Correction")
+        self.root.title("SimpleDB - SQL Database Management System")
         self.root.geometry("1400x900")
         self.root.configure(bg="#f0f0f0")
 
@@ -107,7 +106,7 @@ class SimpleDBGUI:
         # 标题
         title_label = ttk.Label(
             main_frame,
-            text="SimpleDB - SQL Database Management System with Smart Correction",
+            text="SimpleDB - SQL Database Management System",
             font=("Arial", 16, "bold")
         )
         title_label.grid(row=0, column=0, columnspan=2, pady=(0, 20))
@@ -173,10 +172,6 @@ class SimpleDBGUI:
         self.result_display.frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
         self.right_panel.rowconfigure(0, weight=1)
         self.right_panel.columnconfigure(0, weight=1)
-
-        # 智能诊断面板 (放在右侧面板底部)
-        self.diagnosis_panel = SmartDiagnosisPanel(self.right_panel)
-        self.diagnosis_panel.frame.grid(row=1, column=0, sticky=(tk.W, tk.E), pady=(10, 0))
 
         # 更新SQL查询标签页的结果显示引用
         self.sql_tab.result_display = self.result_display
