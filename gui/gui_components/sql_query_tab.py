@@ -953,3 +953,25 @@ class SQLQueryTab:
         else:
             messagebox.showinfo("提示", "修正已应用，可以手动执行或进一步编辑")
 
+    def receive_sql_from_nl_tab(self, sql_content, execute=False):
+        """接收来自自然语言标签页的SQL"""
+        # 将SQL内容设置到输入框
+        self.sql_text.delete(1.0, tk.END)
+        self.sql_text.insert(1.0, sql_content)
+
+        # 如果需要立即执行
+        if execute:
+            # 给用户一个短暂的时间看到SQL内容
+            self.frame.after(500, self._execute_sql)
+            messagebox.showinfo("执行中", "SQL已填入，正在执行...")
+        else:
+            messagebox.showinfo("已填入", "SQL已填入查询标签页")
+
+    def get_current_sql(self):
+        """获取当前SQL内容"""
+        return self.sql_text.get(1.0, tk.END).strip()
+
+    def set_sql_content(self, sql_content):
+        """设置SQL内容"""
+        self.sql_text.delete(1.0, tk.END)
+        self.sql_text.insert(1.0, sql_content)

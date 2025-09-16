@@ -25,31 +25,44 @@ class EnhancedNL2SQL:
 
     def translate(self, natural_query: str) -> Dict:
         """将自然语言查询转换为SQL"""
+        print(f"🚀 开始翻译查询: '{natural_query}'")
+
         try:
             # 1. 预处理和实体识别
             processed_query = self._preprocess_query(natural_query)
+            print(f"📝 预处理后: '{processed_query}'")
+
             entities = self._extract_entities(processed_query)
+            print(f"🎯 提取到的实体: {json.dumps(entities, indent=2, ensure_ascii=False)}")
 
             # 2. 模式匹配（快速路径）
             pattern_result = self._pattern_matching(processed_query, entities)
+            print(f"🔍 模式匹配结果 - 置信度: {pattern_result.get('confidence', 0):.2f}")
+
             if pattern_result['confidence'] > 0.8:
+                print("✅ 使用模式匹配结果")
                 return self._enhance_result(pattern_result, natural_query)
 
             # 3. 使用 DeepSeek API 处理复杂查询
             if self.api_key:
+                print("🤖 使用AI API处理...")
                 ai_result = self._translate_with_deepseek(natural_query, entities)
+                print(f"🎭 AI结果置信度: {ai_result.get('confidence', 0):.2f}")
                 return self._enhance_result(ai_result, natural_query)
             else:
+                print("⚠️ 无API密钥，使用模式匹配结果")
                 return self._enhance_result(pattern_result, natural_query)
 
         except Exception as e:
+            print(f"❌ 翻译过程出错: {str(e)}")
             return {
                 'sql': '',
                 'confidence': 0.0,
                 'explanation': f'转换失败: {str(e)}',
                 'suggestions': ['请检查查询语句的表达方式'],
                 'entities': {},
-                'error': str(e)
+                'error': str(e),
+                'method': 'error'
             }
 
     def _translate_with_deepseek(self, natural_query: str, entities: Dict) -> Dict:
@@ -233,37 +246,38 @@ class EnhancedNL2SQL:
         return None
 
     def _preprocess_query(self, query: str) -> str:
-        """查询预处理"""
+        """查询预处理 - 修复版本"""
+        print(f"📋 原始查询: '{query}'")
+
+        if not query or not query.strip():
+            print("⚠️ 查询为空")
+            return ""
+
+        # 保留原始查询用于表名匹配
+        original_query = query.strip()
         query = query.strip().lower()
 
-        # 标准化常见表达
+        # 标准化常见表达，但保留表名
         replacements = {
-            r'显示|展示|查看|列出|给我看': 'show',
-            r'所有的?|全部|全体': 'all',
+            r'显示|展示|查看|列出|给我看|查询': 'show',
+            r'所有的?数据|全部数据|全体数据': 'all data',  # 修改这里
             r'员工|雇员|职员': 'employee',
             r'部门|科室': 'department',
             r'薪资|工资|薪水|收入': 'salary',
             r'姓名|名字|名称': 'name',
-            r'大于|超过|高于|多于': 'greater than',
-            r'小于|低于|少于|不到': 'less than',
-            r'等于|是|为': 'equals',
-            r'平均|平均值|均值': 'average',
-            r'总数|数量|个数|计数': 'count',
-            r'最大|最高|最多': 'max',
-            r'最小|最低|最少': 'min',
-            r'求和|总和|合计': 'sum',
-            r'按照|根据|依据': 'by',
-            r'分组|分类': 'group',
-            r'排序|排列': 'order'
+            # 移除对"表"的替换，保留原始表名
         }
 
+        processed_query = query
         for pattern, replacement in replacements.items():
-            query = re.sub(pattern, replacement, query)
+            processed_query = re.sub(pattern, replacement, processed_query)
 
-        return query
-
+        print(f"🔄 预处理结果: '{processed_query}'")
+        return processed_query
     def _extract_entities(self, query: str) -> Dict:
         """实体提取"""
+        print(f"🔎 开始实体提取: '{query}'")
+
         entities = {
             'tables': [],
             'columns': [],
@@ -272,35 +286,70 @@ class EnhancedNL2SQL:
             'values': []
         }
 
+        # 获取所有可用的表
+        try:
+            all_tables = self.catalog.get_all_tables()
+            print(f"📊 可用表: {list(all_tables.keys())}")
+        except Exception as e:
+            print(f"⚠️ 获取表信息失败: {e}")
+            all_tables = {}
+
         # 提取表名（支持中英文）
-        all_tables = self.catalog.get_all_tables()
+        table_found = False
         for table_name in all_tables.keys():
-            # 检查英文表名
-            if table_name.lower() in query:
+            # 检查完整表名（包括数字）
+            if table_name.lower() in query.lower():  # 改为不区分大小写
                 entities['tables'].append(table_name)
+                table_found = True
+                print(f"✅ 找到表名: {table_name} (完全匹配)")
+            # 检查表名的各种变形
+            elif self._fuzzy_table_match(query, table_name):
+                entities['tables'].append(table_name)
+                table_found = True
+                print(f"✅ 找到表名: {table_name} (模糊匹配)")
             # 检查单数形式
             elif table_name.lower().rstrip('s') in query:
                 entities['tables'].append(table_name)
+                table_found = True
+                print(f"✅ 找到表名: {table_name} (单数匹配)")
             # 检查关键词匹配
-            elif ('employee' in query and 'employee' in table_name.lower()) or \
-                    ('department' in query and 'department' in table_name.lower()):
+            elif self._fuzzy_table_match(query, table_name):
                 entities['tables'].append(table_name)
+                table_found = True
+                print(f"✅ 找到表名: {table_name} (模糊匹配)")
+
+        if not table_found:
+            print("⚠️ 未找到匹配的表名")
+            # 尝试从实体映射中查找
+            for alias, real_name in self.entity_mapping.get('table_aliases', {}).items():
+                if alias in query:
+                    entities['tables'].append(real_name)
+                    print(f"✅ 通过别名找到表: {alias} -> {real_name}")
 
         # 提取列名
         for table_name, table_info in all_tables.items():
-            columns = [col['name'] for col in table_info.get('columns', [])]
-            for col in columns:
-                if col.lower() in query:
-                    entities['columns'].append({'table': table_name, 'column': col})
+            if table_name in entities['tables']:  # 只检查已识别的表
+                columns = []
+                if isinstance(table_info, dict):
+                    columns = [col.get('name', col) if isinstance(col, dict) else col
+                               for col in table_info.get('columns', [])]
+
+                for col in columns:
+                    if col.lower() in query:
+                        entities['columns'].append({'table': table_name, 'column': col})
+                        print(f"✅ 找到列: {table_name}.{col}")
 
         # 提取数值
-        import re
         numbers = re.findall(r'\b\d+(?:\.\d+)?\b', query)
         entities['values'].extend(numbers)
+        if numbers:
+            print(f"🔢 找到数值: {numbers}")
 
         # 提取聚合函数
         agg_keywords = {
             'count': 'COUNT',
+            'show all': 'SELECT_ALL',
+            'all': 'SELECT_ALL',
             'average': 'AVG',
             'avg': 'AVG',
             'sum': 'SUM',
@@ -311,21 +360,41 @@ class EnhancedNL2SQL:
         for keyword, func in agg_keywords.items():
             if keyword in query:
                 entities['aggregates'].append(func)
+                print(f"📊 找到聚合函数: {keyword} -> {func}")
 
+        print(f"🎯 最终提取结果: {json.dumps(entities, indent=2, ensure_ascii=False)}")
         return entities
 
     def _pattern_matching(self, query: str, entities: Dict) -> Dict:
         """增强的模式匹配"""
-        # 简单查询模式
-        if any(word in query for word in ['show all', 'list all', 'select all']):
-            if entities['tables']:
-                table = entities['tables'][0]
-                return {
-                    'sql': f"SELECT * FROM {table};",
-                    'confidence': 0.9,
-                    'explanation': f'查询{table}表的所有记录',
-                    'pattern': 'select_all'
-                }
+        print(f"🔍 模式匹配开始")
+        print(f"  查询: '{query}'")
+        print(f"  找到的表: {entities.get('tables', [])}")
+
+        # 检查是否是查询所有数据的模式
+        all_data_patterns = [
+            'show all', 'list all', 'select all', 'all data',
+            '所有数据', '全部数据', '全体数据'
+        ]
+
+        is_select_all = any(pattern in query for pattern in all_data_patterns)
+        print(f"  是否为查询全部: {is_select_all}")
+
+        if is_select_all and entities['tables']:
+            # 选择最匹配的表名，而不是第一个
+            table = self._select_best_table(query, entities['tables'])
+            print(f"✅ 构建查询 - 使用表: {table}")
+
+            result = {
+                'sql': f"SELECT * FROM {table};",
+                'confidence': 0.9,
+                'explanation': f'查询{table}表的所有记录',
+                'pattern': 'select_all',
+                'method': 'pattern_matching'
+            }
+
+            print(f"📝 生成SQL: {result['sql']}")
+            return result
 
         # 条件查询模式
         if entities['conditions'] or any(op in query for op in ['greater than', 'less than', 'equals']):
@@ -339,14 +408,84 @@ class EnhancedNL2SQL:
         if 'group by' in query or 'by department' in query:
             return self._build_group_by_query(query, entities)
 
+        print("❌ 未匹配到任何模式")
         return {'sql': '', 'confidence': 0.0, 'pattern': 'unknown'}
+
+    def _select_best_table(self, query: str, tables: List[str]) -> str:
+        """从多个表中选择最匹配的表"""
+        print(f"🎯 选择最佳表名")
+        print(f"  候选表: {tables}")
+        print(f"  查询: '{query}'")
+
+        if len(tables) == 1:
+            print(f"  只有一个表，直接选择: {tables[0]}")
+            return tables[0]
+
+        # 计算每个表名的匹配分数
+        table_scores = {}
+
+        for table in tables:
+            score = 0
+            print(f"  评估表 '{table}':")
+
+            # 1. 完全匹配得分最高
+            if table.lower() in query.lower():
+                exact_matches = len([m for m in re.finditer(re.escape(table.lower()), query.lower())])
+                score += exact_matches * 10
+                print(f"    完全匹配次数: {exact_matches}, 得分: +{exact_matches * 10}")
+
+            # 2. 长度优先（更具体的表名）
+            score += len(table) * 0.1
+            print(f"    长度得分: +{len(table) * 0.1}")
+
+            # 3. 包含数字的表名优先（如果查询中提到了数字）
+            if re.search(r'\d', table) and re.search(r'\d', query):
+                score += 5
+                print(f"    数字匹配得分: +5")
+
+            # 4. 检查表名在查询中的位置（越靠前越重要）
+            try:
+                position = query.lower().find(table.lower())
+                if position >= 0:
+                    # 位置越靠前得分越高
+                    position_score = max(0, 10 - position * 0.1)
+                    score += position_score
+                    print(f"    位置得分: +{position_score}")
+            except:
+                pass
+
+            table_scores[table] = score
+            print(f"    总得分: {score}")
+
+        # 选择得分最高的表
+        best_table = max(table_scores, key=table_scores.get)
+        print(f"🏆 最佳匹配: {best_table} (得分: {table_scores[best_table]})")
+
+        return best_table
+
+    def _fuzzy_table_match(self, query: str, table_name: str) -> bool:
+        """模糊表名匹配"""
+        # 检查orders表的特殊情况
+        if 'order' in table_name.lower() and ('order' in query or 'orders' in query):
+            return True
+
+        # 检查employee相关
+        if 'employee' in table_name.lower() and 'employee' in query:
+            return True
+
+        # 检查department相关
+        if 'department' in table_name.lower() and 'department' in query:
+            return True
+
+        return False
 
     def _build_conditional_query(self, query: str, entities: Dict) -> Dict:
         """构建条件查询"""
         if not entities['tables']:
             return {'sql': '', 'confidence': 0.0}
 
-        table = entities['tables'][0]
+        # 使用最佳匹配的表名
+        table = self._select_best_table(query, entities['tables'])
         sql_parts = [f"SELECT * FROM {table}"]
 
         conditions = []
@@ -382,35 +521,93 @@ class EnhancedNL2SQL:
 
     def _build_aggregate_query(self, query: str, entities: Dict) -> Dict:
         """构建聚合查询"""
-        if not entities['tables'] or not entities['aggregates']:
+        print(f"📊 构建聚合查询")
+
+        if not entities['tables']:
+            print("❌ 没有表名，无法构建聚合查询")
             return {'sql': '', 'confidence': 0.0}
 
-        table = entities['tables'][0]
-        aggregate = entities['aggregates'][0]
+        # 使用最佳匹配的表名
+        table = self._select_best_table(query, entities['tables'])
 
-        if aggregate == 'COUNT':
+        # 处理SELECT_ALL类型
+        if 'SELECT_ALL' in entities['aggregates']:
+            sql = f"SELECT * FROM {table};"
+            explanation = f"查询{table}表的所有记录"
+            confidence = 0.9
+        elif 'COUNT' in entities['aggregates']:
             sql = f"SELECT COUNT(*) as count FROM {table};"
             explanation = f"统计{table}表的记录数"
+            confidence = 0.85
         else:
-            # 找到合适的列
-            target_column = None
-            if aggregate in ['AVG', 'SUM', 'MAX', 'MIN']:
-                numeric_cols = self._get_numeric_columns(table)
-                if numeric_cols:
-                    target_column = numeric_cols[0]
+            # 其他聚合函数
+            aggregate = entities['aggregates'][0]
+            numeric_cols = self._get_numeric_columns(table)
 
-            if target_column:
+            if numeric_cols:
+                target_column = numeric_cols[0]
                 sql = f"SELECT {aggregate}({target_column}) as result FROM {table};"
                 explanation = f"计算{table}表中{target_column}列的{aggregate.lower()}"
+                confidence = 0.8
             else:
                 sql = f"SELECT COUNT(*) as count FROM {table};"
-                explanation = f"统计{table}表的记录数"
+                explanation = f"统计{table}表的记录数（未找到数值列）"
+                confidence = 0.6
+
+        result = {
+            'sql': sql,
+            'confidence': confidence,
+            'explanation': explanation,
+            'pattern': 'aggregate',
+            'method': 'pattern_matching'
+        }
+
+        print(f"📊 聚合查询结果: {result}")
+        return result
+
+    def _build_group_by_query(self, query: str, entities: Dict) -> Dict:
+        """构建分组查询"""
+        if not entities['tables']:
+            return {'sql': '', 'confidence': 0.0}
+
+        # 使用最佳匹配的表名
+        table = self._select_best_table(query, entities['tables'])
+
+        # 默认按部门分组
+        group_by_col = 'department'
+
+        # 检查是否有其他分组列
+        for col_info in entities.get('columns', []):
+            col_name = col_info.get('column', '')
+            if 'department' in col_name.lower() or 'dept' in col_name.lower():
+                group_by_col = col_name
+                break
+
+        # 确定聚合函数
+        if entities.get('aggregates'):
+            agg_func = entities['aggregates'][0]
+            if agg_func == 'COUNT':
+                sql = f"SELECT {group_by_col}, COUNT(*) as count FROM {table} GROUP BY {group_by_col};"
+                explanation = f"按{group_by_col}分组统计{table}表的记录数"
+            else:
+                # 找到合适的聚合列
+                agg_col = self._get_numeric_columns(table)
+                if agg_col:
+                    sql = f"SELECT {group_by_col}, {agg_func}({agg_col[0]}) as result FROM {table} GROUP BY {group_by_col};"
+                    explanation = f"按{group_by_col}分组计算{table}表中{agg_col[0]}的{agg_func.lower()}"
+                else:
+                    sql = f"SELECT {group_by_col}, COUNT(*) as count FROM {table} GROUP BY {group_by_col};"
+                    explanation = f"按{group_by_col}分组统计{table}表的记录数"
+        else:
+            # 默认使用COUNT
+            sql = f"SELECT {group_by_col}, COUNT(*) as count FROM {table} GROUP BY {group_by_col};"
+            explanation = f"按{group_by_col}分组统计{table}表的记录数"
 
         return {
             'sql': sql,
-            'confidence': 0.85,
+            'confidence': 0.8,
             'explanation': explanation,
-            'pattern': 'aggregate'
+            'pattern': 'group_by'
         }
 
     def _ai_enhanced_translation(self, natural_query: str, entities: Dict) -> Dict:
@@ -511,8 +708,9 @@ class EnhancedNL2SQL:
         """获取表的数值类型列"""
         numeric_columns = []
         try:
-            if self.catalog.table_exists(table_name):
-                table_info = self.catalog.get_table(table_name)
+            all_tables = self.catalog.get_all_tables()
+            if table_name in all_tables:
+                table_info = all_tables[table_name]
                 columns = table_info.get('columns', [])
 
                 for col in columns:
@@ -522,11 +720,13 @@ class EnhancedNL2SQL:
                     # 检查是否是数值类型
                     if any(num_type in col_type.upper() for num_type in ['INT', 'FLOAT', 'DECIMAL', 'NUMBER']):
                         numeric_columns.append(col_name)
-                    elif col_name.lower() in ['salary', 'age', 'price', 'amount', 'count']:
+                    elif col_name.lower() in ['salary', 'age', 'price', 'amount', 'count', 'id']:
                         # 基于列名推测
                         numeric_columns.append(col_name)
-        except Exception:
-            pass
+
+            print(f"🔢 表 {table_name} 的数值列: {numeric_columns}")
+        except Exception as e:
+            print(f"⚠️ 获取数值列失败: {e}")
 
         return numeric_columns
 
@@ -651,41 +851,37 @@ class EnhancedNL2SQL:
     def _load_query_patterns(self) -> Dict:
         """加载查询模式"""
         return {
-        'create_table': {
-            'patterns': [
-                r'创建.*?表',
-                r'生成.*?表',
-                r'建立.*?表',
-                r'create.*?table'
-            ],
-            'template': 'CREATE TABLE {table} ({columns});'
-        },
-            'select_all': [
-                r'显示所有',
-                r'查看全部',
-                r'列出所有'
-            ],
-            'count': [
-                r'统计数量',
-                r'有多少',
-                r'计算总数'
-            ],
-            'filter': [
-                r'条件查询',
-                r'筛选',
-                r'过滤'
-            ],
-            'aggregate': [
-                r'平均值',
-                r'最大值',
-                r'最小值',
-                r'总和'
-            ],
-            'group_by': [
-                r'按.*分组',
-                r'分类统计'
-            ]
+            'select_all': {
+                'patterns': [
+                    r'显示.*?所有',
+                    r'查看.*?全部',
+                    r'列出.*?所有',
+                    r'show.*?all',
+                    r'select.*?all'
+                ],
+                'confidence': 0.9
+            },
+            'count': {
+                'patterns': [
+                    r'统计.*?数量',
+                    r'有多少',
+                    r'计算.*?总数',
+                    r'count'
+                ],
+                'confidence': 0.85
+            },
+            'aggregate': {
+                'patterns': [
+                    r'平均.*?值',
+                    r'最大.*?值',
+                    r'最小.*?值',
+                    r'总和',
+                    r'avg|max|min|sum'
+                ],
+                'confidence': 0.8
+            }
         }
+
 
     def _build_entity_mapping(self) -> Dict:
         """构建实体映射"""

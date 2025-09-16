@@ -234,8 +234,10 @@ class SimpleDBGUI:
         self.input_notebook.add(self.sql_tab.frame, text="📝 SQL查询")
 
         # 自然语言查询标签页
-        self.nl_tab = NLQueryTab(self.input_notebook, self.ai_manager.nl2sql_engine, self.sql_tab)
+        self.nl_tab = NLQueryTab(self.input_notebook, self.ai_manager.nl2sql_engine)
         self.input_notebook.add(self.nl_tab.frame, text="🤖 自然语言查询")
+
+        self.nl_tab.set_sql_tab_instance(self.sql_tab)
 
         # 执行计划可视化标签页
         self.plan_tab = PlanVisualizationTab(self.input_notebook, ai_manager=self.ai_manager)
