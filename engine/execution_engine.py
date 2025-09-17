@@ -5,7 +5,7 @@ from catalog.catalog_manager import CatalogManager
 from sql_compiler.codegen.operators import (Operator, CreateTableOp, InsertOp, SeqScanOp, FilterOp, ProjectOp, UpdateOp, \
     DeleteOp, OptimizedSeqScanOp, GroupByOp, OrderByOp, JoinOp, FilteredSeqScanOp, IndexScanOp, IndexOnlyScanOp, CreateIndexOp,
     DropIndexOp, BeginTransactionOp, CommitTransactionOp, RollbackTransactionOp, CreateViewOp, DropViewOp, ShowViewsOp,
-    DescribeViewOp, ViewScanOp)
+    DescribeViewOp, ViewScanOp, ShowIndexesOp)
 from sql_compiler.exceptions.compiler_errors import SemanticError
 from sql_compiler.semantic.symbol_table import SymbolTable
 from sql_compiler.semantic.type_checker import TypeChecker
@@ -247,6 +247,8 @@ class ExecutionEngine:
                                                  plan.index_type)
             elif isinstance(plan, DropIndexOp):
                 return self.execute_drop_index(plan.index_name)
+            elif isinstance(plan, ShowIndexesOp):
+                return self.execute_show_indexes(plan.table_name)
             else:
                 raise SemanticError(f"不支持的执行计划类型: {type(plan).__name__}")
         except Exception as e:
@@ -2092,3 +2094,33 @@ class ExecutionEngine:
 
         # 普通表，返回顺序扫描
         return SeqScanOp(table_name)
+
+    def execute_show_indexes(self, table_name: Optional[str] = None) -> List[Dict]:
+        """执行SHOW INDEXES语句"""
+        try:
+            # 从catalog获取索引信息
+            if table_name:
+                # 获取指定表的索引
+                indexes = self.catalog.get_table_indexes(table_name)  # 使用正确的方法名
+                return [{
+                    "Table": table_name,
+                    "Index_name": idx["name"],  # 使用正确的键名
+                    "Columns": ', '.join(idx["columns"]),
+                    "Unique": idx["unique"],  # 使用正确的键名
+                    "Index_type": idx["type"]  # 使用正确的键名
+                } for idx in indexes]
+            else:
+                # 获取所有索引
+                all_indexes = self.catalog.get_all_indexes()  # 使用正确的方法名
+                result = []
+                for idx_name, idx_info in all_indexes.items():
+                    result.append({
+                        "Table": idx_info["table"],
+                        "Index_name": idx_name,  # 直接使用索引名
+                        "Columns": ', '.join(idx_info["columns"]),
+                        "Unique": idx_info["unique"],
+                        "Index_type": idx_info["type"]
+                    })
+                return result
+        except Exception as e:
+            raise SemanticError(f"显示索引错误: {str(e)}")
