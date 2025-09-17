@@ -59,6 +59,7 @@ KEYWORDS = {
     'DROP': TokenType.DROP,
     'SHOW': TokenType.SHOW,
     'INDEXES': TokenType.INDEXES,
+    'TO': TokenType.TO,
 
     # 事务相关新关键字
     'BEGIN': TokenType.BEGIN,

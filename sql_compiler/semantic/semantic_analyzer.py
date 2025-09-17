@@ -6,12 +6,13 @@ from sql_compiler.exceptions.compiler_errors import SemanticError
 class SemanticAnalyzer:
     """语义分析器 - 扩展支持新语法和类型检查"""
 
-    def __init__(self, catalog: CatalogManager):
+    def __init__(self, catalog: CatalogManager,silent_mode: bool = False):
         self.catalog = catalog
         self.symbol_table = SymbolTable()
         # 添加别名追踪
         self.current_aliases = {}  # 当前查询中的别名映射
         self.alias_to_real = {}  # 别名 -> 真实表名
+        self.silent_mode = silent_mode
 
     def analyze(self, stmt: Statement):
         """分析语句"""

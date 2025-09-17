@@ -94,6 +94,7 @@ class TokenType(Enum):
     DROP = "DROP"
     SHOW = "SHOW"
     INDEXES = "INDEXES"
+    TO = "TO"
 
     # 事务控制关键字
     BEGIN = "BEGIN"
